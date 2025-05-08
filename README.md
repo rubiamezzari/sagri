@@ -1,6 +1,6 @@
 # MERN App Básico
 
-![my picture] [https://github.com/mathlbraga/mern-app-main/blob/main/mern-app.png]
+![my picture](https://github.com/mathlbraga/mern-app-main/blob/main/mern-app.png)
 
 Uma aplicação full-stack [MERN](https://www.mongodb.com/mern-stack) para gerenciamento de informações de usuários.
 
