@@ -1,25 +1,81 @@
-import React from "react"
-import { Route, Routes } from "react-router-dom"
-import Navbar from "./components/navbar"
-import Footer from "./components/footer"
-import UserList from "./components/userList"
-import Edit from "./components/edit"
-import Create from "./components/create"
+import React, { useEffect } from "react";
+import { Route, Routes } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import Footer from "./components/footer";
+import Home from "./components/Home";
+
+// Associados
+import Associados from "./components/associados/Associados";
+import CreateAssociado from "./components/associados/CreateAssociado";
+import EditAssociado from "./components/associados/EditAssociado";
+import UserListAssociado from "./components/associados/userListAssociado";
+import DetalhesAssociado from "./components/associados/DetalhesAssociado";
+
+// Implementos
+import Implementos from "./components/implementos/implementos";
+import CreateImplemento from "./components/implementos/CreateImplemento";
+import EditImplemento from "./components/implementos/EditImplemento";
+import ListImplemento from "./components/implementos/ListImplemento";
+
+// Maquinas
+import Maquinas from "./components/maquinas/maquinas";
+import CreateMaquina from "./components/maquinas/CreateMaquina";
+import EditMaquina from "./components/maquinas/EditMaquina";
+import ListMaquinas from "./components/maquinas/ListMaquinas";
+
+// Operadores
+import Operadores from "./components/operadores/operadores";
+import CreateOperador from "./components/operadores/CreateOperador";
+import EditOperador from "./components/operadores/EditOperador";
+import UserListOperador from "./components/operadores/userListOperador";
 
 const App = () => {
-    return (
-        <div className="d-flex flex-column min-vh-100">
-            <Navbar />
-            <main className="flex-fill container my-4">
-                <Routes>
-                    <Route exact path="/" element={<UserList />} />
-                    <Route path="/edit/:id" element={<Edit />} />
-                    <Route path="/create" element={<Create />} />
-                </Routes>
-            </main>
-            <Footer /> 
-        </div>
-    )
-}
+  useEffect(() => {
+    document.body.style.backgroundColor = "#eeffe7"; 
+document.body.style.fontFamily = "'segoe ui', sans-serif"; 
+    return () => {
+      document.body.style.backgroundColor = null;
+      document.body.style.fontFamily = null;
+    };
+  }, []);
 
-export default App
+  return (
+    <div className="d-flex flex-column min-vh-100">
+      <Navbar />
+      <main className="flex-fill container my-4">
+        <Routes>
+          <Route path="/" element={<Home />} />
+
+          {/* Rotas para Associados */}
+          <Route path="/associados" element={<Associados />} />
+          <Route path="/associados/create" element={<CreateAssociado />} />
+          <Route path="/associados/edit/:id" element={<EditAssociado />} />
+          <Route path="/associados/list" element={<UserListAssociado />} />
+          <Route path="/associados/:id" element={<DetalhesAssociado />} />
+ 
+
+          {/* Rotas para Implementos */}
+          <Route path="/implementos" element={<Implementos />} />
+          <Route path="/implementos/create" element={<CreateImplemento />} />
+          <Route path="/implementos/edit/:id" element={<EditImplemento />} />
+          <Route path="/implementos/list" element={<ListImplemento />} />
+
+          {/* Rotas para Maquinas */}
+          <Route path="/maquinas" element={<Maquinas />} />
+          <Route path="/maquinas/create" element={<CreateMaquina />} />
+          <Route path="/maquinas/edit/:id" element={<EditMaquina />} />
+          <Route path="/maquinas/list" element={<ListMaquinas />} />
+
+          {/* Rotas para Operadores */}
+          <Route path="/operadores" element={<Operadores />} />
+          <Route path="/operadores/create" element={<CreateOperador />} />
+          <Route path="/operadores/edit/:id" element={<EditOperador />} />
+          <Route path="/operadores/list" element={<UserListOperador />} />
+        </Routes>
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
+export default App;

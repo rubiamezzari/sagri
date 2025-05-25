@@ -1,23 +1,30 @@
-const express = require("express")
-const app = express()
-const cors = require("cors")
+const express = require("express");
+const cors = require("cors");
+const dbo = require("./db/conn");
 
-const port = 5050
+const app = express();
+const port = 5050;
 
-app.use(cors())
-app.use(express.json())
-app.use(require("./routes/user")) // cria as rotas para manipulação de usuários
+app.use(cors());
+app.use(express.json());
 
-const dbo = require("./db/conn")
+app.use(require("./routes/associados"));
+app.use(require("./routes/operadores"));
+app.use(require("./routes/maquinas"));
+app.use(require("./routes/implementos"));
 
-app.get("/", function(req, res) {
-    res.send("App is running")
-})
 
-dbo.connectToMongoDB(function (error) {
-    if (error) throw error
+// Teste
+app.get("/", (req, res) => {
+  res.send("Servidor rodando!");
+});
 
-    app.listen(port, () => {
-        console.log("Servidor rodando na porta: " + port)
-    })
-})
+dbo.connectToMongoDB((err) => {
+  if (err) {
+    console.error(err);
+    process.exit();
+  }
+  app.listen(port, () => {
+    console.log(`Servidor rodando na porta ${port}`);
+  });
+});

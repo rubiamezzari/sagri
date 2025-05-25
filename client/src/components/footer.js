@@ -4,36 +4,14 @@ import "bootstrap/dist/js/bootstrap.bundle";
 
 export default function Footer() {
   return (
-    <footer className="bg-dark text-light py-4">
+    <footer style={{ backgroundColor: "#ccedbf" }} className="text-dark py-4 shadow-sm">
       <div className="container text-center">
-        <p className="mb-1">MongoDB + Express + React + Node.js = MERN </p>
-        <p className="mb-1">Professor Matheus Lorenzato Braga</p>
-        <div className="d-flex justify-content-center gap-3">
-          <a
-            href="mailto:matheus.braga@ifc.edu.br"
-            className="text-light"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            E-mail
-          </a>
-          <a
-            href="https://www.instagram.com/mathlbraga"
-            className="text-light"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Instagram
-          </a>
-          <a
-            href="https://www.linkedin.com/in/mathlbraga"
-            className="text-light"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            LinkedIn
-          </a>
-        </div>
+        <h5 className="mb-2 fw-bold" style={{ color: "#000" }}>
+          SAGRI - Sistema de Agendamento de Maquinário Agrícola
+        </h5>
+        <p className="mb-0" style={{ fontSize: "0.95rem", coloe:"000" }}>
+          Conselho Municipal de Desenvolvimento Agropecuário do Campo, Balneário Gaivota - SC
+        </p>
       </div>
     </footer>
   );
