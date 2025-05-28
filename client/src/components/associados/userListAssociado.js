@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 
 const REACT_APP_YOUR_HOSTNAME = "http://localhost:5050";
 
-// Estilo do botão "Mais detalhes"
 const btnDetalhes = {
   backgroundColor: "#1c3d21",
   color: "#fff",

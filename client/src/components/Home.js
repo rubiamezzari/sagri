@@ -129,7 +129,7 @@ export default function TelaInicialAdmin() {
           </div>
         </div>
 
-        <div style={{ ...section, flex: "1", minWidth: "250px" }}>
+        <div style={{ ...section, flex: "1", minWidth: "250px" , fontWeight: "300"}}>
           <h3 style={heading}>Máquinas</h3>
           <p><strong>Disponíveis:</strong> {maquinasDisponiveis.length}</p>
           <p><strong>Ocupadas:</strong> {maquinasOcupadas.length}</p>

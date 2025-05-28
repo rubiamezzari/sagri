@@ -104,47 +104,106 @@ export default function DetalhesAssociado() {
     >
       <h2 style={tituloNome}>{associado.nome}</h2>
 
-      <div style={linha}><div style={campoLabel}>Código:</div> #{associado.id}</div>
-      <div style={linha}><div style={campoLabel}>Data de associação:</div> {associado.data_associacao}</div>
-      <div style={linha}><div style={campoLabel}>CPF:</div> {associado.cpf}</div>
-      <div style={linha}><div style={campoLabel}>Telefone:</div> {associado.telefone}</div>
-      <div style={linha}><div style={campoLabel}>E-mail:</div> {associado.email}</div>
+      <div style={linha}>
+        <div style={campoLabel}>Código:</div> #{associado.id}
+      </div>
+      <div style={linha}>
+        <div style={campoLabel}>Data de associação:</div> {associado.data_associacao}
+      </div>
+      <div style={linha}>
+        <div style={campoLabel}>CPF:</div> {associado.cpf}
+      </div>
+      <div style={linha}>
+        <div style={campoLabel}>Telefone:</div> {associado.telefone}
+      </div>
+      <div style={linha}>
+        <div style={campoLabel}>E-mail:</div> {associado.email}
+      </div>
 
       <h4 style={{ marginTop: "25px", fontSize: "1.05rem", color: "#1a3c1a" }}>Endereço:</h4>
-      <div style={linha}><div style={campoLabel}>Rua:</div> {associado.endereco.rua}</div>
-      <div style={linha}><div style={campoLabel}>Número:</div> {associado.endereco.numero}</div>
-      <div style={linha}><div style={campoLabel}>Complemento:</div> {associado.endereco.complemento}</div>
-      <div style={linha}><div style={campoLabel}>Bairro:</div> {associado.endereco.bairro}</div>
-      <div style={linha}><div style={campoLabel}>Cidade:</div> {associado.endereco.cidade}</div>
-      <div style={linha}><div style={campoLabel}>UF:</div> {associado.endereco.estado}</div>
-      <div style={linha}><div style={campoLabel}>CEP:</div> {associado.endereco.cep}</div>
+      <div style={linha}>
+        <div style={campoLabel}>Rua:</div> {associado.endereco.rua}
+      </div>
+      <div style={linha}>
+        <div style={campoLabel}>Número:</div> {associado.endereco.numero}
+      </div>
+      <div style={linha}>
+        <div style={campoLabel}>Complemento:</div> {associado.endereco.complemento}
+      </div>
+      <div style={linha}>
+        <div style={campoLabel}>Bairro:</div> {associado.endereco.bairro}
+      </div>
+      <div style={linha}>
+        <div style={campoLabel}>Cidade:</div> {associado.endereco.cidade}
+      </div>
+      <div style={linha}>
+        <div style={campoLabel}>UF:</div> {associado.endereco.estado}
+      </div>
+      <div style={linha}>
+        <div style={campoLabel}>CEP:</div> {associado.endereco.cep}
+      </div>
 
-      {associado.documentos && associado.documentos.length > 0 && (
+      {associado.documentos && (
         <>
-          <h4 style={{ marginTop: "25px", fontSize: "1.05rem", color: "#1a3c1a" }}>Comprovante de anuidade:</h4>
-          <a
-            href={associado.documentos[0]}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              backgroundColor: "#c8facc",
-              color: "#1c3d21",
-              padding: "6px 12px",
-              borderRadius: "4px",
-              textDecoration: "none",
-              display: "inline-block",
-              marginTop: "5px",
-              fontWeight: "500",
-            }}
-          >
-            anuidade.pdf
-          </a>
+          {associado.documentos.anuidade && (
+            <>
+              <h4 style={{ marginTop: "25px", fontSize: "1.05rem", color: "#1a3c1a" }}>
+                Comprovante de anuidade:
+              </h4>
+              <a
+               href={`${REACT_APP_YOUR_HOSTNAME}/uploads/anuidade/${associado.documentos.anuidade}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  backgroundColor: "#c8facc",
+                  color: "#1c3d21",
+                  padding: "4px 12px",
+                  borderRadius: "4px",
+                  textDecoration: "none",
+                  display: "inline-block",
+                  marginTop: "5px",
+                  fontWeight: "500",
+                }}
+              >
+                anuidade.pdf
+              </a>
+            </>
+          )}
+
+          {associado.documentos.caf && (
+            <>
+              <h4 style={{ marginTop: "25px", fontSize: "1.05rem", color: "#1a3c1a" }}>
+                CAF:
+              </h4>
+              <a
+                href={`${REACT_APP_YOUR_HOSTNAME}/uploads/caf/${associado.documentos.caf}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  backgroundColor: "#c8facc",
+                  color: "#1c3d21",
+                  padding: "4px 12px",
+                  borderRadius: "4px",
+                  textDecoration: "none",
+                  display: "inline-block",
+                  marginTop: "5px",
+                  fontWeight: "500",
+                }}
+              >
+                caf.pdf
+              </a>
+            </>
+          )}
         </>
       )}
 
       <div style={{ marginTop: "30px" }}>
-        <Link to={`/associados/edit/${id}`} style={btnEditar}>Editar</Link>
-        <button onClick={handleDelete} style={btnExcluir}>Excluir</button>
+        <Link to={`/associados/edit/${id}`} style={btnEditar}>
+          Editar
+        </Link>
+        <button onClick={handleDelete} style={btnExcluir}>
+          Excluir
+        </button>
       </div>
     </div>
   );

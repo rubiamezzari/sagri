@@ -16,6 +16,8 @@ import Implementos from "./components/implementos/implementos";
 import CreateImplemento from "./components/implementos/CreateImplemento";
 import EditImplemento from "./components/implementos/EditImplemento";
 import ListImplemento from "./components/implementos/ListImplemento";
+import DetalhesImplemento from "./components/implementos/DetalhesImplemento";
+
 
 // Maquinas
 import Maquinas from "./components/maquinas/maquinas";
@@ -59,6 +61,8 @@ document.body.style.fontFamily = "'segoe ui', sans-serif";
           <Route path="/implementos/create" element={<CreateImplemento />} />
           <Route path="/implementos/edit/:id" element={<EditImplemento />} />
           <Route path="/implementos/list" element={<ListImplemento />} />
+          <Route path="/implementos/:id" element={<DetalhesImplemento />} />
+
 
           {/* Rotas para Maquinas */}
           <Route path="/maquinas" element={<Maquinas />} />
