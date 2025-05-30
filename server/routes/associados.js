@@ -27,7 +27,6 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// ROTA para criar associado com upload de arquivos
 router.post(
   "/associados/create",
   upload.fields([
@@ -57,7 +56,6 @@ router.post(
   }
 );
 
-// ROTA para criar associado sem arquivos (JSON)
 router.post("/associados", async (req, res) => {
   const dbConnect = dbo.getDb();
 
@@ -80,7 +78,6 @@ router.post("/associados", async (req, res) => {
   }
 });
 
-// Buscar todos os associados
 router.get("/associados", async (req, res) => {
   const dbConnect = dbo.getDb();
 
@@ -92,7 +89,6 @@ router.get("/associados", async (req, res) => {
   }
 });
 
-// Buscar associado por ID
 router.get("/associados/:id", async (req, res) => {
   const dbConnect = dbo.getDb();
   const query = { _id: new ObjectId(req.params.id) };
@@ -109,7 +105,6 @@ router.get("/associados/:id", async (req, res) => {
   }
 });
 
-// Deletar associado por ID
 router.delete("/associados/:id", async (req, res) => {
   const dbConnect = dbo.getDb();
   const query = { _id: new ObjectId(req.params.id) };
@@ -122,7 +117,6 @@ router.delete("/associados/:id", async (req, res) => {
   }
 });
 
-// Função auxiliar para "achatar" objetos (você usa no PATCH)
 function flattenObject(ob) {
   const toReturn = {};
 
@@ -143,12 +137,10 @@ function flattenObject(ob) {
   return toReturn;
 }
 
-// Atualizar associado por ID (PATCH)
 router.patch("/associados/update/:id", async (req, res) => {
   const dbConnect = dbo.getDb();
   const query = { _id: new ObjectId(req.params.id) };
 
-  // REMOVE o _id do corpo da requisição para evitar erro
   delete req.body._id;
 
   const updates = {
@@ -176,7 +168,6 @@ router.patch("/associados/update/:id", async (req, res) => {
   const dbConnect = dbo.getDb();
   const query = { _id: new ObjectId(req.params.id) };
 
-  // REMOVE o _id do corpo da requisição para evitar erro
   delete req.body._id;
 
   const updates = {
