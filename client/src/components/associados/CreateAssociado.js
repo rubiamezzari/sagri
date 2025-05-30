@@ -44,37 +44,29 @@ const inputStyle = {
 };
 
 const inputFocus = {
-  borderColor: "#e8e8e8",
+  borderColor: "#1c3d21",
   outline: "none",
 };
 
-const btnCadastrar = {
-  backgroundColor: "#1c3d21",
-  color: "#daf4d0",
+const uploadContainerStyle = {
+  backgroundColor: "#eeffe7",
+  borderRadius: "8px",
   padding: "8px 10px",
-  borderRadius: "5px",
-  border: "none",
-  cursor: "pointer",
-  fontWeight: "500",
-  fontSize: "1.1rem",
-  width: "30%",
-  marginTop: "10px",
-  transition: "background-color 0.3s",
+  marginBottom: "10px",
+  display: "flex",
+  alignItems: "center",
+  gap: "12px",
 };
 
-const btnCancelar = {
-  backgroundColor: "#daf4d0",
-  color: "#86a479",
-  padding: "8px 10px",
-  borderRadius: "5px",
-  border: "none",
+const uploadLabelStyle = {
+  backgroundColor: "#ccedbf",
+  padding: "6px 12px",
+  borderRadius: "6px",
   cursor: "pointer",
+  fontSize: "0.85rem",
   fontWeight: "500",
-  fontSize: "1.1rem",
-  width: "30%",
-  marginTop: "10px",
-  marginLeft: "20px",
-  transition: "background-color 0.3s",
+  color: "#1c3d21",
+  whiteSpace: "nowrap",
 };
 
 export default function CreateAssociado() {
@@ -101,6 +93,8 @@ export default function CreateAssociado() {
   });
 
   const [focusField, setFocusField] = useState(null);
+  const [hoverCadastrar, setHoverCadastrar] = useState(false);
+  const [hoverCancelar, setHoverCancelar] = useState(false);
 
   const navigate = useNavigate();
 
@@ -122,19 +116,40 @@ export default function CreateAssociado() {
     }));
   }
 
+  function formatarTelefone(telefone) {
+    const numeros = telefone.replace(/\D/g, "");
+    if (numeros.length === 11) {
+      return numeros.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+    }
+    return telefone;
+  }
+
+  function formatarCPF(cpf) {
+    const numeros = cpf.replace(/\D/g, "");
+    if (numeros.length === 11) {
+      return numeros.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+    }
+    return cpf;
+  }
+
   async function onSubmit(e) {
     e.preventDefault();
 
     try {
+ 
+      const telefoneFormatado = formatarTelefone(form.telefone);
+      const cpfFormatado = formatarCPF(form.cpf);
+
+      const formCopy = {
+        ...form,
+        telefone: telefoneFormatado,
+        cpf: cpfFormatado,
+        documentos: { anuidade: null, caf: null },
+      };
+
       const formData = new FormData();
-
-      // O resto dos dados (menos arquivos) vira JSON e vai como string no campo 'data'
-      const formCopy = { ...form, documentos: { anuidade: null, caf: null } };
-      // tirando arquivos do JSON porque vão separados
-
       formData.append("dados", JSON.stringify(formCopy));
 
-      // Se tiver arquivos, adiciona no formData com os nomes dos campos
       if (form.documentos.anuidade) {
         formData.append("anuidade", form.documentos.anuidade);
       }
@@ -146,7 +161,7 @@ export default function CreateAssociado() {
         `${REACT_APP_YOUR_HOSTNAME}/associados/create`,
         {
           method: "POST",
-          body: formData, // multipart/form-data automático com FormData
+          body: formData,
         }
       );
 
@@ -189,35 +204,32 @@ export default function CreateAssociado() {
     return focusField === name ? { ...inputStyle, ...inputFocus } : inputStyle;
   }
 
-  // Estilo para o "container" dos uploads, igual ao que você enviou
-  const uploadContainerStyle = {
-    backgroundColor: "#eeffe7",
-    borderRadius: "8px",
+  const getBtnCadastrarStyle = (hover) => ({
+    backgroundColor: hover ? "#143018" : "#1c3d21",
+    color: "#daf4d0",
     padding: "8px 10px",
-    marginBottom: "10px",
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-  };
-
-  const uploadLabelStyle = {
-    backgroundColor: "#ccedbf",
-    padding: "6px 12px",
-    borderRadius: "6px",
+    borderRadius: "5px",
+    border: "none",
     cursor: "pointer",
-    fontSize: "0.85rem",
     fontWeight: "500",
-    color: "#1c3d21",
-    whiteSpace: "nowrap",
-  };
+    fontSize: "1.1rem",
+    width: "30%",
+    transition: "background-color 0.3s",
+  });
 
-  const fileNameStyle = {
-    fontSize: "0.85rem",
-    color: "#000",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
-  };
+  const getBtnCancelarStyle = (hover) => ({
+    backgroundColor: hover ? "#ccedbf" : "#daf4d0",
+    color: "#86a479",
+    padding: "8px 10px",
+    borderRadius: "5px",
+    border: "none",
+    cursor: "pointer",
+    fontWeight: "500",
+    fontSize: "1.1rem",
+    width: "30%",
+    marginLeft: "20px",
+    transition: "background-color 0.3s",
+  });
 
   return (
     <div style={containerStyle}>
@@ -409,55 +421,52 @@ export default function CreateAssociado() {
 
         <h5 style={sectionTitle}>DOCUMENTOS</h5>
 
-        <label style={labelStyle} htmlFor="anuidade">
-          Anuidade (PDF ou imagem)
-        </label>
         <div style={uploadContainerStyle}>
           <label htmlFor="anuidade" style={uploadLabelStyle}>
-            Selecionar arquivo
+            {form.documentos.anuidade
+              ? "Anuidade: " + form.documentos.anuidade.name
+              : "Selecionar Anuidade"}
           </label>
           <input
-            id="anuidade"
             type="file"
-            accept=".pdf,.jpg,.jpeg,.png"
+            id="anuidade"
+            accept=".pdf,image/*"
             style={{ display: "none" }}
             onChange={(e) =>
               updateDocumentos({ anuidade: e.target.files[0] || null })
             }
           />
-          <span style={fileNameStyle}>
-            {form.documentos.anuidade
-              ? form.documentos.anuidade.name
-              : "Nenhum arquivo selecionado"}
-          </span>
         </div>
 
-        <label style={labelStyle} htmlFor="caf">
-          CAF (PDF ou imagem)
-        </label>
         <div style={uploadContainerStyle}>
           <label htmlFor="caf" style={uploadLabelStyle}>
-            Selecionar arquivo
+            {form.documentos.caf
+              ? "CAF:"
+              : "Selecionar CAF"}
           </label>
           <input
-            id="caf"
             type="file"
-            accept=".pdf,.jpg,.jpeg,.png"
-            style={{ display: "none" }}
+            id="caf"
+            accept=".pdf,image/*"
+            style={{ display: "none" }} 
             onChange={(e) => updateDocumentos({ caf: e.target.files[0] || null })}
           />
-          <span style={fileNameStyle}>
-            {form.documentos.caf ? form.documentos.caf.name : "Nenhum arquivo selecionado"}
-          </span>
         </div>
 
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <button type="submit" style={btnCadastrar}>
+        <div style={{ marginTop: "30px", display: "flex", justifyContent: "center" }}>
+          <button
+            type="submit"
+            style={getBtnCadastrarStyle(hoverCadastrar)}
+            onMouseEnter={() => setHoverCadastrar(true)}
+            onMouseLeave={() => setHoverCadastrar(false)}
+          >
             Cadastrar
           </button>
           <button
             type="button"
-            style={btnCancelar}
+            style={getBtnCancelarStyle(hoverCancelar)}
+            onMouseEnter={() => setHoverCancelar(true)}
+            onMouseLeave={() => setHoverCancelar(false)}
             onClick={() => navigate("/associados")}
           >
             Cancelar

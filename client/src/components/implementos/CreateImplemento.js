@@ -131,7 +131,6 @@ export default function CreateImplemento() {
         foto: null,
       });
 
-      // Redirecionamento com replace
       navigate("/implementos", { replace: true });
 
     } catch (error) {

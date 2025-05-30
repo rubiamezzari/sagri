@@ -7,6 +7,7 @@ const router = express.Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
+// GET todos implementos
 router.get("/implementos", async (req, res) => {
   const dbConnect = dbo.getDb();
 
@@ -29,6 +30,7 @@ router.get("/implementos", async (req, res) => {
   }
 });
 
+// GET implemento por id
 router.get("/implementos/:id", async (req, res) => {
   const dbConnect = dbo.getDb();
   const query = { _id: new ObjectId(req.params.id) };
@@ -53,6 +55,7 @@ router.get("/implementos/:id", async (req, res) => {
   }
 });
 
+// POST criar novo implemento
 router.post("/implementos/create", upload.single("foto"), async (req, res) => {
   const dbConnect = dbo.getDb();
 
@@ -82,6 +85,49 @@ router.post("/implementos/create", upload.single("foto"), async (req, res) => {
   }
 });
 
+// PATCH atualizar implemento por id
+router.patch("/implementos/update/:id", upload.single("foto"), async (req, res) => {
+  const dbConnect = dbo.getDb();
+  const query = { _id: new ObjectId(req.params.id) };
+
+  try {
+    // dados JSON em req.body.dados, pode ser vazio
+    const dados = req.body.dados ? JSON.parse(req.body.dados) : {};
+
+    // Monta o objeto para update
+    const updateFields = { ...dados };
+
+    // Se enviou foto nova, substitui
+    if (req.file) {
+      updateFields.foto = req.file.buffer;
+    }
+
+    const updates = { $set: updateFields };
+
+    const result = await dbConnect.collection("implementos").updateOne(query, updates);
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: "Implemento não encontrado" });
+    }
+
+    const implementoAtualizado = await dbConnect.collection("implementos").findOne(query);
+
+    // Converte foto para base64
+    if (implementoAtualizado.foto && Buffer.isBuffer(implementoAtualizado.foto)) {
+      implementoAtualizado.foto = `data:image/jpeg;base64,${implementoAtualizado.foto.toString("base64")}`;
+    } else {
+      implementoAtualizado.foto = null;
+    }
+
+    res.status(200).json(implementoAtualizado);
+
+  } catch (err) {
+    console.error("Erro ao atualizar implemento:", err);
+    res.status(500).json({ error: "Erro ao atualizar implemento", details: err.message });
+  }
+});
+
+// DELETE implemento
 router.delete("/implementos/:id", async (req, res) => {
   const dbConnect = dbo.getDb();
 

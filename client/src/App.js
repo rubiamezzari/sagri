@@ -24,12 +24,13 @@ import Maquinas from "./components/maquinas/maquinas";
 import CreateMaquina from "./components/maquinas/CreateMaquina";
 import EditMaquina from "./components/maquinas/EditMaquina";
 import ListMaquinas from "./components/maquinas/ListMaquinas";
+import DetalhesMaquina from "./components/maquinas/DetalhesMaquina";
 
 // Operadores
 import Operadores from "./components/operadores/operadores";
 import CreateOperador from "./components/operadores/CreateOperador";
 import EditOperador from "./components/operadores/EditOperador";
-import UserListOperador from "./components/operadores/userListOperador";
+import UserListOperador from "./components/operadores/UserListOperador";
 
 const App = () => {
   useEffect(() => {
@@ -69,6 +70,7 @@ document.body.style.fontFamily = "'segoe ui', sans-serif";
           <Route path="/maquinas/create" element={<CreateMaquina />} />
           <Route path="/maquinas/edit/:id" element={<EditMaquina />} />
           <Route path="/maquinas/list" element={<ListMaquinas />} />
+          <Route path="/maquinas/:id" element={<DetalhesMaquina />} />
 
           {/* Rotas para Operadores */}
           <Route path="/operadores" element={<Operadores />} />

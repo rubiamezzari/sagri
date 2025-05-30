@@ -144,9 +144,69 @@ function flattenObject(ob) {
 }
 
 // Atualizar associado por ID (PATCH)
-router.patch("/associados/:id", async (req, res) => {
+router.patch("/associados/update/:id", async (req, res) => {
   const dbConnect = dbo.getDb();
   const query = { _id: new ObjectId(req.params.id) };
+
+  // REMOVE o _id do corpo da requisição para evitar erro
+  delete req.body._id;
+
+  const updates = {
+    $set: flattenObject(req.body),
+  };
+
+  console.log(query);
+  console.log(updates);
+
+  try {
+    const result = await dbConnect.collection("associados").updateOne(query, updates);
+
+    if (result.matchedCount === 0) {
+      return res.status(404).send({ error: "Associado não encontrado" });
+    }
+
+    const associadoAtualizado = await dbConnect.collection("associados").findOne(query);
+    res.status(200).send(associadoAtualizado);
+  } catch (err) {
+    console.log(err.message);
+    res.status(500).send({ error: "Erro ao atualizar associado!!", details: err.message });
+  }
+});
+router.patch("/associados/update/:id", async (req, res) => {
+  const dbConnect = dbo.getDb();
+  const query = { _id: new ObjectId(req.params.id) };
+
+  // REMOVE o _id do corpo da requisição para evitar erro
+  delete req.body._id;
+
+  const updates = {
+    $set: flattenObject(req.body),
+  };
+
+  console.log(query);
+  console.log(updates);
+
+  try {
+    const result = await dbConnect.collection("associados").updateOne(query, updates);
+
+    if (result.matchedCount === 0) {
+      return res.status(404).send({ error: "Associado não encontrado" });
+    }
+
+    const associadoAtualizado = await dbConnect.collection("associados").findOne(query);
+    res.status(200).send(associadoAtualizado);
+  } catch (err) {
+    console.log(err.message);
+    res.status(500).send({ error: "Erro ao atualizar associado!!", details: err.message });
+  }
+});
+
+
+router.post("/associados/update/:id", async (req, res) => {
+  const dbConnect = dbo.getDb();
+  const query = { _id: new ObjectId(req.params.id) };
+
+  console.log(query)
 
   const updates = {
     $set: flattenObject(req.body),
@@ -165,5 +225,6 @@ router.patch("/associados/:id", async (req, res) => {
     res.status(500).send({ error: "Erro ao atualizar associado", details: err.message });
   }
 });
+
 
 module.exports = router;

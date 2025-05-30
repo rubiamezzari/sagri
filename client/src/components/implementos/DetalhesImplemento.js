@@ -106,7 +106,7 @@ export default function DetalhesImplemento() {
       <h2 style={tituloNome}>{`${implemento.tipo} - ${implemento.marca} ${implemento.modelo}`}</h2>
 
       <div style={linha}>
-        <div style={campoLabel}>ID:</div> #{implemento._id}
+        <div style={campoLabel}>ID:</div> #{implemento.numero}
       </div>
       <div style={linha}>
         <div style={campoLabel}>Tipo:</div> {implemento.tipo}
