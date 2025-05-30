@@ -18,7 +18,7 @@ export default function Associados() {
     <div style={{ padding: "20px" }}>
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "15px" }}>
         <Link style={btnCadastrar} to="/associados/create">
-          + novo cadastro
+          + novo associado
         </Link>
       </div>
       <UserListAssociado />

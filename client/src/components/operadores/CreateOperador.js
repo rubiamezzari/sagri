@@ -301,7 +301,7 @@ export default function CreateOperador() {
             Cadastrar
           </button>
           <button
-            type="button"
+            type="submit"
             style={getBtnCancelarStyle(hoverCancelar)}
             onMouseEnter={() => setHoverCancelar(true)}
             onMouseLeave={() => setHoverCancelar(false)}

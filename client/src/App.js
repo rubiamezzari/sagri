@@ -31,6 +31,7 @@ import Operadores from "./components/operadores/operadores";
 import CreateOperador from "./components/operadores/CreateOperador";
 import EditOperador from "./components/operadores/EditOperador";
 import UserListOperador from "./components/operadores/UserListOperador";
+import DetalhesOperador from "./components/operadores/DetalhesOperador";
 
 const App = () => {
   useEffect(() => {
@@ -77,6 +78,8 @@ document.body.style.fontFamily = "'segoe ui', sans-serif";
           <Route path="/operadores/create" element={<CreateOperador />} />
           <Route path="/operadores/edit/:id" element={<EditOperador />} />
           <Route path="/operadores/list" element={<UserListOperador />} />
+          <Route path="/operadores/:id" element={<DetalhesOperador />} />
+          
         </Routes>
       </main>
       <Footer />
