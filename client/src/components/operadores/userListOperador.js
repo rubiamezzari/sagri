@@ -44,7 +44,6 @@ export default function ListOperadores() {
             <th style={{ padding: "12px 0" }}>Telefone</th>
             <th style={{ padding: "12px 0" }}>CPF</th>
             <th style={{ padding: "12px 0" }}>Status</th>
-            <th style={{ padding: "12px 0" }}>Foto</th>
             <th style={{ padding: "12px 0" }}></th>
           </tr>
         </thead>

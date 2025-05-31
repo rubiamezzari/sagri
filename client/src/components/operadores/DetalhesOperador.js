@@ -112,18 +112,6 @@ export default function DetalhesOperador() {
         <div style={campoLabel}>Status:</div> {operador.status}
       </div>
 
-      <div style={linha}>
-        <div style={campoLabel}>Foto:</div>
-        {operador.foto ? (
-          <img
-            src={operador.foto}
-            alt="Foto do operador"
-            style={{ width: 100, borderRadius: 8 }}
-          />
-        ) : (
-          "Sem foto"
-        )}
-      </div>
 
       <div style={{ marginTop: "30px" }}>
         <Link to={`/operadores/edit/${id}`} style={btnEditar}>

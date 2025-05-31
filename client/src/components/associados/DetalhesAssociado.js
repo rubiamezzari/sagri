@@ -105,6 +105,9 @@ export default function DetalhesAssociado() {
             <h2 style={tituloNome}>{associado.nome}</h2>
 
             <div style={linha}>
+                <div style={campoLabel}>Usuário:</div> {associado.usuario}
+            </div>
+            <div style={linha}>
                 <div style={campoLabel}>Número:</div> #{associado.numero}
             </div>
             <div style={linha}>

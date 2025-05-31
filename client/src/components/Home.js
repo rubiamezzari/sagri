@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const containerStyle = {
   backgroundColor: "#d8f0d2",
   padding: "30px 20px",
-  borderRadius: "16px",
+  borderRadius: "5px",
   maxWidth: "1000px",
   margin: "20px auto",
   color: "#000",
@@ -12,10 +12,13 @@ const containerStyle = {
 
 const section = {
   backgroundColor: "#fff",
-  borderRadius: "12px",
+  borderRadius: "5px",
   padding: "20px",
   marginBottom: "20px",
   transition: "0.3s ease",
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "space-between",
 };
 
 const heading = {
@@ -28,7 +31,7 @@ const heading = {
 const linkBox = {
   padding: "10px 18px",
   backgroundColor: "#bbdeb6",
-  borderRadius: "8px",
+  borderRadius: "5px",
   textDecoration: "none",
   color: "#000",
   fontWeight: "600",
@@ -40,7 +43,7 @@ const linkBox = {
 const itemBox = {
   backgroundColor: "#f3fff3",
   padding: "12px 16px",
-  borderRadius: "8px",
+  borderRadius: "5px",
   marginBottom: "10px",
   fontSize: "0.95rem",
   color: "#1a1a1a",
@@ -64,8 +67,10 @@ const subtitleStyle = {
 
 const sectionFooter = {
   display: "flex",
-  justifyContent: "flex-end",
-  marginTop: "12px",
+  justifyContent: "flex-start",
+  gap: "10px",
+  marginTop: "20px",
+  alignItems: "center",
 };
 
 export default function TelaInicialAdmin() {
@@ -106,8 +111,16 @@ export default function TelaInicialAdmin() {
         Acompanhe os dados principais do sistema
       </p>
 
-      <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", marginBottom: "20px" }}>
-        <div style={{ ...section, flex: "1", minWidth: "260px" }}>
+      <div
+        style={{
+          display: "flex",
+          gap: "20px",
+          flexWrap: "wrap",
+          marginBottom: "20px",
+          alignItems: "stretch",
+        }}
+      >
+        <div style={{ ...section, flex: "1", minWidth: "260px", minHeight: "250px" }}>
           <h3 style={heading}>Total de Associados</h3>
           <p style={{ fontSize: "2.2rem", fontWeight: "bold" }}>{totalAssociados}</p>
           <div style={sectionFooter}>
@@ -115,23 +128,25 @@ export default function TelaInicialAdmin() {
           </div>
         </div>
 
-        <div style={{ ...section, flex: "2", minWidth: "260px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+        <div style={{ ...section, flex: "2", minWidth: "260px", minHeight: "250px" }}>
           <h3 style={heading}>Solicitações Pendentes</h3>
-          {solicitacoes.length === 0 ? (
-            <p>Nenhuma solicitação pendente.</p>
-          ) : (
-            solicitacoes.slice(0, 5).map(item => (
-              <div key={item.id} style={itemBox}>
-                <strong>{item.nome}</strong> solicitou para <strong>{item.data}</strong>
-              </div>
-            ))
-          )}
+          <div style={{ flexGrow: 1 }}>
+            {solicitacoes.length === 0 ? (
+              <p>Nenhuma solicitação pendente.</p>
+            ) : (
+              solicitacoes.slice(0, 5).map(item => (
+                <div key={item.id} style={itemBox}>
+                  <strong>{item.nome}</strong> solicitou para <strong>{item.data}</strong>
+                </div>
+              ))
+            )}
+          </div>
           <div style={sectionFooter}>
             <Link to="/agendamentos/list" style={linkBox}>Ver todos os agendamentos</Link>
           </div>
         </div>
 
-        <div style={{ ...section, flex: "1", minWidth: "260px" }}>
+        <div style={{ ...section, flex: "1", minWidth: "260px", minHeight: "250px" }}>
           <h3 style={heading}>Máquinas</h3>
           <p><strong>Disponíveis:</strong> {maquinasDisponiveis.length}</p>
           <p><strong>Ocupadas:</strong> {maquinasOcupadas.length}</p>

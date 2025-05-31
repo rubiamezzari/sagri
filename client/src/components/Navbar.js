@@ -3,7 +3,6 @@ import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap/dist/js/bootstrap.bundle";
 import { NavLink } from "react-router-dom";
 import Logo from "./Logo.png";
-import { FaUserCircle, FaBell } from "react-icons/fa";
 
 export default function Navbar() { 
     const linkStyle = ({ isActive }) => ({
@@ -81,24 +80,6 @@ export default function Navbar() {
                             </NavLink>
                         </li>
                     </ul>
-
-                    <div className="d-flex">
-                        <NavLink
-                            className="nav-link"
-                            to="/notificacoes"
-                            style={{ color: "white", marginRight: "1rem" }}
-                        >
-                            <FaBell size={18} />
-                        </NavLink>
-
-                        <NavLink
-                            className="nav-link"
-                            to="/perfil"
-                            style={{ color: "white" }}
-                        >
-                            <FaUserCircle size={20} />
-                        </NavLink>
-                    </div>
                 </div>
             </nav>
         </div>

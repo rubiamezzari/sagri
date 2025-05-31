@@ -98,6 +98,7 @@ const uploadLabelStyle = {
 
 export default function CreateAssociado() {
   const [form, setForm] = useState({
+    usuario: "",
     nome: "",
     email: "",
     telefone: "",
@@ -200,6 +201,7 @@ export default function CreateAssociado() {
 
       // limpa form após sucesso
       setForm({
+        usuario: "",
         nome: "",
         email: "",
         telefone: "",
@@ -235,6 +237,20 @@ export default function CreateAssociado() {
     <div style={containerStyle}>
       <form onSubmit={onSubmit}>
         <h5 style={sectionTitle}>DADOS PESSOAIS</h5>
+
+        <label style={labelStyle} htmlFor="usuario">
+          Usuário
+        </label>
+        <input
+          id="usuario"
+          type="text"
+          style={getInputStyle("usuario")}
+          value={form.usuario}
+          onChange={(e) => updateForm({ usuario: e.target.value })}
+          onFocus={() => setFocusField("usuario")}
+          onBlur={() => setFocusField(null)}
+          required
+        />
 
         <label style={labelStyle} htmlFor="nome">
           Nome

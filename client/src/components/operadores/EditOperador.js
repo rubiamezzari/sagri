@@ -1,11 +1,69 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
+const API_URL = "http://localhost:5050";
+
+const containerStyle = {
+  maxWidth: "800px",
+  margin: "40px auto",
+  padding: "30px 40px",
+  backgroundColor: "#ffffff",
+  borderRadius: "5px",
+  textAlign: "center",
+};
+
+const sectionTitle = {
+  color: "#100f0d",
+  marginBottom: "16px",
+  fontWeight: "500",
+  fontSize: "1rem",
+  borderBottom: "0.5px solid rgb(131, 148, 131)",
+  paddingBottom: "6px",
+};
+
+const labelStyle = {
+  display: "block",
+  marginBottom: "6px",
+  fontWeight: "600",
+  color: "#100f0d",
+  fontSize: "0.8rem",
+  textAlign: "left",
+};
+
+const inputStyle = {
+  width: "100%",
+  padding: "5px 6px",
+  marginBottom: "10px",
+  borderRadius: "5px",
+  border: "0.1px solid #e8e8e8",
+  fontSize: "1rem",
+  boxSizing: "border-box",
+  transition: "border-color 0.3s",
+};
+
+const inputFocus = {
+  borderColor: "#e8e8e8",
+  outline: "none",
+};
+
+const btnStyle = {
+  backgroundColor: "#1c3d21",
+  color: "#daf4d0",
+  padding: "8px 10px",
+  borderRadius: "5px",
+  border: "none",
+  cursor: "pointer",
+  fontWeight: "500",
+  fontSize: "1.1rem",
+  width: "30%",
+  marginTop: "10px",
+};
+
 export default function EditOperador() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
+  const [form, setForm] = useState({
     nome: "",
     cpf: "",
     telefone: "",
@@ -14,62 +72,113 @@ export default function EditOperador() {
     observacao: "",
   });
 
-  useEffect(() => {
-    fetch(`http://localhost:5000/operadores/${id}`)
-      .then(res => res.json())
-      .then(data => setFormData(data))
-      .catch(err => console.error("Erro ao buscar operador:", err));
-  }, [id]);
+  const [focusField, setFocusField] = useState(null);
 
-  function handleChange(e) {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await fetch(`${API_URL}/operadores/${id}`);
+        if (!response.ok) throw new Error();
+        const operador = await response.json();
+        setForm(operador);
+      } catch {
+        alert("Erro ao buscar operador.");
+        navigate("/operadores");
+      }
+    }
+
+    fetchData();
+  }, [id, navigate]);
+
+  function updateForm(value) {
+    setForm((prev) => ({ ...prev, ...value }));
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+  function getInputStyle(name) {
+    return focusField === name ? { ...inputStyle, ...inputFocus } : inputStyle;
+  }
 
+  async function onSubmit(e) {
+    e.preventDefault();
     try {
-      const response = await fetch(`http://localhost:5000/operadores/update/${id}`, {
+      const response = await fetch(`${API_URL}/operadores/update/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(form),
       });
 
-      if (response.ok) {
-        alert("Operador atualizado com sucesso!");
-        navigate("/operadores");
-      } else {
-        alert("Erro ao atualizar operador.");
-      }
-    } catch (err) {
-      console.error("Erro:", err);
+      if (!response.ok) throw new Error();
+
+      alert("Operador atualizado com sucesso!");
+      navigate("/operadores");
+    } catch {
+      alert("Erro ao atualizar operador.");
     }
   }
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2 style={{ marginBottom: "20px" }}>Editar Operador</h2>
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "12px", maxWidth: "400px" }}>
-        <input name="nome" value={formData.nome} onChange={handleChange} placeholder="Nome" required />
-        <input name="cpf" value={formData.cpf} onChange={handleChange} placeholder="CPF" required />
-        <input name="telefone" value={formData.telefone} onChange={handleChange} placeholder="Telefone" required />
-        <input name="categoria_cnh" value={formData.categoria_cnh} onChange={handleChange} placeholder="Categoria CNH" required />
-        <select name="status" value={formData.status} onChange={handleChange} required>
-          <option value="">Selecione o status</option>
-          <option value="ativo">Ativo</option>
-          <option value="inativo">Inativo</option>
-        </select>
-        <textarea name="observacao" value={formData.observacao} onChange={handleChange} placeholder="Observações" />
+    <div style={containerStyle}>
+      <form onSubmit={onSubmit}>
+        <h5 style={sectionTitle}>DADOS DO OPERADOR</h5>
 
-        <button type="submit" style={{
-          backgroundColor: "#ccedbf",
-          color: "#000",
-          padding: "8px",
-          border: "1px solid #1c3d21",
-          borderRadius: "5px",
-          fontWeight: "500"
-        }}>Salvar</button>
+        {[
+          ["nome", "Nome"],
+          ["cpf", "CPF"],
+          ["telefone", "Telefone"],
+          ["categoria_cnh", "Categoria CNH"],
+        ].map(([name, label]) => (
+          <div key={name}>
+            <label style={labelStyle}>{label}</label>
+            <input
+              type="text"
+              name={name}
+              style={getInputStyle(name)}
+              value={form[name]}
+              onChange={(e) => updateForm({ [name]: e.target.value })}
+              onFocus={() => setFocusField(name)}
+              onBlur={() => setFocusField(null)}
+              required
+            />
+          </div>
+        ))}
+
+        <div>
+          <label style={labelStyle}>Status</label>
+          <select
+            name="status"
+            style={getInputStyle("status")}
+            value={form.status}
+            onChange={(e) => updateForm({ status: e.target.value })}
+            onFocus={() => setFocusField("status")}
+            onBlur={() => setFocusField(null)}
+            required
+          >
+            <option value="">Selecione o status</option>
+            <option value="ativo">Ativo</option>
+            <option value="inativo">Inativo</option>
+          </select>
+        </div>
+
+        <div>
+          <label style={labelStyle}>Observações</label>
+          <textarea
+            name="observacao"
+            style={{ ...getInputStyle("observacao"), height: "80px", resize: "vertical" }}
+            value={form.observacao}
+            onChange={(e) => updateForm({ observacao: e.target.value })}
+            onFocus={() => setFocusField("observacao")}
+            onBlur={() => setFocusField(null)}
+          />
+        </div>
+
+        <button type="submit" style={btnStyle}>Salvar</button>
+        <button
+          type="button"
+          onClick={() => navigate("/operadores")}
+          style={{ ...btnStyle, backgroundColor: "#daf4d0", marginLeft: "10px", color: "#86a479" }}
+        >
+          Cancelar
+        </button>
       </form>
     </div>
   );

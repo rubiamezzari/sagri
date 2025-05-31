@@ -6,7 +6,7 @@ export default function Footer() {
   return (
     <footer style={{ backgroundColor: "#ccedbf" }} className="text-dark py-4 shadow-sm">
       <div className="container text-center">
-        <h5 className="mb-2 fw-bold" style={{ color: "#000" }}>
+        <h5 className="mb-2 " style={{ color: "#000" }}>
           SAGRI - Sistema de Agendamento de Maquinário Agrícola
         </h5>
         <p className="mb-0" style={{ fontSize: "0.95rem", coloe:"000" }}>
