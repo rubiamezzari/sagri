@@ -1,7 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
-
-const REACT_APP_YOUR_HOSTNAME = "http://localhost:5050";
 
 const btnDetalhes = {
   backgroundColor: "#1c3d21",
@@ -12,29 +10,10 @@ const btnDetalhes = {
   border: "none",
   cursor: "pointer",
   fontWeight: "500",
-  textDecoration:"none",
+  textDecoration: "none",
 };
 
-export default function UserListAssociado() {
-  const [associados, setAssociados] = useState([]);
-
-  useEffect(() => {
-    async function getAssociados() {
-      const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/associados/`);
-
-      if (!response.ok) {
-        const message = `Ocorreu um erro: ${response.statusText}`;
-        window.alert(message);
-        return;
-      }
-
-      const associados = await response.json();
-      setAssociados(associados);
-    }
-
-    getAssociados();
-  }, []);
-
+export default function UserListAssociado({ associados }) {
   function associadoList() {
     return associados.map((associado, index) => (
       <tr key={associado._id} style={{ borderBottom: "1px solid #ccc" }}>

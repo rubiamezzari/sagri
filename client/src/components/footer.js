@@ -9,7 +9,7 @@ export default function Footer() {
         <h5 className="mb-2 " style={{ color: "#000" }}>
           SAGRI - Sistema de Agendamento de Maquinário Agrícola
         </h5>
-        <p className="mb-0" style={{ fontSize: "0.95rem", coloe:"000" }}>
+        <p className="mb-0" style={{ fontSize: "0.95rem", color:"000" }}>
           Conselho Municipal de Desenvolvimento Agropecuário do Campo, Balneário Gaivota - SC
         </p>
       </div>
