@@ -47,8 +47,8 @@ const inputFocus = {
   outline: "none",
 };
 
-const btnCadastrar = {
-  backgroundColor: "#1c3d21",
+const getBtnCadastrarStyle = (hover) => ({
+  backgroundColor: hover ? "#143018" : "#1c3d21",
   color: "#daf4d0",
   padding: "8px 10px",
   borderRadius: "5px",
@@ -56,13 +56,12 @@ const btnCadastrar = {
   cursor: "pointer",
   fontWeight: "500",
   fontSize: "1.1rem",
-  width: "48%",
-  marginTop: "10px",
+  width: "30%",
   transition: "background-color 0.3s",
-};
+});
 
-const btnCancelar = {
-  backgroundColor: "#daf4d0",
+const getBtnCancelarStyle = (hover) => ({
+  backgroundColor: hover ? "#ccedbf" : "#daf4d0",
   color: "#86a479",
   padding: "8px 10px",
   borderRadius: "5px",
@@ -70,11 +69,10 @@ const btnCancelar = {
   cursor: "pointer",
   fontWeight: "500",
   fontSize: "1.1rem",
-  width: "48%",
-  marginTop: "10px",
-  marginLeft: "4%",
+  width: "30%",
+  marginLeft: "20px",
   transition: "background-color 0.3s",
-};
+});
 
 export default function CreateImplemento() {
   const [form, setForm] = useState({
@@ -88,6 +86,8 @@ export default function CreateImplemento() {
     foto: null,
   });
 
+  const [hoverCadastrar, setHoverCadastrar] = useState(false);
+  const [hoverCancelar, setHoverCancelar] = useState(false);
   const [focusField, setFocusField] = useState(null);
   const navigate = useNavigate();
 
@@ -266,13 +266,17 @@ export default function CreateImplemento() {
         </div>
 
         <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <button type="submit" style={btnCadastrar}>
+          <button type="submit" style={getBtnCadastrarStyle(hoverCadastrar)}
+            onMouseEnter={() => setHoverCadastrar(true)}
+            onMouseLeave={() => setHoverCadastrar(false)}>
             Cadastrar
           </button>
           <button
             type="button"
-            style={btnCancelar}
-            onClick={() => navigate("/implementos")}
+            style={getBtnCancelarStyle(hoverCancelar)}
+            onMouseEnter={() => setHoverCancelar(true)}
+            onMouseLeave={() => setHoverCancelar(false)}
+            onClick={() => navigate("/associados")}
           >
             Cancelar
           </button>

@@ -24,20 +24,21 @@ const sectionTitle = {
 
 const labelStyle = {
   display: "block",
-  marginBottom: "6px",
+  marginBottom: "4px",
   fontWeight: "600",
   color: "#100f0d",
   fontSize: "0.8rem",
   textAlign: "left",
+  marginTop: "8px",
 };
 
 const inputStyle = {
   width: "100%",
-  padding: "5px 6px",
-  marginBottom: "10px",
+  padding: "4px 6px",
+  marginBottom: "12px",
   borderRadius: "5px",
   border: "0.1px solid #e8e8e8",
-  fontSize: "1rem",
+  fontSize: "0.9rem",
   boxSizing: "border-box",
   transition: "border-color 0.3s",
   maxWidth: "100%",
@@ -56,6 +57,7 @@ const uploadContainerStyle = {
   display: "flex",
   alignItems: "center",
   gap: "12px",
+  justifyContent: "flex-start",
 };
 
 const uploadLabelStyle = {
@@ -112,14 +114,12 @@ export default function CreateOperador() {
       const telefoneFormatado = formatarTelefone(form.telefone);
       const cpfFormatado = formatarCPF(form.cpf);
 
-      const formCopy = {
-        ...form,
-        telefone: telefoneFormatado,
-        cpf: cpfFormatado,
-      };
-
       const formData = new FormData();
-      formData.append("dados", JSON.stringify(formCopy));
+      formData.append("nome", form.nome);
+      formData.append("email", form.email);
+      formData.append("telefone", telefoneFormatado);
+      formData.append("cpf", cpfFormatado);
+      formData.append("senha", form.senha);
 
       if (form.foto) {
         formData.append("foto", form.foto);
@@ -139,7 +139,6 @@ export default function CreateOperador() {
         return;
       }
 
-      // Limpa o formulário após sucesso
       setForm({
         nome: "",
         email: "",
@@ -191,9 +190,7 @@ export default function CreateOperador() {
       <form onSubmit={onSubmit}>
         <h5 style={sectionTitle}>DADOS DO OPERADOR</h5>
 
-        <label style={labelStyle} htmlFor="nome">
-          Nome
-        </label>
+        <label style={labelStyle} htmlFor="nome">Nome</label>
         <input
           id="nome"
           type="text"
@@ -205,9 +202,7 @@ export default function CreateOperador() {
           required
         />
 
-        <label style={labelStyle} htmlFor="email">
-          Email
-        </label>
+        <label style={labelStyle} htmlFor="email">Email</label>
         <input
           id="email"
           type="email"
@@ -219,9 +214,7 @@ export default function CreateOperador() {
           required
         />
 
-        <label style={labelStyle} htmlFor="telefone">
-          Telefone
-        </label>
+        <label style={labelStyle} htmlFor="telefone">Telefone</label>
         <input
           id="telefone"
           type="text"
@@ -233,9 +226,7 @@ export default function CreateOperador() {
           required
         />
 
-        <label style={labelStyle} htmlFor="cpf">
-          CPF
-        </label>
+        <label style={labelStyle} htmlFor="cpf">CPF</label>
         <input
           id="cpf"
           type="text"
@@ -247,9 +238,7 @@ export default function CreateOperador() {
           required
         />
 
-        <label style={labelStyle} htmlFor="senha">
-          Senha
-        </label>
+        <label style={labelStyle} htmlFor="senha">Senha</label>
         <input
           id="senha"
           type="password"
@@ -282,7 +271,7 @@ export default function CreateOperador() {
         </div>
 
         {form.foto && (
-          <div style={{ textAlign: "center", marginBottom: "20px" }}>
+          <div style={{ textAlign: "left", marginBottom: "20px" }}>
             <img
               src={URL.createObjectURL(form.foto)}
               alt="Foto selecionada"
@@ -301,11 +290,11 @@ export default function CreateOperador() {
             Cadastrar
           </button>
           <button
-            type="submit"
+            type="button"
             style={getBtnCancelarStyle(hoverCancelar)}
+            onClick={() => navigate("/operadores")}
             onMouseEnter={() => setHoverCancelar(true)}
             onMouseLeave={() => setHoverCancelar(false)}
-            onClick={() => navigate("/operadores")}
           >
             Cancelar
           </button>

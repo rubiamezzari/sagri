@@ -98,6 +98,7 @@ router.patch("/maquinas/update/:id", upload.single("foto"), async (req, res) => 
 
   try {
     const dados = req.body.dados ? JSON.parse(req.body.dados) : {};
+    delete dados._id; // ✅ garante que _id não será atualizado
 
     const updateFields = { ...dados };
 
@@ -128,6 +129,7 @@ router.patch("/maquinas/update/:id", upload.single("foto"), async (req, res) => 
     res.status(500).json({ error: "Erro ao atualizar máquina", details: err.message });
   }
 });
+
 
 // DELETE máquina
 router.delete("/maquinas/:id", async (req, res) => {

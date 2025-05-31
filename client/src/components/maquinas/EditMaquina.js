@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+
+const API_URL = "http://localhost:5050";
 
 const containerStyle = {
   maxWidth: "800px",
@@ -7,120 +9,209 @@ const containerStyle = {
   padding: "30px 40px",
   backgroundColor: "#ffffff",
   borderRadius: "5px",
+  textAlign: "center",
 };
 
 const sectionTitle = {
   color: "#100f0d",
   marginBottom: "16px",
-  fontWeight: "600",
-  fontSize: "1.2rem",
+  fontWeight: "500",
+  fontSize: "1rem",
   borderBottom: "0.5px solid rgb(131, 148, 131)",
-  paddingBottom: "10px",
+  paddingBottom: "6px",
 };
 
 const labelStyle = {
+  display: "block",
+  marginBottom: "6px",
   fontWeight: "600",
   color: "#100f0d",
+  fontSize: "0.8rem",
+  textAlign: "left",
+};
+
+const inputStyle = {
+  width: "100%",
+  padding: "5px 6px",
+  marginBottom: "10px",
+  borderRadius: "5px",
+  border: "0.1px solid #e8e8e8",
+  fontSize: "1rem",
+  boxSizing: "border-box",
+  transition: "border-color 0.3s",
+};
+
+const inputFocus = {
+  borderColor: "#e8e8e8",
+  outline: "none",
+};
+
+const btnStyle = {
+  backgroundColor: "#1c3d21",
+  color: "#daf4d0",
+  padding: "8px 10px",
+  borderRadius: "5px",
+  border: "none",
+  cursor: "pointer",
+  fontWeight: "500",
+  fontSize: "1.1rem",
+  width: "30%",
   marginTop: "10px",
 };
 
-const valueStyle = {
-  marginLeft: "10px",
-  fontWeight: "400",
+const uploadContainerStyle = {
+  backgroundColor: "#eeffe7",
+  borderRadius: "8px",
+  padding: "8px 10px",
+  marginBottom: "10px",
+  display: "flex",
+  alignItems: "center",
+  gap: "12px",
 };
 
-const btnVoltar = {
-  marginTop: "20px",
-  padding: "8px 14px",
+const uploadLabelStyle = {
   backgroundColor: "#ccedbf",
-  border: "1px solid #1c3d21",
-  borderRadius: "5px",
+  padding: "6px 12px",
+  borderRadius: "6px",
   cursor: "pointer",
-  fontWeight: "600",
-  color: "#000",
+  fontSize: "0.85rem",
+  fontWeight: "500",
+  color: "#1c3d21",
+  whiteSpace: "nowrap",
 };
 
-export default function DetalhesMaquina() {
-  const { id } = useParams();
+export default function EditMaquina() {
+  const [form, setForm] = useState({
+    tipo: "",
+    marca: "",
+    modelo: "",
+    potencia: "",
+    status: "",
+    n_serie: "",
+    observacao: "",
+    foto: null,
+  });
+
+  const [focusField, setFocusField] = useState(null);
+  const params = useParams();
   const navigate = useNavigate();
-  const [maquina, setMaquina] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function fetchMaquina() {
-      try {
-        const res = await fetch(`http://localhost:5050/maquinas/${id}`);
-        if (!res.ok) {
-          throw new Error("Erro ao buscar máquina");
-        }
-        const data = await res.json();
-        setMaquina(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+    async function fetchData() {
+      const response = await fetch(`${API_URL}/maquinas/${params.id}`);
+      if (!response.ok) {
+        alert("Erro ao buscar máquina.");
+        navigate("/maquinas");
+        return;
       }
-    }
-    fetchMaquina();
-  }, [id]);
 
-  if (loading) return <p>Carregando...</p>;
-  if (error) return <p>{error}</p>;
-  if (!maquina) return <p>Máquina não encontrada</p>;
+      const maquina = await response.json();
+      setForm(maquina);
+    }
+
+    fetchData();
+  }, [params.id, navigate]);
+
+  function updateForm(value) {
+    setForm((prev) => ({ ...prev, ...value }));
+  }
+
+  function getInputStyle(name) {
+    return focusField === name ? { ...inputStyle, ...inputFocus } : inputStyle;
+  }
+
+  async function onSubmit(e) {
+    e.preventDefault();
+
+    const formData = new FormData();
+    const formCopy = { ...form, foto: null };
+    formData.append("dados", JSON.stringify(formCopy));
+
+    if (form.foto instanceof File) {
+      formData.append("foto", form.foto);
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/maquinas/update/${params.id}`, {
+        method: "PATCH",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        alert("Erro ao atualizar máquina.");
+        return;
+      }
+
+      alert("Máquina atualizada com sucesso!");
+      navigate("/maquinas");
+    } catch (err) {
+      alert("Erro ao se comunicar com o servidor.");
+    }
+  }
 
   return (
     <div style={containerStyle}>
-      <h2 style={sectionTitle}>Detalhes da Máquina</h2>
+      <form onSubmit={onSubmit}>
+        <h5 style={sectionTitle}>DADOS DA MÁQUINA</h5>
 
-      <div>
-        <strong style={labelStyle}>Tipo:</strong>
-        <span style={valueStyle}>{maquina.tipo || maquina.nome}</span>
-      </div>
+        {[
+          ["tipo", "Tipo"],
+          ["marca", "Marca"],
+          ["modelo", "Modelo"],
+          ["potencia", "Potência"],
+          ["status", "Status"],
+          ["n_serie", "Número de Série"],
+        ].map(([name, label]) => (
+          <div key={name}>
+            <label style={labelStyle}>{label}</label>
+            <input
+              type="text"
+              style={getInputStyle(name)}
+              value={form[name]}
+              onChange={(e) => updateForm({ [name]: e.target.value })}
+              onFocus={() => setFocusField(name)}
+              onBlur={() => setFocusField(null)}
+            />
+          </div>
+        ))}
 
-      <div>
-        <strong style={labelStyle}>Marca:</strong>
-        <span style={valueStyle}>{maquina.marca}</span>
-      </div>
+        <label style={labelStyle}>Observações</label>
+        <textarea
+          style={{ ...getInputStyle("observacao"), height: "80px", resize: "vertical" }}
+          value={form.observacao}
+          onChange={(e) => updateForm({ observacao: e.target.value })}
+          onFocus={() => setFocusField("observacao")}
+          onBlur={() => setFocusField(null)}
+        />
 
-      <div>
-        <strong style={labelStyle}>Modelo:</strong>
-        <span style={valueStyle}>{maquina.modelo}</span>
-      </div>
-
-      <div>
-        <strong style={labelStyle}>Potência:</strong>
-        <span style={valueStyle}>{maquina.potencia || "N/A"}</span>
-      </div>
-
-      <div>
-        <strong style={labelStyle}>Número de Série:</strong>
-        <span style={valueStyle}>{maquina.n_serie || "N/A"}</span>
-      </div>
-
-      <div>
-        <strong style={labelStyle}>Status:</strong>
-        <span style={valueStyle}>{maquina.status || "N/A"}</span>
-      </div>
-
-      <div>
-        <strong style={labelStyle}>Observação:</strong>
-        <p style={{ marginLeft: "10px" }}>{maquina.observacao || "Sem observações"}</p>
-      </div>
-
-      {maquina.foto && (
-        <div style={{ marginTop: "20px" }}>
-          <img
-            src={maquina.foto}
-            alt="Foto da máquina"
-            style={{ maxWidth: "100%", borderRadius: "8px" }}
+        <div style={uploadContainerStyle}>
+          <label htmlFor="foto" style={uploadLabelStyle}>
+            {form.foto instanceof File
+              ? "Foto: " + form.foto.name
+              : form.foto
+              ? "Foto selecionada"
+              : "Selecionar Foto"}
+          </label>
+          <input
+            id="foto"
+            type="file"
+            accept="image/*"
+            style={{ display: "none" }}
+            onChange={(e) => updateForm({ foto: e.target.files[0] || null })}
           />
         </div>
-      )}
 
-      <button style={btnVoltar} onClick={() => navigate(-1)}>
-        Voltar
-      </button>
+        <button type="submit" style={btnStyle}>
+          Salvar
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate("/maquinas")}
+          style={{ ...btnStyle, backgroundColor: "#daf4d0", marginLeft: "10px", color: "#86a479" }}
+        >
+          Cancelar
+        </button>
+      </form>
     </div>
   );
 }

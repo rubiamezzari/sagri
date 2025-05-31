@@ -69,6 +69,33 @@ const uploadLabelStyle = {
   whiteSpace: "nowrap",
 };
 
+  const getBtnCadastrarStyle = (hover) => ({
+    backgroundColor: hover ? "#143018" : "#1c3d21",
+    color: "#daf4d0",
+    padding: "8px 10px",
+    borderRadius: "5px",
+    border: "none",
+    cursor: "pointer",
+    fontWeight: "500",
+    fontSize: "1.1rem",
+    width: "30%",
+    transition: "background-color 0.3s",
+  });
+
+  const getBtnCancelarStyle = (hover) => ({
+    backgroundColor: hover ? "#ccedbf" : "#daf4d0",
+    color: "#86a479",
+    padding: "8px 10px",
+    borderRadius: "5px",
+    border: "none",
+    cursor: "pointer",
+    fontWeight: "500",
+    fontSize: "1.1rem",
+    width: "30%",
+    marginLeft: "20px",
+    transition: "background-color 0.3s",
+  });
+
 export default function CreateAssociado() {
   const [form, setForm] = useState({
     nome: "",
@@ -203,33 +230,6 @@ export default function CreateAssociado() {
   function getInputStyle(name) {
     return focusField === name ? { ...inputStyle, ...inputFocus } : inputStyle;
   }
-
-  const getBtnCadastrarStyle = (hover) => ({
-    backgroundColor: hover ? "#143018" : "#1c3d21",
-    color: "#daf4d0",
-    padding: "8px 10px",
-    borderRadius: "5px",
-    border: "none",
-    cursor: "pointer",
-    fontWeight: "500",
-    fontSize: "1.1rem",
-    width: "30%",
-    transition: "background-color 0.3s",
-  });
-
-  const getBtnCancelarStyle = (hover) => ({
-    backgroundColor: hover ? "#ccedbf" : "#daf4d0",
-    color: "#86a479",
-    padding: "8px 10px",
-    borderRadius: "5px",
-    border: "none",
-    cursor: "pointer",
-    fontWeight: "500",
-    fontSize: "1.1rem",
-    width: "30%",
-    marginLeft: "20px",
-    transition: "background-color 0.3s",
-  });
 
   return (
     <div style={containerStyle}>

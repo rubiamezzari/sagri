@@ -1,43 +1,55 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 
-const containerStyle = {
-  maxWidth: "800px",
-  margin: "40px auto",
-  padding: "30px 40px",
-  backgroundColor: "#ffffff",
-  borderRadius: "5px",
+const REACT_APP_YOUR_HOSTNAME = "http://localhost:5050";
+
+const linha = {
+  padding: "6px 0",
+  display: "flex",
+  gap: "8px",
+  fontSize: "0.95rem",
+  borderBottom: "1px solid #d5ecd0",
 };
 
-const sectionTitle = {
-  color: "#100f0d",
-  marginBottom: "16px",
-  fontWeight: "600",
-  fontSize: "1.2rem",
-  borderBottom: "0.5px solid rgb(131, 148, 131)",
+const campoLabel = {
+  minWidth: "160px",
+  fontWeight: "bold",
+};
+
+const tituloNome = {
+  fontSize: "1.25rem",
+  fontWeight: "bold",
+  textTransform: "uppercase",
   paddingBottom: "10px",
+  marginBottom: "20px",
+  borderBottom: "2px solid #a5d6a7",
+  color: "#1a3c1a",
 };
 
-const labelStyle = {
-  fontWeight: "600",
-  color: "#100f0d",
-  marginTop: "10px",
-};
-
-const valueStyle = {
-  marginLeft: "10px",
-  fontWeight: "400",
-};
-
-const btnVoltar = {
-  marginTop: "20px",
-  padding: "8px 14px",
-  backgroundColor: "#ccedbf",
-  border: "1px solid #1c3d21",
+const btnBase = {
+  padding: "5px 18px",
   borderRadius: "5px",
+  fontWeight: "500",
+  fontSize: "1rem",
+  border: "none",
   cursor: "pointer",
-  fontWeight: "600",
-  color: "#000",
+  transition: "all 0.3s ease",
+  marginRight: "15px",
+  marginTop: "20px",
+  color: "#fff",
+  textDecoration: "none",
+  display: "inline-block",
+};
+
+const btnEditar = {
+  ...btnBase,
+  backgroundColor: "#1c3d21",
+};
+
+const btnExcluir = {
+  ...btnBase,
+  backgroundColor: "#daf4d0",
+  color: "#86a479",
 };
 
 export default function DetalhesMaquina() {
@@ -45,67 +57,65 @@ export default function DetalhesMaquina() {
   const navigate = useNavigate();
   const [maquina, setMaquina] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function fetchMaquina() {
-      try {
-        const res = await fetch(`http://localhost:5050/maquinas/${id}`);
-        if (!res.ok) {
-          throw new Error("Erro ao buscar máquina");
-        }
-        const data = await res.json();
-        setMaquina(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
+    async function fetchData() {
+      const res = await fetch(`${REACT_APP_YOUR_HOSTNAME}/maquinas/${id}`);
+      const data = await res.json();
+      setMaquina(data);
+      setLoading(false);
     }
-    fetchMaquina();
+    fetchData();
   }, [id]);
 
-  if (loading) return <p>Carregando...</p>;
-  if (error) return <p>{error}</p>;
-  if (!maquina) return <p>Máquina não encontrada</p>;
+  async function handleDelete() {
+    const confirmar = window.confirm("Tem certeza que deseja excluir esta máquina?");
+    if (!confirmar) return;
+
+    const res = await fetch(`${REACT_APP_YOUR_HOSTNAME}/maquinas/${id}`, {
+      method: "DELETE",
+    });
+
+    if (res.ok) {
+      alert("Máquina excluída com sucesso!");
+      navigate("/maquinas/list");
+    } else {
+      alert("Erro ao excluir máquina.");
+    }
+  }
+
+  if (loading || !maquina) return <div>Carregando...</div>;
 
   return (
-    <div style={containerStyle}>
-      <h2 style={sectionTitle}>Detalhes da Máquina</h2>
+    <div
+      style={{
+        backgroundColor: "#fff",
+        padding: "30px",
+        borderRadius: "5px",
+        maxWidth: "950px",
+        margin: "40px auto",
+        fontFamily: "'Segoe UI', sans-serif",
+      }}
+    >
+      <h2 style={tituloNome}>{maquina.tipo || maquina.nome}</h2>
 
-      <div>
-        <strong style={labelStyle}>Tipo:</strong>
-        <span style={valueStyle}>{maquina.tipo || maquina.nome}</span>
+      <div style={linha}>
+        <div style={campoLabel}>Marca:</div> {maquina.marca}
       </div>
-
-      <div>
-        <strong style={labelStyle}>Marca:</strong>
-        <span style={valueStyle}>{maquina.marca}</span>
+      <div style={linha}>
+        <div style={campoLabel}>Modelo:</div> {maquina.modelo}
       </div>
-
-      <div>
-        <strong style={labelStyle}>Modelo:</strong>
-        <span style={valueStyle}>{maquina.modelo}</span>
+      <div style={linha}>
+        <div style={campoLabel}>Potência:</div> {maquina.potencia || "N/A"}
       </div>
-
-      <div>
-        <strong style={labelStyle}>Potência:</strong>
-        <span style={valueStyle}>{maquina.potencia || "N/A"}</span>
+      <div style={linha}>
+        <div style={campoLabel}>Número de Série:</div> {maquina.n_serie || "N/A"}
       </div>
-
-      <div>
-        <strong style={labelStyle}>Número de Série:</strong>
-        <span style={valueStyle}>{maquina.n_serie || "N/A"}</span>
+      <div style={linha}>
+        <div style={campoLabel}>Status:</div> {maquina.status || "N/A"}
       </div>
-
-      <div>
-        <strong style={labelStyle}>Status:</strong>
-        <span style={valueStyle}>{maquina.status || "N/A"}</span>
-      </div>
-
-      <div>
-        <strong style={labelStyle}>Observação:</strong>
-        <p style={{ marginLeft: "10px" }}>{maquina.observacao || "Sem observações"}</p>
+      <div style={linha}>
+        <div style={campoLabel}>Observação:</div> {maquina.observacao || "Sem observações"}
       </div>
 
       {maquina.foto && (
@@ -118,9 +128,14 @@ export default function DetalhesMaquina() {
         </div>
       )}
 
-      <button style={btnVoltar} onClick={() => navigate(-1)}>
-        Voltar
-      </button>
+      <div style={{ marginTop: "30px" }}>
+        <Link to={`/maquinas/edit/${id}`} style={btnEditar}>
+          Editar
+        </Link>
+        <button onClick={handleDelete} style={btnExcluir}>
+          Excluir
+        </button>
+      </div>
     </div>
   );
 }

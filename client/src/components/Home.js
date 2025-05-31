@@ -2,47 +2,49 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 const containerStyle = {
-  backgroundColor: "#eeffe7",
+  backgroundColor: "#d8f0d2",
   padding: "30px 20px",
-  borderRadius: "10px",
+  borderRadius: "16px",
   maxWidth: "1000px",
-  margin: "10px auto",
-  fontFamily: "'Segoe UI', sans-serif",
+  margin: "20px auto",
   color: "#000",
 };
 
 const section = {
-  backgroundColor: "#ffffff",
-  borderRadius: "10px",
+  backgroundColor: "#fff",
+  borderRadius: "12px",
   padding: "20px",
   marginBottom: "20px",
+  transition: "0.3s ease",
 };
 
 const heading = {
-  fontSize: "1.3rem",
-  marginBottom: "8px",
+  fontSize: "1.4rem",
+  marginBottom: "12px",
   fontWeight: "600",
-  color: "#000",
+  color: "#1a1a1a",
 };
 
 const linkBox = {
-  padding: "8px 16px",
-  backgroundColor: "#ccedbf",
-  borderRadius: "6px",
+  padding: "10px 18px",
+  backgroundColor: "#bbdeb6",
+  borderRadius: "8px",
   textDecoration: "none",
   color: "#000",
-  fontWeight: "500",
-  marginTop: "12px",
+  fontWeight: "600",
+  marginTop: "14px",
   display: "inline-block",
+  transition: "background-color 0.3s",
 };
 
 const itemBox = {
-  backgroundColor: "#f6fff6",
+  backgroundColor: "#f3fff3",
   padding: "12px 16px",
   borderRadius: "8px",
-  marginBottom: "8px",
+  marginBottom: "10px",
   fontSize: "0.95rem",
-  color: "#000",
+  color: "#1a1a1a",
+  border: "1px solid #dbf5db",
 };
 
 const titleStyle = {
@@ -50,20 +52,20 @@ const titleStyle = {
   fontWeight: "700",
   textAlign: "center",
   color: "#000",
-  marginBottom: "5px",
+  marginBottom: "10px",
 };
 
 const subtitleStyle = {
   fontSize: "1rem",
   textAlign: "center",
-  color: "#000",
+  color: "#333",
   marginBottom: "30px",
 };
 
 const sectionFooter = {
   display: "flex",
   justifyContent: "flex-end",
-  marginTop: "10px",
+  marginTop: "12px",
 };
 
 export default function TelaInicialAdmin() {
@@ -96,31 +98,31 @@ export default function TelaInicialAdmin() {
 
   const maquinasDisponiveis = maquinas.filter(m => m.status === "disponível");
   const maquinasOcupadas = maquinas.filter(m => m.status === "ocupada");
-// escrever alguma coisa depois
+
   return (
     <div style={containerStyle}>
-      <h2 style={titleStyle}></h2>
+      <h2 style={titleStyle}>Painel Administrativo</h2>
       <p style={subtitleStyle}>
-       
+        Acompanhe os dados principais do sistema
       </p>
 
       <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", marginBottom: "20px" }}>
-        <div style={{ ...section, flex: "1", minWidth: "250px" }}>
+        <div style={{ ...section, flex: "1", minWidth: "260px" }}>
           <h3 style={heading}>Total de Associados</h3>
-          <p style={{ fontSize: "2rem", fontWeight: "bold" }}>{totalAssociados}</p>
+          <p style={{ fontSize: "2.2rem", fontWeight: "bold" }}>{totalAssociados}</p>
           <div style={sectionFooter}>
             <Link to="/associados/list" style={linkBox}>Ver associados</Link>
           </div>
         </div>
 
-        <div style={{ ...section, flex: "2", minWidth: "250px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-          <h3 style={heading}>Solicitações</h3>
+        <div style={{ ...section, flex: "2", minWidth: "260px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+          <h3 style={heading}>Solicitações Pendentes</h3>
           {solicitacoes.length === 0 ? (
             <p>Nenhuma solicitação pendente.</p>
           ) : (
             solicitacoes.slice(0, 5).map(item => (
               <div key={item.id} style={itemBox}>
-                <strong>{item.nome}</strong> solicitou agendamento para <strong>{item.data}</strong>
+                <strong>{item.nome}</strong> solicitou para <strong>{item.data}</strong>
               </div>
             ))
           )}
@@ -129,7 +131,7 @@ export default function TelaInicialAdmin() {
           </div>
         </div>
 
-        <div style={{ ...section, flex: "1", minWidth: "250px" , fontWeight: "300"}}>
+        <div style={{ ...section, flex: "1", minWidth: "260px" }}>
           <h3 style={heading}>Máquinas</h3>
           <p><strong>Disponíveis:</strong> {maquinasDisponiveis.length}</p>
           <p><strong>Ocupadas:</strong> {maquinasOcupadas.length}</p>

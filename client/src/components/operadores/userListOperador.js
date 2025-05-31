@@ -63,13 +63,6 @@ export default function ListOperadores() {
               <td style={{ padding: "12px 8px" }}>{op.telefone}</td>
               <td style={{ padding: "12px 8px" }}>{op.cpf}</td>
               <td style={{ padding: "12px 8px" }}>{op.status}</td>
-              <td style={{ padding: "8px" }}>
-                {op.foto ? (
-                  <img src={op.foto} alt="Foto do operador" style={{ width: 60, borderRadius: 4 }} />
-                ) : (
-                  "Sem foto"
-                )}
-              </td>
               <td style={{ textAlign: "center", padding: "12px 8px" }}>
                 <Link to={`/operadores/${op._id}`} style={btnDetalhes}>
                   Mais detalhes
