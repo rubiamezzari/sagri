@@ -7,14 +7,31 @@ const router = express.Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// GET todos implementos
+// GET todos implementos com status atualizado conforme agendamento
 router.get("/implementos", async (req, res) => {
   const dbConnect = dbo.getDb();
 
   try {
-    const result = await dbConnect.collection("implementos").find({}).toArray();
+    const implementos = await dbConnect.collection("implementos").find({}).toArray();
 
-    const implementosComImagem = result.map((implemento) => {
+    // Buscar agendamentos ativos (ex: status "agendado")
+    const agendamentosAtivos = await dbConnect
+      .collection("agendamentos")
+      .find({ status: "agendado" })
+      .toArray();
+
+    // Cria um set com os IDs dos implementos agendados
+    const implementosAgendadosIds = new Set(
+      agendamentosAtivos.map((a) => a.implementoId.toString())
+    );
+
+    // Atualiza o status do implemento para "indisponível" caso esteja agendado
+    const implementosAtualizados = implementos.map((implemento) => {
+      if (implementosAgendadosIds.has(implemento._id.toString())) {
+        implemento.status = "indisponível"; // força status indisponível
+      }
+
+      // Converte foto pra base64 se precisar
       if (implemento.foto && Buffer.isBuffer(implemento.foto)) {
         implemento.foto = `data:image/jpeg;base64,${implemento.foto.toString("base64")}`;
       } else {
@@ -23,7 +40,7 @@ router.get("/implementos", async (req, res) => {
       return implemento;
     });
 
-    res.status(200).send(implementosComImagem);
+    res.status(200).send(implementosAtualizados);
   } catch (err) {
     console.error("Erro ao buscar implementos:", err);
     res.status(500).send({ error: "Erro ao buscar implementos", details: err.message });
@@ -91,13 +108,10 @@ router.patch("/implementos/update/:id", upload.single("foto"), async (req, res) 
   const query = { _id: new ObjectId(req.params.id) };
 
   try {
-    // dados JSON em req.body.dados, pode ser vazio
     const dados = req.body.dados ? JSON.parse(req.body.dados) : {};
 
-    // Monta o objeto para update
     const updateFields = { ...dados };
 
-    // Se enviou foto nova, substitui
     if (req.file) {
       updateFields.foto = req.file.buffer;
     }
@@ -112,7 +126,6 @@ router.patch("/implementos/update/:id", upload.single("foto"), async (req, res) 
 
     const implementoAtualizado = await dbConnect.collection("implementos").findOne(query);
 
-    // Converte foto para base64
     if (implementoAtualizado.foto && Buffer.isBuffer(implementoAtualizado.foto)) {
       implementoAtualizado.foto = `data:image/jpeg;base64,${implementoAtualizado.foto.toString("base64")}`;
     } else {

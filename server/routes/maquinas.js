@@ -7,23 +7,49 @@ const router = express.Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// GET todas as máquinas
+// GET todas as máquinas com status atualizado baseado em agendamento do dia
 router.get("/maquinas", async (req, res) => {
   const dbConnect = dbo.getDb();
 
   try {
-    const result = await dbConnect.collection("maquinas").find({}).toArray();
+    // Pega todas as máquinas
+    const maquinas = await dbConnect.collection("maquinas").find({}).toArray();
 
-    const maquinasComImagem = result.map((maquina) => {
+    // Define início e fim do dia atual para comparação
+    const hoje = new Date();
+    const inicioDoDia = new Date(hoje.setHours(0, 0, 0, 0));
+    const fimDoDia = new Date(hoje.setHours(23, 59, 59, 999));
+
+    // Busca agendamentos que estejam ativos hoje
+    const agendamentosHoje = await dbConnect
+      .collection("agendamentos")
+      .find({
+        dataInicio: { $lte: fimDoDia },
+        dataFim: { $gte: inicioDoDia },
+      })
+      .toArray();
+
+    // Atualiza status da máquina para "em uso" caso esteja agendada hoje
+    const maquinasComStatusAtualizado = maquinas.map((maquina) => {
+      const estaEmUso = agendamentosHoje.some(
+        (ag) => ag.maquinaId.toString() === maquina._id.toString()
+      );
+
+      const statusAtualizado = estaEmUso ? "em uso" : maquina.status;
+
+      let fotoBase64 = null;
       if (maquina.foto && Buffer.isBuffer(maquina.foto)) {
-        maquina.foto = `data:image/jpeg;base64,${maquina.foto.toString("base64")}`;
-      } else {
-        maquina.foto = null;
+        fotoBase64 = `data:image/jpeg;base64,${maquina.foto.toString("base64")}`;
       }
-      return maquina;
+
+      return {
+        ...maquina,
+        status: statusAtualizado,
+        foto: fotoBase64,
+      };
     });
 
-    res.status(200).send(maquinasComImagem);
+    res.status(200).send(maquinasComStatusAtualizado);
   } catch (err) {
     console.error("Erro ao buscar máquinas:", err);
     res.status(500).send({ error: "Erro ao buscar máquinas", details: err.message });
@@ -81,7 +107,6 @@ router.post("/maquinas/create", upload.single("foto"), async (req, res) => {
       message: "Máquina cadastrada com sucesso!",
       maquinaId: result.insertedId,
     });
-
   } catch (err) {
     console.error("Erro ao cadastrar máquina:", err);
     res.status(500).json({
@@ -98,7 +123,7 @@ router.patch("/maquinas/update/:id", upload.single("foto"), async (req, res) => 
 
   try {
     const dados = req.body.dados ? JSON.parse(req.body.dados) : {};
-    delete dados._id; // ✅ garante que _id não será atualizado
+    delete dados._id; // evita atualização do _id
 
     const updateFields = { ...dados };
 
@@ -123,13 +148,11 @@ router.patch("/maquinas/update/:id", upload.single("foto"), async (req, res) => 
     }
 
     res.status(200).json(maquinaAtualizada);
-
   } catch (err) {
     console.error("Erro ao atualizar máquina:", err);
     res.status(500).json({ error: "Erro ao atualizar máquina", details: err.message });
   }
 });
-
 
 // DELETE máquina
 router.delete("/maquinas/:id", async (req, res) => {

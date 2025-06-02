@@ -77,6 +77,7 @@ const getBtnCancelarStyle = (hover) => ({
 export default function CreateOperador() {
   const [form, setForm] = useState({
     usuario: "",
+    nome: "",
     email: "",
     telefone: "",
     cpf: "",
@@ -110,7 +111,14 @@ export default function CreateOperador() {
 
       alert("Operador cadastrado com sucesso!");
 
-      setForm({ usuario: "", email: "", telefone: "", cpf: "", senha: "" });
+      setForm({
+        usuario: "",
+        nome: "",
+        email: "",
+        telefone: "",
+        cpf: "",
+        senha: "",
+      });
       navigate("/operadores", { replace: true });
     } catch (error) {
       alert("Erro na comunicação com o servidor.");
@@ -128,6 +136,7 @@ export default function CreateOperador() {
 
         {[
           { name: "usuario", label: "Usuário" },
+          { name: "nome", label: "Nome" },
           { name: "email", label: "Email" },
           { name: "telefone", label: "Telefone" },
           { name: "cpf", label: "CPF" },

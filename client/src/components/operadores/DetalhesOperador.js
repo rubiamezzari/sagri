@@ -100,18 +100,20 @@ export default function DetalhesOperador() {
         fontFamily: "'Segoe UI', sans-serif",
       }}
     >
-      <h2 style={tituloNome}>{operador.nome}</h2>
+      <h2 style={tituloNome}>{operador.nome || operador.usuario}</h2>
 
       <div style={linha}>
-        <div style={campoLabel}>Telefone:</div> {operador.telefone}
+        <div style={campoLabel}>Usuário:</div> {operador.usuario || "—"}
       </div>
       <div style={linha}>
-        <div style={campoLabel}>CPF:</div> {operador.cpf}
+        <div style={campoLabel}>Email:</div> {operador.email || "—"}
       </div>
       <div style={linha}>
-        <div style={campoLabel}>Status:</div> {operador.status}
+        <div style={campoLabel}>Telefone:</div> {operador.telefone || "—"}
       </div>
-
+      <div style={linha}>
+        <div style={campoLabel}>CPF:</div> {operador.cpf || "—"}
+      </div>
 
       <div style={{ marginTop: "30px" }}>
         <Link to={`/operadores/edit/${id}`} style={btnEditar}>

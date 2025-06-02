@@ -3,38 +3,17 @@ const { ObjectId } = require("mongodb");
 const dbo = require("../db/conn");
 
 const router = express.Router();
-
-function flattenObject(ob) {
-  const toReturn = {};
-
-  for (const i in ob) {
-    if (!Object.prototype.hasOwnProperty.call(ob, i)) continue;
-
-    if (typeof ob[i] === "object" && ob[i] !== null && !Array.isArray(ob[i])) {
-      const flatObject = flattenObject(ob[i]);
-      for (const x in flatObject) {
-        if (!Object.prototype.hasOwnProperty.call(flatObject, x)) continue;
-
-        toReturn[i + "." + x] = flatObject[x];
-      }
-    } else {
-      toReturn[i] = ob[i];
-    }
-  }
-  return toReturn;
-}
-
 // Criar operador
 router.post("/operadores/create", async (req, res) => {
   const dbConnect = dbo.getDb();
 
   const novoOperador = {
     nome: req.body.nome,
-    cpf: req.body.cpf,
+    usuario: req.body.usuario,
+    senha: req.body.senha,
+    email: req.body.email,
     telefone: req.body.telefone,
-    categoria_cnh: req.body.categoria_cnh,
-    status: req.body.status,
-    observacao: req.body.observacao,
+    cpf: req.body.cpf,
   };
 
   try {
@@ -45,25 +24,32 @@ router.post("/operadores/create", async (req, res) => {
   }
 });
 
-// Listar todos operadores
+
+// Listar todos operadores (sem senha!)
 router.get("/operadores", async (req, res) => {
   const dbConnect = dbo.getDb();
 
   try {
-    const operadores = await dbConnect.collection("operadores").find({}).toArray();
+    const operadores = await dbConnect.collection("operadores").find({}, {
+      projection: { nome: 1, usuario: 1, email: 1, telefone: 1, cpf: 1 }
+    }).toArray();
+
     res.status(200).send(operadores);
   } catch (err) {
     res.status(500).send({ error: "Erro ao buscar operadores" });
   }
 });
 
-// Buscar operador por id
+// Buscar operador por id (sem senha!)
 router.get("/operadores/:id", async (req, res) => {
   const dbConnect = dbo.getDb();
   const query = { _id: new ObjectId(req.params.id) };
 
   try {
-    const operador = await dbConnect.collection("operadores").findOne(query);
+    const operador = await dbConnect.collection("operadores").findOne(query, {
+      projection: { nome: 1, usuario: 1, email: 1, telefone: 1, cpf: 1 }
+    });
+
     if (!operador) {
       return res.status(404).send("Operador não encontrado");
     }
@@ -73,16 +59,15 @@ router.get("/operadores/:id", async (req, res) => {
   }
 });
 
-// Atualizar operador (PATCH)
+// Atualizar operador
 router.patch("/operadores/update/:id", async (req, res) => {
   const dbConnect = dbo.getDb();
   const query = { _id: new ObjectId(req.params.id) };
 
-  // Remove _id caso venha no body
   delete req.body._id;
 
   const updates = {
-    $set: flattenObject(req.body),
+    $set: req.body,
   };
 
   try {
@@ -92,7 +77,10 @@ router.patch("/operadores/update/:id", async (req, res) => {
       return res.status(404).send({ error: "Operador não encontrado" });
     }
 
-    const operadorAtualizado = await dbConnect.collection("operadores").findOne(query);
+    const operadorAtualizado = await dbConnect.collection("operadores").findOne(query, {
+      projection: { nome: 1, usuario: 1, email: 1, telefone: 1, cpf: 1 }
+    });
+
     res.status(200).send(operadorAtualizado);
   } catch (err) {
     res.status(500).send({ error: "Erro ao atualizar operador", details: err.message });

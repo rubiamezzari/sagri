@@ -101,7 +101,7 @@ export default function CreateMaquina() {
     marca: "",
     modelo: "",
     potencia: "",
-    status: "",
+    status: "Disponível", // valor fixo
     n_serie: "",
     observacao: "",
     foto: null,
@@ -145,7 +145,7 @@ export default function CreateMaquina() {
         marca: "",
         modelo: "",
         potencia: "",
-        status: "",
+        status: "Disponível",
         n_serie: "",
         observacao: "",
         foto: null,
@@ -166,7 +166,7 @@ export default function CreateMaquina() {
       <form onSubmit={onSubmit}>
         <h5 style={sectionTitle}>DADOS DA MÁQUINA</h5>
 
-        {["tipo", "marca", "modelo", "potencia", "status", "n_serie"].map((name) => (
+        {["tipo", "marca", "modelo", "potencia", "n_serie"].map((name) => (
           <div key={name}>
             <label style={labelStyle} htmlFor={name}>
               {name.charAt(0).toUpperCase() + name.slice(1).replace("_", " ")}
@@ -179,7 +179,7 @@ export default function CreateMaquina() {
               onChange={(e) => updateForm({ [name]: e.target.value })}
               onFocus={() => setFocusField(name)}
               onBlur={() => setFocusField(null)}
-              required={name === "tipo" || name === "marca" || name === "status"}
+              required={name === "tipo" || name === "marca"}
             />
           </div>
         ))}
