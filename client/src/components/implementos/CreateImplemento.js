@@ -80,7 +80,6 @@ export default function CreateImplemento() {
     marca: "",
     modelo: "",
     capacidade: "",
-    status: "",
     n_serie: "",
     observacao: "",
     foto: null,
@@ -125,7 +124,6 @@ export default function CreateImplemento() {
         marca: "",
         modelo: "",
         capacidade: "",
-        status: "",
         n_serie: "",
         observacao: "",
         foto: null,
@@ -218,16 +216,6 @@ export default function CreateImplemento() {
           onBlur={() => setFocusField(null)}
         />
 
-        <label style={labelStyle}>Status</label>
-        <input
-          type="text"
-          style={getInputStyle("status")}
-          value={form.status}
-          onChange={(e) => updateForm({ status: e.target.value })}
-          onFocus={() => setFocusField("status")}
-          onBlur={() => setFocusField(null)}
-          required
-        />
 
         <label style={labelStyle}>Número de Série</label>
         <input

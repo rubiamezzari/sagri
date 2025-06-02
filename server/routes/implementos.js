@@ -14,29 +14,31 @@ router.get("/implementos", async (req, res) => {
   try {
     const implementos = await dbConnect.collection("implementos").find({}).toArray();
 
-    // Buscar agendamentos ativos (ex: status "agendado")
     const agendamentosAtivos = await dbConnect
       .collection("agendamentos")
       .find({ status: "agendado" })
       .toArray();
 
-    // Cria um set com os IDs dos implementos agendados
     const implementosAgendadosIds = new Set(
       agendamentosAtivos.map((a) => a.implementoId.toString())
     );
 
-    // Atualiza o status do implemento para "indisponível" caso esteja agendado
     const implementosAtualizados = implementos.map((implemento) => {
+      // Verifica se o implemento está agendado
       if (implementosAgendadosIds.has(implemento._id.toString())) {
-        implemento.status = "indisponível"; // força status indisponível
+        implemento.status = "indisponível";
+      } else {
+        // Define "disponível" se status estiver ausente
+        implemento.status = implemento.status || "disponível";
       }
 
-      // Converte foto pra base64 se precisar
+      // Converte a imagem para base64 se necessário
       if (implemento.foto && Buffer.isBuffer(implemento.foto)) {
         implemento.foto = `data:image/jpeg;base64,${implemento.foto.toString("base64")}`;
       } else {
         implemento.foto = null;
       }
+
       return implemento;
     });
 
@@ -92,7 +94,6 @@ router.post("/implementos/create", upload.single("foto"), async (req, res) => {
       message: "Implemento cadastrado com sucesso!",
       implementoId: result.insertedId,
     });
-
   } catch (err) {
     console.error("Erro ao cadastrar implemento:", err);
     res.status(500).json({
@@ -133,7 +134,6 @@ router.patch("/implementos/update/:id", upload.single("foto"), async (req, res) 
     }
 
     res.status(200).json(implementoAtualizado);
-
   } catch (err) {
     console.error("Erro ao atualizar implemento:", err);
     res.status(500).json({ error: "Erro ao atualizar implemento", details: err.message });
