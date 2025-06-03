@@ -3,10 +3,10 @@ import ListImplemento from "./ListImplemento";
 import { Link } from "react-router-dom";
 
 export default function Implementos() {
-  const btnCadastrar = {
+   const btnCadastrar = {
     backgroundColor: "#ccedbf",
     color: "#000",
-    padding: "5px 16px",
+    padding: "5px 15px",
     borderRadius: "5px",
     border: "1px solid #1c3d21",
     cursor: "pointer",
@@ -15,13 +15,20 @@ export default function Implementos() {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "15px" }}>
-        <Link style={btnCadastrar} to="/implementos/create">
-          + novo implemento
-        </Link>
-      </div>
-      <ListImplemento />
-    </div>
-  );
+     <div style={{ padding: "20px" }}>
+       <div
+         style={{
+           display: "flex",
+           justifyContent: "flex-end",
+           marginBottom: "30px",
+         }}
+       >
+         <Link style={btnCadastrar} to="/implementos/create">
+           + novo implemento
+         </Link>
+       </div>
+ 
+       <ListImplemento implemento={Implementos} />
+     </div>
+   );
 }

@@ -407,19 +407,24 @@ export default function CreateAssociado() {
           required
         />
 
-        <label style={labelStyle} htmlFor="uf">
-          UF
-        </label>
-        <input
-          id="uf"
-          type="text"
-          style={getInputStyle("uf")}
-          value={form.endereco.uf}
-          onChange={(e) => updateEndereco({ uf: e.target.value })}
-          onFocus={() => setFocusField("uf")}
-          onBlur={() => setFocusField(null)}
-          required
-        />
+                  <label style={labelStyle} htmlFor="uf">
+              UF
+            </label>
+            <select
+              id="uf"
+              style={getInputStyle("uf")}
+              value={form.endereco.uf}
+              onChange={(e) => updateEndereco({ uf: e.target.value })}
+              onFocus={() => setFocusField("uf")}
+              onBlur={() => setFocusField(null)}
+              required
+            >
+              <option value=""></option>
+              <option value="PR">PR</option>
+              <option value="RS">RS</option>
+              <option value="SC">SC</option>
+            </select>
+
 
         <label style={labelStyle} htmlFor="cep">
           CEP

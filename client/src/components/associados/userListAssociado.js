@@ -25,28 +25,37 @@ export default function UserListAssociado({ associados }) {
   );
 
   return (
-    <div style={{width:"100%", backgroundColor: "#fff", padding: "20px", borderRadius: "5px", }}>
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center",  }}>
-          <input
-            type="text"
-            placeholder="Pesquisar implemento..."
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "10px",
-              borderRadius: "5px",
-              border: "1px solid #ccc",
-              outlineColor: "#1c3d21",
-              fontSize: "0.85rem",
-              marginBottom: "15px",
-            }}
-          />
+    <div style={{ width: "100%", backgroundColor: "#fff", padding: "20px", borderRadius: "5px", }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", }}>
+        <input
+          type="text"
+          placeholder="Pesquisar associado..."
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "10px",
+            borderRadius: "5px",
+            border: "1px solid #ccc",
+            outlineColor: "#1c3d21",
+            fontSize: "0.85rem",
+            marginBottom: "15px",
+          }}
+        />
       </div>
 
       {/* Tabela */}
-      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.85rem", textAlign: "center" }}>
-        <thead style={{ backgroundColor: "#f8f8f8", fontWeight: "600" }}>
+      <table style={{
+        width: "100%",
+        borderCollapse: "collapse",
+        fontSize: "0.85rem",
+        textAlign: "center"
+      }}>
+
+        <thead style={{
+          backgroundColor: "#f8f8f8",
+          fontWeight: "600"
+        }}>
           <tr style={{ borderBottom: "1px solid #ccc" }}>
             <th style={{ padding: "12px 0" }}>#</th>
             <th style={{ padding: "12px 0" }}>Nome completo</th>

@@ -81,7 +81,7 @@ export default function DetalhesOperador() {
 
     if (response.ok) {
       alert("Operador excluído com sucesso!");
-      navigate("/operadores/list");
+      navigate("/operadores");
     } else {
       alert("Erro ao excluir operador.");
     }
