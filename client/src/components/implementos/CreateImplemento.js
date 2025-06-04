@@ -82,7 +82,6 @@ export default function CreateImplemento() {
     capacidade: "",
     n_serie: "",
     observacao: "",
-    foto: null,
   });
 
   const [hoverCadastrar, setHoverCadastrar] = useState(false);
@@ -97,12 +96,7 @@ export default function CreateImplemento() {
   async function onSubmit(e) {
     e.preventDefault();
 
-    const formData = new FormData();
-    const formCopy = { ...form, foto: null };
-    formData.append("dados", JSON.stringify(formCopy));
-    if (form.foto) {
-      formData.append("foto", form.foto);
-    }
+    const formData = new FormData()
 
     try {
       const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/implementos/create`, {
@@ -126,7 +120,6 @@ export default function CreateImplemento() {
         capacidade: "",
         n_serie: "",
         observacao: "",
-        foto: null,
       });
 
       navigate("/implementos", { replace: true });
@@ -139,35 +132,6 @@ export default function CreateImplemento() {
   function getInputStyle(name) {
     return focusField === name ? { ...inputStyle, ...inputFocus } : inputStyle;
   }
-
-  const uploadContainerStyle = {
-    backgroundColor: "#eeffe7",
-    borderRadius: "8px",
-    padding: "8px 10px",
-    marginBottom: "10px",
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-  };
-
-  const uploadLabelStyle = {
-    backgroundColor: "#ccedbf",
-    padding: "6px 12px",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "0.85rem",
-    fontWeight: "500",
-    color: "#1c3d21",
-    whiteSpace: "nowrap",
-  };
-
-  const fileNameStyle = {
-    fontSize: "0.85rem",
-    color: "#000",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
-  };
 
   return (
     <div style={containerStyle}>
@@ -235,23 +199,6 @@ export default function CreateImplemento() {
           onFocus={() => setFocusField("observacao")}
           onBlur={() => setFocusField(null)}
         />
-
-        <label style={labelStyle}>Foto do Implemento</label>
-        <div style={uploadContainerStyle}>
-          <label htmlFor="foto" style={uploadLabelStyle}>
-            Selecionar imagem
-          </label>
-          <input
-            id="foto"
-            type="file"
-            accept=".jpg,.jpeg,.png"
-            style={{ display: "none" }}
-            onChange={(e) => updateForm({ foto: e.target.files[0] || null })}
-          />
-          <span style={fileNameStyle}>
-            {form.foto ? form.foto.name : "Nenhum arquivo selecionado"}
-          </span>
-        </div>
 
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <button type="submit" style={getBtnCadastrarStyle(hoverCadastrar)}

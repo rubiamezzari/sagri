@@ -88,8 +88,6 @@ export default function EditImplemento() {
     status: "",
     n_serie: "",
     observacao: "",
-    foto: null,
-    foto_url: "",  // campo para a URL da foto atual
   });
 
   const [focusField, setFocusField] = useState(null);
@@ -107,8 +105,6 @@ export default function EditImplemento() {
           status: data.status || "",
           n_serie: data.n_serie || "",
           observacao: data.observacao || "",
-          foto: null,
-          foto_url: data.foto_url || "", // URL da foto vindo do backend
         });
       })
       .catch(() => alert("Erro ao carregar dados do implemento"));
@@ -122,12 +118,7 @@ export default function EditImplemento() {
     e.preventDefault();
 
     const formData = new FormData();
-    // Envia os dados menos a foto (que vai separada)
-    const formCopy = { ...form, foto: null, foto_url: undefined };
-    formData.append("dados", JSON.stringify(formCopy));
-    if (form.foto) {
-      formData.append("foto", form.foto);
-    }
+    formData.append("dados", JSON.stringify);
 
     try {
       const response = await fetch(`${API_URL}/implementos/update/${id}`, {
@@ -154,35 +145,7 @@ export default function EditImplemento() {
     return focusField === name ? { ...inputStyle, ...inputFocus } : inputStyle;
   }
 
-  const uploadContainerStyle = {
-    backgroundColor: "#eeffe7",
-    borderRadius: "8px",
-    padding: "8px 10px",
-    marginBottom: "10px",
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-  };
-
-  const uploadLabelStyle = {
-    backgroundColor: "#ccedbf",
-    padding: "6px 12px",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "0.85rem",
-    fontWeight: "500",
-    color: "#1c3d21",
-    whiteSpace: "nowrap",
-  };
-
-  const fileNameStyle = {
-    fontSize: "0.85rem",
-    color: "#000",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
-  };
-
+  
   return (
     <div style={containerStyle}>
       <form onSubmit={onSubmit}>
@@ -260,38 +223,7 @@ export default function EditImplemento() {
           onBlur={() => setFocusField(null)}
         />
 
-        <label style={labelStyle}>Foto do Implemento</label>
-        <div style={uploadContainerStyle}>
-          <label htmlFor="foto" style={uploadLabelStyle}>
-            Selecionar imagem
-          </label>
-          <input
-            id="foto"
-            type="file"
-            accept=".jpg,.jpeg,.png"
-            style={{ display: "none" }}
-            onChange={(e) => updateForm({ foto: e.target.files[0] || null })}
-          />
-          <span style={fileNameStyle}>
-            {form.foto
-              ? form.foto.name
-              : form.foto_url
-              ? "Imagem cadastrada"
-              : "Nenhum arquivo selecionado"}
-          </span>
-        </div>
-
-        {/* Exibe a imagem atual, só se existir e não tiver novo arquivo selecionado */}
-        {form.foto_url && !form.foto && (
-          <div style={{ marginTop: "10px" }}>
-            <img
-              src={`${API_URL}/${form.foto_url}`}
-              alt="Implemento"
-              style={{ maxWidth: "100%", height: "auto", borderRadius: "5px" }}
-            />
-          </div>
-        )}
-
+      
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <button type="submit" style={btnSalvar}>
             Salvar

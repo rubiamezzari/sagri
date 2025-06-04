@@ -127,16 +127,6 @@ export default function DetalhesImplemento() {
         <div style={campoLabel}>Status:</div> {implemento.status}
       </div>
 
-      {implemento.foto && (
-        <div style={{ marginTop: "25px" }}>
-          <img
-            src={implemento.foto}
-            alt={`Foto do implemento ${implemento.tipo}`}
-            style={{ maxWidth: "300px", borderRadius: "6px", boxShadow: "0 0 10px rgba(0,0,0,0.1)" }}
-          />
-        </div>
-      )}
-
       {implemento.observacao && (
         <div style={{ marginTop: "25px" }}>
           <h4 style={{ fontSize: "1.05rem", color: "#1a3c1a" }}>Observações:</h4>
