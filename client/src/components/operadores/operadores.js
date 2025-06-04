@@ -1,5 +1,5 @@
 import React from "react";
-import UserListOperador from "./UserListOperador";
+import UserListOperador from "./userListOperador";
 import { Link } from "react-router-dom";
 
 export default function operadores() {

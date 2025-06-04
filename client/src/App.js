@@ -30,7 +30,7 @@ import DetalhesMaquina from "./components/maquinas/DetalhesMaquina";
 import Operadores from "./components/operadores/operadores";
 import CreateOperador from "./components/operadores/CreateOperador";
 import EditOperador from "./components/operadores/EditOperador";
-import UserListOperador from "./components/operadores/UserListOperador";
+import UserListOperador from "./components/operadores/userListOperador";
 import DetalhesOperador from "./components/operadores/DetalhesOperador";
 
 const App = () => {

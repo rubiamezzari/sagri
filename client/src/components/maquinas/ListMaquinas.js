@@ -29,7 +29,7 @@ function getStatusStyle(status) {
     case "disponível":
       return {
         ...baseStyle,
-        backgroundColor: "#d4edda",
+        backgroundColor: "#ccedbf",
         color: "#155724",
       };
     case "indisponível":
