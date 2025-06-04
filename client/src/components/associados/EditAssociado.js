@@ -192,7 +192,7 @@ export default function EditAssociado() {
           onBlur={() => setFocusField(null)}
         />
 
-        <label style={labelStyle}>Telefone</label>
+        <label style={labelStyle}>telefone</label>
         <input
           type="text"
           style={getInputStyle("telefone")}
