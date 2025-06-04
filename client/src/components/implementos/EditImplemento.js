@@ -96,7 +96,7 @@ export default function EditImplemento() {
     fetch(`${API_URL}/implementos/${id}`)
       .then((res) => res.json())
       .then((data) => {
-        // Ajusta o estado para carregar os dados, incluindo a foto_url
+        // Ajusta o estado para carregar os dados
         setForm({
           tipo: data.tipo || "",
           marca: data.marca || "",

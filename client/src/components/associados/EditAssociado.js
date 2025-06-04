@@ -315,7 +315,7 @@ export default function EditAssociado() {
           onBlur={() => setFocusField(null)}
           required
         >
-          <option value="">Selecione</option>
+          <option value=""></option>
           <option value="PR">PR</option>
           <option value="RS">RS</option>
           <option value="SC">SC</option>

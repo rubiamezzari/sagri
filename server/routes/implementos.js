@@ -1,8 +1,11 @@
 const express = require("express");
 const { ObjectId } = require("mongodb");
 const dbo = require("../db/conn");
+const multer = require("multer");
 
 const router = express.Router();
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 // GET todos implementos com status atualizado conforme agendamento
 router.get("/implementos", async (req, res) => {
@@ -29,6 +32,13 @@ router.get("/implementos", async (req, res) => {
         implemento.status = implemento.status || "disponível";
       }
 
+      // Converte a imagem para base64 se necessário
+      if (implemento.foto && Buffer.isBuffer(implemento.foto)) {
+        implemento.foto = `data:image/jpeg;base64,${implemento.foto.toString("base64")}`;
+      } else {
+        implemento.foto = null;
+      }
+
       return implemento;
     });
 
@@ -51,6 +61,12 @@ router.get("/implementos/:id", async (req, res) => {
       return res.status(404).send("Implemento não encontrado");
     }
 
+    if (result.foto && Buffer.isBuffer(result.foto)) {
+      result.foto = `data:image/jpeg;base64,${result.foto.toString("base64")}`;
+    } else {
+      result.foto = null;
+    }
+
     res.status(200).send(result);
   } catch (err) {
     console.error("Erro ao buscar implemento por ID:", err);
@@ -59,14 +75,15 @@ router.get("/implementos/:id", async (req, res) => {
 });
 
 // POST criar novo implemento
-router.post("/implementos/create", async (req, res) => {
+router.post("/implementos/create", upload.single("foto"), async (req, res) => {
   const dbConnect = dbo.getDb();
 
   try {
-    const dados = JSON.parse(req.body.dados || "{}");
+    const dados = JSON.parse(req.body.dados);
 
     const novoImplemento = {
       ...dados,
+      foto: req.file ? req.file.buffer : null,
     };
 
     const result = await dbConnect.collection("implementos").insertOne(novoImplemento);
@@ -87,13 +104,20 @@ router.post("/implementos/create", async (req, res) => {
 });
 
 // PATCH atualizar implemento por id
-router.patch("/implementos/update/:id", async (req, res) => {
+router.patch("/implementos/update/:id", upload.single("foto"), async (req, res) => {
   const dbConnect = dbo.getDb();
   const query = { _id: new ObjectId(req.params.id) };
 
   try {
     const dados = req.body.dados ? JSON.parse(req.body.dados) : {};
-    const updates = { $set: { ...dados } };
+
+    const updateFields = { ...dados };
+
+    if (req.file) {
+      updateFields.foto = req.file.buffer;
+    }
+
+    const updates = { $set: updateFields };
 
     const result = await dbConnect.collection("implementos").updateOne(query, updates);
 
@@ -102,6 +126,12 @@ router.patch("/implementos/update/:id", async (req, res) => {
     }
 
     const implementoAtualizado = await dbConnect.collection("implementos").findOne(query);
+
+    if (implementoAtualizado.foto && Buffer.isBuffer(implementoAtualizado.foto)) {
+      implementoAtualizado.foto = `data:image/jpeg;base64,${implementoAtualizado.foto.toString("base64")}`;
+    } else {
+      implementoAtualizado.foto = null;
+    }
 
     res.status(200).json(implementoAtualizado);
   } catch (err) {

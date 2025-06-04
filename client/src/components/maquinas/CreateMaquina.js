@@ -104,7 +104,6 @@ export default function CreateMaquina() {
     status: "Disponível", // valor fixo
     n_serie: "",
     observacao: "",
-    foto: null,
   });
 
   const [focusField, setFocusField] = useState(null);

@@ -277,7 +277,6 @@ export default function CreateAssociado() {
           onChange={(e) => updateForm({ email: e.target.value })}
           onFocus={() => setFocusField("email")}
           onBlur={() => setFocusField(null)}
-          required
         />
 
         <label style={labelStyle} htmlFor="telefone">
