@@ -47,8 +47,8 @@ const inputFocus = {
   outline: "none",
 };
 
-const btnSalvar = {
-  backgroundColor: "#1c3d21",
+const getBtnSalvarStyle = (hover) => ({
+  backgroundColor: hover ? "#143018" : "#1c3d21",
   color: "#daf4d0",
   padding: "8px 10px",
   borderRadius: "5px",
@@ -59,11 +59,11 @@ const btnSalvar = {
   width: "48%",
   marginTop: "10px",
   transition: "background-color 0.3s",
-};
+});
 
-const btnCancelar = {
-  backgroundColor: "#daf4d0",
-  color: "#86a479",
+const getBtnCancelarStyle = (hover) => ({
+  backgroundColor: hover ? "#ccedbf" : "#daf4d0",
+  color: "#143018",
   padding: "8px 10px",
   borderRadius: "5px",
   border: "none",
@@ -74,7 +74,7 @@ const btnCancelar = {
   marginTop: "10px",
   marginLeft: "4%",
   transition: "background-color 0.3s",
-};
+});
 
 export default function EditImplemento() {
   const { id } = useParams();
@@ -92,11 +92,13 @@ export default function EditImplemento() {
 
   const [focusField, setFocusField] = useState(null);
 
+  const [hoverSalvar, setHoverSalvar] = useState(false);
+  const [hoverCancelar, setHoverCancelar] = useState(false);
+
   useEffect(() => {
     fetch(`${API_URL}/implementos/${id}`)
       .then((res) => res.json())
       .then((data) => {
-        // Ajusta o estado para carregar os dados
         setForm({
           tipo: data.tipo || "",
           marca: data.marca || "",
@@ -117,13 +119,13 @@ export default function EditImplemento() {
   async function onSubmit(e) {
     e.preventDefault();
 
-    const formData = new FormData();
-    formData.append("dados", JSON.stringify);
-
     try {
       const response = await fetch(`${API_URL}/implementos/update/${id}`, {
-        method: "PATCH",  // método corrigido para PATCH
-        body: formData,
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
       });
 
       if (!response.ok) {
@@ -134,7 +136,6 @@ export default function EditImplemento() {
 
       const data = await response.json();
       alert(data.message || "Implemento atualizado com sucesso!");
-
       navigate("/implementos", { replace: true });
     } catch (error) {
       alert("Erro na comunicação com o servidor.");
@@ -145,7 +146,6 @@ export default function EditImplemento() {
     return focusField === name ? { ...inputStyle, ...inputFocus } : inputStyle;
   }
 
-  
   return (
     <div style={containerStyle}>
       <form onSubmit={onSubmit}>
@@ -223,15 +223,22 @@ export default function EditImplemento() {
           onBlur={() => setFocusField(null)}
         />
 
-      
         <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <button type="submit" style={btnSalvar}>
+          <button
+            type="submit"
+            style={getBtnSalvarStyle(hoverSalvar)}
+            onMouseEnter={() => setHoverSalvar(true)}
+            onMouseLeave={() => setHoverSalvar(false)}
+          >
             Salvar
           </button>
+
           <button
             type="button"
-            style={btnCancelar}
+            style={getBtnCancelarStyle(hoverCancelar)}
             onClick={() => navigate("/implementos")}
+            onMouseEnter={() => setHoverCancelar(true)}
+            onMouseLeave={() => setHoverCancelar(false)}
           >
             Cancelar
           </button>

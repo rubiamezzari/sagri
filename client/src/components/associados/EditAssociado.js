@@ -44,22 +44,8 @@ const inputStyle = {
 };
 
 const inputFocus = {
-  borderColor: "#e8e8e8",
+  borderColor: "#1c3d21",
   outline: "none",
-};
-
-const btnCadastrar = {
-  backgroundColor: "#1c3d21",
-  color: "#daf4d0",
-  padding: "8px 10px",
-  borderRadius: "5px",
-  border: "none",
-  cursor: "pointer",
-  fontWeight: "500",
-  fontSize: "1.1rem",
-  width: "30%",
-  marginTop: "10px",
-  transition: "background-color 0.3s",
 };
 
 const uploadContainerStyle = {
@@ -83,6 +69,33 @@ const uploadLabelStyle = {
   whiteSpace: "nowrap",
 };
 
+// Funções para gerar estilos dinâmicos dos botões
+const getBtnCadastrarStyle = (hover) => ({
+  backgroundColor: hover ? "#143018" : "#1c3d21",
+  color: "#daf4d0",
+  padding: "8px 10px",
+  borderRadius: "5px",
+  border: "none",
+  cursor: "pointer",
+  fontWeight: "500",
+  fontSize: "1.1rem",
+  width: "30%",
+  transition: "background-color 0.3s",
+});
+
+const getBtnCancelarStyle = (hover) => ({
+  backgroundColor: hover ? "#ccedbf" : "#daf4d0",
+  color: "#143018",
+  padding: "8px 10px",
+  borderRadius: "5px",
+  border: "none",
+  cursor: "pointer",
+  fontWeight: "500",
+  fontSize: "1.1rem",
+  width: "30%",
+  marginLeft: "20px",
+  transition: "background-color 0.3s",
+});
 
 export default function EditAssociado() {
   const [form, setForm] = useState({
@@ -108,6 +121,8 @@ export default function EditAssociado() {
   });
 
   const [focusField, setFocusField] = useState(null);
+  const [hoverSalvar, setHoverSalvar] = useState(false);
+  const [hoverCancelar, setHoverCancelar] = useState(false);
 
   const params = useParams();
   const navigate = useNavigate();
@@ -145,7 +160,6 @@ export default function EditAssociado() {
     }));
   }
 
-
   async function onSubmit(e) {
     e.preventDefault();
     const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/associados/update/${params.id}`, {
@@ -155,7 +169,6 @@ export default function EditAssociado() {
     });
 
     if (!response.ok) {
-      console.log(response.ok)
       window.alert("Erro ao atualizar associado.");
       return;
     }
@@ -306,21 +319,16 @@ export default function EditAssociado() {
         <label style={labelStyle} htmlFor="uf">
           UF
         </label>
-        <select
+        <input
           id="uf"
+          type="text"
           style={getInputStyle("uf")}
           value={form.endereco.uf}
           onChange={(e) => updateEndereco({ uf: e.target.value })}
           onFocus={() => setFocusField("uf")}
           onBlur={() => setFocusField(null)}
           required
-        >
-          <option value=""></option>
-          <option value="PR">PR</option>
-          <option value="RS">RS</option>
-          <option value="SC">SC</option>
-
-        </select>
+        />
 
         <label style={labelStyle} htmlFor="cep">
           CEP
@@ -336,51 +344,56 @@ export default function EditAssociado() {
           required
         />
 
-
-
         <h5 style={sectionTitle}>DOCUMENTOS</h5>
 
         <div style={uploadContainerStyle}>
           <label htmlFor="anuidade" style={uploadLabelStyle}>
-            {form.documentos.anuidade
-              ? "Anuidade: " + form.documentos.anuidade.name
-              : "Selecionar Anuidade"}
+            Anuidade
           </label>
           <input
             type="file"
             id="anuidade"
-            accept=".pdf,image/*"
+            name="anuidade"
+            onChange={(e) => updateDocumentos({ anuidade: e.target.files[0]?.name || "" })}
             style={{ display: "none" }}
-            onChange={(e) =>
-              updateDocumentos({ anuidade: e.target.files[0] || null })
-            }
           />
+          <span>{form.documentos.anuidade}</span>
         </div>
 
         <div style={uploadContainerStyle}>
           <label htmlFor="caf" style={uploadLabelStyle}>
-            {form.documentos.caf
-              ? "CAF: " + form.documentos.caf
-              : "Selecionar CAF"}
+            CAF
           </label>
           <input
             type="file"
             id="caf"
-            accept=".pdf,image/*"
+            name="caf"
+            onChange={(e) => updateDocumentos({ caf: e.target.files[0]?.name || "" })}
             style={{ display: "none" }}
-            onChange={(e) => updateDocumentos({ caf: e.target.files[0] || null })}
           />
+          <span>{form.documentos.caf}</span>
         </div>
-        <button type="submit" style={btnCadastrar}>
-          Salvar
-        </button>
-        <button
-          type="button"
-          onClick={() => navigate("/associados")}
-          style={{ ...btnCadastrar, backgroundColor: "#daf4d0", marginLeft: "10px", color: "#86a479" }}
-        >
-          Cancelar
-        </button>
+
+        <div>
+          <button
+            type="submit"
+            style={getBtnCadastrarStyle(hoverSalvar)}
+            onMouseEnter={() => setHoverSalvar(true)}
+            onMouseLeave={() => setHoverSalvar(false)}
+          >
+            Salvar
+          </button>
+
+          <button
+            type="button"
+            style={getBtnCancelarStyle(hoverCancelar)}
+            onClick={() => navigate("/associados")}
+            onMouseEnter={() => setHoverCancelar(true)}
+            onMouseLeave={() => setHoverCancelar(false)}
+          >
+            Cancelar
+          </button>
+        </div>
       </form>
     </div>
   );

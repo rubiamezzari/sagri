@@ -3,13 +3,13 @@ const { ObjectId } = require("mongodb");
 const dbo = require("../db/conn");
 
 const router = express.Router();
-// Criar operador
+
+// Criar operador (sem campo "usuario")
 router.post("/operadores/create", async (req, res) => {
   const dbConnect = dbo.getDb();
 
   const novoOperador = {
     nome: req.body.nome,
-    usuario: req.body.usuario,
     senha: req.body.senha,
     email: req.body.email,
     telefone: req.body.telefone,
@@ -24,14 +24,13 @@ router.post("/operadores/create", async (req, res) => {
   }
 });
 
-
-// Listar todos operadores (sem senha!)
+// Listar todos operadores (sem senha e sem "usuario")
 router.get("/operadores", async (req, res) => {
   const dbConnect = dbo.getDb();
 
   try {
     const operadores = await dbConnect.collection("operadores").find({}, {
-      projection: { nome: 1, usuario: 1, email: 1, telefone: 1, cpf: 1 }
+      projection: { nome: 1, email: 1, telefone: 1, cpf: 1 }
     }).toArray();
 
     res.status(200).send(operadores);
@@ -40,14 +39,14 @@ router.get("/operadores", async (req, res) => {
   }
 });
 
-// Buscar operador por id (sem senha!)
+// Buscar operador por id (sem senha e sem "usuario")
 router.get("/operadores/:id", async (req, res) => {
   const dbConnect = dbo.getDb();
   const query = { _id: new ObjectId(req.params.id) };
 
   try {
     const operador = await dbConnect.collection("operadores").findOne(query, {
-      projection: { nome: 1, usuario: 1, email: 1, telefone: 1, cpf: 1 }
+      projection: { nome: 1, email: 1, telefone: 1, cpf: 1 }
     });
 
     if (!operador) {
@@ -59,7 +58,7 @@ router.get("/operadores/:id", async (req, res) => {
   }
 });
 
-// Atualizar operador
+// Atualizar operador (sem "usuario")
 router.patch("/operadores/update/:id", async (req, res) => {
   const dbConnect = dbo.getDb();
   const query = { _id: new ObjectId(req.params.id) };
@@ -78,7 +77,7 @@ router.patch("/operadores/update/:id", async (req, res) => {
     }
 
     const operadorAtualizado = await dbConnect.collection("operadores").findOne(query, {
-      projection: { nome: 1, usuario: 1, email: 1, telefone: 1, cpf: 1 }
+      projection: { nome: 1, email: 1, telefone: 1, cpf: 1 }
     });
 
     res.status(200).send(operadorAtualizado);

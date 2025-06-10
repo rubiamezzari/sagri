@@ -100,11 +100,8 @@ export default function DetalhesOperador() {
         fontFamily: "'Segoe UI', sans-serif",
       }}
     >
-      <h2 style={tituloNome}>{operador.nome || operador.usuario}</h2>
+      <h2 style={tituloNome}>{operador.nome}</h2>
 
-      <div style={linha}>
-        <div style={campoLabel}>Usuário:</div> {operador.usuario || "—"}
-      </div>
       <div style={linha}>
         <div style={campoLabel}>Email:</div> {operador.email || "—"}
       </div>

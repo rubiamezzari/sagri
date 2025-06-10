@@ -62,7 +62,7 @@ const getBtnCadastrarStyle = (hover) => ({
 
 const getBtnCancelarStyle = (hover) => ({
   backgroundColor: hover ? "#ccedbf" : "#daf4d0",
-  color: "#86a479",
+  color: "#143018",
   padding: "8px 10px",
   borderRadius: "5px",
   border: "none",
@@ -76,7 +76,6 @@ const getBtnCancelarStyle = (hover) => ({
 
 export default function CreateOperador() {
   const [form, setForm] = useState({
-    usuario: "",
     nome: "",
     email: "",
     telefone: "",
@@ -112,13 +111,13 @@ export default function CreateOperador() {
       alert("Operador cadastrado com sucesso!");
 
       setForm({
-        usuario: "",
         nome: "",
         email: "",
         telefone: "",
         cpf: "",
         senha: "",
       });
+
       navigate("/operadores", { replace: true });
     } catch (error) {
       alert("Erro na comunicação com o servidor.");
@@ -134,30 +133,28 @@ export default function CreateOperador() {
       <form onSubmit={onSubmit}>
         <h5 style={sectionTitle}>DADOS DO OPERADOR</h5>
 
-   {[  
-  { name: "usuario", label: "Usuário" },  
-  { name: "nome", label: "Nome" },  
-  { name: "email", label: "Email", required: false },  
-  { name: "telefone", label: "Telefone" },  
-  { name: "cpf", label: "CPF" },  
-  { name: "senha", label: "Senha", type: "password" },  
-].map(({ name, label, type = "text", required = true }) => (
-  <div key={name}>
-    <label style={labelStyle} htmlFor={name}>{label}</label>
-    <input
-      id={name}
-      type={type}
-      style={getInputStyle(name)}
-      value={form[name]}
-      onChange={(e) => updateForm({ [name]: e.target.value })}
-      onFocus={() => setFocusField(name)}
-      onBlur={() => setFocusField(null)}
-      {...(required ? { required: true } : {})}
-    />
-  </div>
-))}
+        {[
+          { name: "nome", label: "Nome" },
+          { name: "email", label: "Email", required: false },
+          { name: "telefone", label: "Telefone" },
+          { name: "cpf", label: "CPF" },
+          { name: "senha", label: "Senha", type: "password" },
+        ].map(({ name, label, type = "text", required = true }) => (
+          <div key={name}>
+            <label style={labelStyle} htmlFor={name}>{label}</label>
+            <input
+              id={name}
+              type={type}
+              style={getInputStyle(name)}
+              value={form[name]}
+              onChange={(e) => updateForm({ [name]: e.target.value })}
+              onFocus={() => setFocusField(name)}
+              onBlur={() => setFocusField(null)}
+              {...(required ? { required: true } : {})}
+            />
+          </div>
+        ))}
 
-        
         <div style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
           <button
             type="submit"

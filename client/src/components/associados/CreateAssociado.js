@@ -84,7 +84,7 @@ const uploadLabelStyle = {
 
   const getBtnCancelarStyle = (hover) => ({
     backgroundColor: hover ? "#ccedbf" : "#daf4d0",
-    color: "#86a479",
+    color: "#143018",
     padding: "8px 10px",
     borderRadius: "5px",
     border: "none",

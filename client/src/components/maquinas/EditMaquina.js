@@ -46,19 +46,6 @@ const inputFocus = {
   outline: "none",
 };
 
-const btnStyle = {
-  backgroundColor: "#1c3d21",
-  color: "#daf4d0",
-  padding: "8px 10px",
-  borderRadius: "5px",
-  border: "none",
-  cursor: "pointer",
-  fontWeight: "500",
-  fontSize: "1.1rem",
-  width: "30%",
-  marginTop: "10px",
-};
-
 const uploadContainerStyle = {
   backgroundColor: "#eeffe7",
   borderRadius: "8px",
@@ -80,6 +67,35 @@ const uploadLabelStyle = {
   whiteSpace: "nowrap",
 };
 
+const getBtnSalvarStyle = (hover) => ({
+  backgroundColor: hover ? "#143018" : "#1c3d21",
+  color: "#daf4d0",
+  padding: "8px 10px",
+  borderRadius: "5px",
+  border: "none",
+  cursor: "pointer",
+  fontWeight: "500",
+  fontSize: "1.1rem",
+  width: "30%",
+  marginTop: "10px",
+  transition: "background-color 0.3s",
+});
+
+const getBtnCancelarStyle = (hover) => ({
+  backgroundColor: hover ? "#c2dbac" : "#daf4d0",
+  color: "#86a479",
+  padding: "8px 10px",
+  borderRadius: "5px",
+  border: "none",
+  cursor: "pointer",
+  fontWeight: "500",
+  fontSize: "1.1rem",
+  width: "30%",
+  marginTop: "10px",
+  marginLeft: "10px",
+  transition: "background-color 0.3s",
+});
+
 export default function EditMaquina() {
   const [form, setForm] = useState({
     tipo: "",
@@ -93,6 +109,9 @@ export default function EditMaquina() {
   });
 
   const [focusField, setFocusField] = useState(null);
+  const [hoverSalvar, setHoverSalvar] = useState(false);
+  const [hoverCancelar, setHoverCancelar] = useState(false);
+
   const params = useParams();
   const navigate = useNavigate();
 
@@ -201,13 +220,20 @@ export default function EditMaquina() {
           />
         </div>
 
-        <button type="submit" style={btnStyle}>
+        <button
+          type="submit"
+          style={getBtnSalvarStyle(hoverSalvar)}
+          onMouseEnter={() => setHoverSalvar(true)}
+          onMouseLeave={() => setHoverSalvar(false)}
+        >
           Salvar
         </button>
         <button
           type="button"
           onClick={() => navigate("/maquinas")}
-          style={{ ...btnStyle, backgroundColor: "#daf4d0", marginLeft: "10px", color: "#86a479" }}
+          style={getBtnCancelarStyle(hoverCancelar)}
+          onMouseEnter={() => setHoverCancelar(true)}
+          onMouseLeave={() => setHoverCancelar(false)}
         >
           Cancelar
         </button>
