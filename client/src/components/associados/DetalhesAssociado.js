@@ -43,13 +43,13 @@ const btnBase = {
 
 const btnEditar = {
     ...btnBase,
-    backgroundColor: "#1c3d21",
+    backgroundColor: "#1A381F",
 };
 
 const btnExcluir = {
     ...btnBase,
     backgroundColor: "#daf4d0",
-    color: "#86a479",
+    color: "#143018",
 };
 
 export default function DetalhesAssociado() {
@@ -105,10 +105,7 @@ export default function DetalhesAssociado() {
             <h2 style={tituloNome}>{associado.nome}</h2>
 
             <div style={linha}>
-                <div style={campoLabel}>Usuário:</div> {associado.usuario}
-            </div>
-            <div style={linha}>
-                <div style={campoLabel}>Número:</div> #{associado.numero}
+                <div style={campoLabel}>Número:</div> #{associado.id}
             </div>
             <div style={linha}>
                 <div style={campoLabel}>Data de associação:</div> {associado.data_associacao}
@@ -159,7 +156,7 @@ export default function DetalhesAssociado() {
                                 rel="noopener noreferrer"
                                 style={{
                                     backgroundColor: "#c8facc",
-                                    color: "#1c3d21",
+                                    color: "#1A381F",
                                     padding: "4px 12px",
                                     borderRadius: "4px",
                                     textDecoration: "none",
@@ -168,7 +165,7 @@ export default function DetalhesAssociado() {
                                     fontWeight: "500",
                                 }}
                             >
-                                anuidade.pdf
+                                anuidade
                             </a>
                         </>
                     )}
@@ -184,7 +181,7 @@ export default function DetalhesAssociado() {
                                 rel="noopener noreferrer"
                                 style={{
                                     backgroundColor: "#c8facc",
-                                    color: "#1c3d21",
+                                    color: "#1A381F",
                                     padding: "4px 12px",
                                     borderRadius: "4px",
                                     textDecoration: "none",
@@ -193,7 +190,7 @@ export default function DetalhesAssociado() {
                                     fontWeight: "500",
                                 }}
                             >
-                                caf.pdf
+                                caf 
                             </a>
                         </>
                     )}

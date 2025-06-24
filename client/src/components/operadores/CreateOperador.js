@@ -43,12 +43,12 @@ const inputStyle = {
 };
 
 const inputFocus = {
-  borderColor: "#1c3d21",
+  borderColor: "#1A381F",
   outline: "none",
 };
 
 const getBtnCadastrarStyle = (hover) => ({
-  backgroundColor: hover ? "#143018" : "#1c3d21",
+  backgroundColor: hover ? "#143018" : "#1A381F",
   color: "#daf4d0",
   padding: "8px 10px",
   borderRadius: "5px",
@@ -61,7 +61,7 @@ const getBtnCadastrarStyle = (hover) => ({
 });
 
 const getBtnCancelarStyle = (hover) => ({
-  backgroundColor: hover ? "#ccedbf" : "#daf4d0",
+  backgroundColor: hover ? "#c7e5cc" : "#daf4d0",
   color: "#143018",
   padding: "8px 10px",
   borderRadius: "5px",
@@ -92,14 +92,36 @@ export default function CreateOperador() {
     setForm((prev) => ({ ...prev, ...value }));
   }
 
+  function formatarTelefone(telefone) {
+    const numeros = telefone.replace(/\D/g, "");
+    if (numeros.length === 11) {
+      return numeros.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+    }
+    return telefone;
+  }
+
+  function formatarCPF(cpf) {
+    const numeros = cpf.replace(/\D/g, "");
+    if (numeros.length === 11) {
+      return numeros.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+    }
+    return cpf;
+  }
+
   async function onSubmit(e) {
     e.preventDefault();
 
     try {
+      const telefoneFormatado = formatarTelefone(form.telefone);
+      const cpfFormatado = formatarCPF(form.cpf);
       const response = await fetch(`${API_URL}/operadores/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          telefone: telefoneFormatado,
+          cpf: cpfFormatado,
+        }),
       });
 
       if (!response.ok) {
@@ -133,27 +155,74 @@ export default function CreateOperador() {
       <form onSubmit={onSubmit}>
         <h5 style={sectionTitle}>DADOS DO OPERADOR</h5>
 
-        {[
-          { name: "nome", label: "Nome" },
-          { name: "email", label: "Email", required: false },
-          { name: "telefone", label: "Telefone" },
-          { name: "cpf", label: "CPF" },
-          { name: "senha", label: "Senha", type: "password" },
-        ].map(({ name, label, type = "text", required = true }) => (
-          <div key={name}>
-            <label style={labelStyle} htmlFor={name}>{label}</label>
-            <input
-              id={name}
-              type={type}
-              style={getInputStyle(name)}
-              value={form[name]}
-              onChange={(e) => updateForm({ [name]: e.target.value })}
-              onFocus={() => setFocusField(name)}
-              onBlur={() => setFocusField(null)}
-              {...(required ? { required: true } : {})}
-            />
-          </div>
-        ))}
+        <label style={labelStyle} htmlFor="nome">
+          Nome
+        </label>
+        <input
+          id="nome"
+          type="text"
+          style={getInputStyle("nome")}
+          value={form.nome}
+          onChange={(e) => updateForm({ nome: e.target.value })}
+          onFocus={() => setFocusField("nome")}
+          onBlur={() => setFocusField(null)}
+          required
+        />
+
+        <label style={labelStyle} htmlFor="email">
+          Email
+        </label>
+        <input
+          id="email"
+          type="email"
+          style={getInputStyle("email")}
+          value={form.email}
+          onChange={(e) => updateForm({ email: e.target.value })}
+          onFocus={() => setFocusField("email")}
+          onBlur={() => setFocusField(null)}
+        />
+
+        <label style={labelStyle} htmlFor="telefone">
+          Telefone
+        </label>
+        <input
+          id="telefone"
+          type="text"
+          style={getInputStyle("telefone")}
+          value={form.telefone}
+          onChange={(e) => updateForm({ telefone: e.target.value })}
+          onFocus={() => setFocusField("telefone")}
+          onBlur={() => setFocusField(null)}
+          required
+        />
+
+        <label style={labelStyle} htmlFor="cpf">
+          CPF
+        </label>
+        <input
+          id="cpf"
+          type="text"
+          style={getInputStyle("cpf")}
+          value={form.cpf}
+          onChange={(e) => updateForm({ cpf: e.target.value })}
+          onFocus={() => setFocusField("cpf")}
+          onBlur={() => setFocusField(null)}
+          required
+        />
+
+        <label style={labelStyle} htmlFor="senha">
+          Senha
+        </label>
+        <input
+          id="senha"
+          type="password"
+          style={getInputStyle("senha")}
+          value={form.senha}
+          onChange={(e) => updateForm({ senha: e.target.value })}
+          onFocus={() => setFocusField("senha")}
+          onBlur={() => setFocusField(null)}
+          required
+        />
 
         <div style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
           <button

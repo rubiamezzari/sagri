@@ -48,7 +48,7 @@ const inputFocus = {
 };
 
 const getBtnCadastrarStyle = (hover) => ({
-  backgroundColor: hover ? "#143018" : "#1c3d21",
+  backgroundColor: hover ? "#143018" : "#1A381F",
   color: "#daf4d0",
   padding: "8px 10px",
   borderRadius: "5px",

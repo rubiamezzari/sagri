@@ -43,13 +43,13 @@ const btnBase = {
 
 const btnEditar = {
   ...btnBase,
-  backgroundColor: "#1c3d21",
+  backgroundColor: "#1A381F",
 };
 
 const btnExcluir = {
   ...btnBase,
   backgroundColor: "#daf4d0",
-  color: "#86a479",
+  color: "#143018",
 };
 
 export default function DetalhesImplemento() {

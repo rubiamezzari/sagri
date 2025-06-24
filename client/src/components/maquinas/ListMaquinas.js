@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const API_URL = "http://localhost:5050";
 
 const btnDetalhes = {
-  backgroundColor: "#1c3d21",
+  backgroundColor: "#1A381F",
   color: "#fff",
   padding: "5px 12px",
   borderRadius: "4px",
@@ -29,8 +29,8 @@ function getStatusStyle(status) {
     case "disponível":
       return {
         ...baseStyle,
-        backgroundColor: "#ccedbf",
-        color: "#155724",
+        backgroundColor: "#C7E5CD",
+        color: "#183A20",
       };
     case "indisponível":
       return {
@@ -85,7 +85,7 @@ export default function ListImplementos() {
             padding: "10px",
             borderRadius: "5px",
             border: "1px solid #ccc",
-            outlineColor: "#1c3d21",
+            outlineColor: "#1A381F",
             fontSize: "0.85rem",
           }}
         />

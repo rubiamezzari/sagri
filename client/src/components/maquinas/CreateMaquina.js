@@ -43,12 +43,12 @@ const inputStyle = {
 };
 
 const inputFocus = {
-  borderColor: "#1c3d21",
+  borderColor: "#1A381F",
   outline: "none",
 };
 
 const uploadContainerStyle = {
-  backgroundColor: "#eeffe7",
+  backgroundColor: "#F1F9F2",
   borderRadius: "8px",
   padding: "8px 10px",
   marginBottom: "10px",
@@ -58,18 +58,18 @@ const uploadContainerStyle = {
 };
 
 const uploadLabelStyle = {
-  backgroundColor: "#ccedbf",
+  backgroundColor: "#c7e5cc",
   padding: "6px 12px",
   borderRadius: "6px",
   cursor: "pointer",
   fontSize: "0.85rem",
   fontWeight: "500",
-  color: "#1c3d21",
+  color: "#1A381F",
   whiteSpace: "nowrap",
 };
 
 const getBtnCadastrarStyle = (hover) => ({
-  backgroundColor: hover ? "#143018" : "#1c3d21",
+  backgroundColor: hover ? "#143018" : "#1A381F",
   color: "#daf4d0",
   padding: "8px 10px",
   borderRadius: "5px",
@@ -82,7 +82,7 @@ const getBtnCadastrarStyle = (hover) => ({
 });
 
 const getBtnCancelarStyle = (hover) => ({
-  backgroundColor: hover ? "#ccedbf" : "#daf4d0",
+  backgroundColor: hover ? "#c7e5cc" : "#daf4d0",
   color: "#143018",
   padding: "8px 10px",
   borderRadius: "5px",

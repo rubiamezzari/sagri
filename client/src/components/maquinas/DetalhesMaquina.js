@@ -53,12 +53,12 @@ const styles = {
     display: "inline-block",
   },
   btnEditar: {
-    backgroundColor: "#1c3d21",
+    backgroundColor: "#1A381F",
     color: "#daf4d0",
   },
   btnExcluir: {
     backgroundColor: "#daf4d0",
-    color: "#86a479",
+    color: "#143018",
   },
 };
 

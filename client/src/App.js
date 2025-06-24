@@ -35,7 +35,7 @@ import DetalhesOperador from "./components/operadores/DetalhesOperador";
 
 const App = () => {
   useEffect(() => {
-    document.body.style.backgroundColor = "#eeffe7"; 
+    document.body.style.backgroundColor = "#F1F9F2"; 
 document.body.style.fontFamily = "'segoe ui', sans-serif"; 
     return () => {
       document.body.style.backgroundColor = null;

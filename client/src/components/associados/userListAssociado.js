@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
 const btnDetalhes = {
-  backgroundColor: "#1c3d21",
+  backgroundColor: "#1A381F",
   color: "#fff",
   padding: "5px 12px",
   borderRadius: "4px",
@@ -13,16 +13,18 @@ const btnDetalhes = {
   textDecoration: "none",
 };
 
-
 export default function UserListAssociado({ associados }) {
   const [busca, setBusca] = useState("");
 
-  const associadosFiltrados = associados.filter((associado) =>
-    associado.nome?.toLowerCase().includes(busca.toLowerCase()) ||
-    associado.telefone?.toLowerCase().includes(busca.toLowerCase()) ||
-    associado.cpf?.toLowerCase().includes(busca.toLowerCase()) ||
-    associado.endereco?.bairro?.toLowerCase().includes(busca.toLowerCase())
-  );
+  // Filtra e inverte a lista (pra mostrar do mais novo pro mais antigo)
+  const associadosFiltrados = associados
+    .filter((associado) =>
+      associado.nome?.toLowerCase().includes(busca.toLowerCase()) ||
+      associado.telefone?.toLowerCase().includes(busca.toLowerCase()) ||
+      associado.cpf?.toLowerCase().includes(busca.toLowerCase()) ||
+      associado.endereco?.bairro?.toLowerCase().includes(busca.toLowerCase())
+    )
+    .reverse(); // inverte a ordem
 
   return (
     <div style={{ width: "100%", backgroundColor: "#fff", padding: "20px", borderRadius: "5px", }}>
@@ -37,7 +39,7 @@ export default function UserListAssociado({ associados }) {
             padding: "10px",
             borderRadius: "5px",
             border: "1px solid #ccc",
-            outlineColor: "#1c3d21",
+            outlineColor: "#1A381F",
             fontSize: "0.85rem",
             marginBottom: "15px",
           }}
@@ -51,7 +53,6 @@ export default function UserListAssociado({ associados }) {
         fontSize: "0.85rem",
         textAlign: "center"
       }}>
-
         <thead style={{
           backgroundColor: "#f8f8f8",
           fontWeight: "600"
@@ -75,7 +76,9 @@ export default function UserListAssociado({ associados }) {
           ) : (
             associadosFiltrados.map((associado, index) => (
               <tr key={associado._id} style={{ borderBottom: "1px solid #ccc" }}>
-                <td style={{ padding: "12px 8px" }}>{index + 1}</td>
+                <td style={{ padding: "12px 8px" }}>
+                  {associadosFiltrados.length - index}
+                </td>
                 <td style={{ padding: "12px 8px" }}>{associado.nome?.toUpperCase()}</td>
                 <td style={{ padding: "12px 8px" }}>{associado.telefone}</td>
                 <td style={{ padding: "12px 8px" }}>{associado.cpf}</td>

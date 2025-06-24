@@ -7,7 +7,7 @@ import Logo from "./Logo.png";
 export default function Navbar() { 
     const linkStyle = ({ isActive }) => ({
         color: "white",
-        borderBottom: isActive ? "3px solid #66bb6a" : "none",
+        borderBottom: isActive ? "3px solid #81c58d" : "none",
         paddingBottom: "2px",
         transition: "border-bottom 0.3s",
     });
@@ -17,9 +17,9 @@ export default function Navbar() {
             <nav
                 className="navbar navbar-expand-lg"
                 style={{
-                    backgroundColor: "#1c3d21", 
+                    backgroundColor: "#1A381F", 
                     padding: "0px 20px",   
-                    boxShadow: "0 2px 5px rgba(0,0,0,0.4)",
+                    boxShadow: "0 1px 2px rgba(0,0,0,0.4)",
                 }}
             >
                 <NavLink className="navbar-brand" to="/">

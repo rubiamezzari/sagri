@@ -44,12 +44,12 @@ const inputStyle = {
 };
 
 const inputFocus = {
-  borderColor: "#1c3d21",
+  borderColor: "#1A381F",
   outline: "none",
 };
 
 const uploadContainerStyle = {
-  backgroundColor: "#eeffe7",
+  backgroundColor: "#F1F9F2",
   borderRadius: "8px",
   padding: "8px 10px",
   marginBottom: "10px",
@@ -65,12 +65,12 @@ const uploadLabelStyle = {
   cursor: "pointer",
   fontSize: "0.85rem",
   fontWeight: "500",
-  color: "#1c3d21",
+  color: "#1A381F",
   whiteSpace: "nowrap",
 };
 
   const getBtnCadastrarStyle = (hover) => ({
-    backgroundColor: hover ? "#143018" : "#1c3d21",
+    backgroundColor: hover ? "#143018" : "#1A381F",
     color: "#daf4d0",
     padding: "8px 10px",
     borderRadius: "5px",
@@ -83,7 +83,7 @@ const uploadLabelStyle = {
   });
 
   const getBtnCancelarStyle = (hover) => ({
-    backgroundColor: hover ? "#ccedbf" : "#daf4d0",
+    backgroundColor: hover ? "#c7e5cc" : "#daf4d0",
     color: "#143018",
     padding: "8px 10px",
     borderRadius: "5px",
@@ -98,7 +98,6 @@ const uploadLabelStyle = {
 
 export default function CreateAssociado() {
   const [form, setForm] = useState({
-    usuario: "",
     nome: "",
     email: "",
     telefone: "",
@@ -201,7 +200,6 @@ export default function CreateAssociado() {
 
       // limpa form após sucesso
       setForm({
-        usuario: "",
         nome: "",
         email: "",
         telefone: "",
@@ -238,19 +236,6 @@ export default function CreateAssociado() {
       <form onSubmit={onSubmit}>
         <h5 style={sectionTitle}>DADOS PESSOAIS</h5>
 
-        <label style={labelStyle} htmlFor="usuario">
-          Usuário
-        </label>
-        <input
-          id="usuario"
-          type="text"
-          style={getInputStyle("usuario")}
-          value={form.usuario}
-          onChange={(e) => updateForm({ usuario: e.target.value })}
-          onFocus={() => setFocusField("usuario")}
-          onBlur={() => setFocusField(null)}
-          required
-        />
 
         <label style={labelStyle} htmlFor="nome">
           Nome
@@ -461,7 +446,7 @@ export default function CreateAssociado() {
         <div style={uploadContainerStyle}>
           <label htmlFor="caf" style={uploadLabelStyle}>
             {form.documentos.caf
-              ? "CAF:"
+              ? "CAF: "  + form.documentos.caf.name
               : "Selecionar CAF"}
           </label>
           <input

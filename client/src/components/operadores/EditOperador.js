@@ -28,7 +28,7 @@ const inputStyle = {
 };
 
 const btnSalvarStyle = (hover) => ({
-  backgroundColor: hover ? "#143018" : "#1c3d21",
+  backgroundColor: hover ? "#143018" : "#1A381F",
   color: "#fff",
   padding: "8px 20px",
   borderRadius: "4px",

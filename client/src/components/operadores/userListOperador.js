@@ -3,8 +3,8 @@ import { Link } from "react-router-dom";
 
 const API_URL = "http://localhost:5050";
 
-const btnAcao = {
-  backgroundColor: "#1c3d21",
+const btnEditar = {
+  backgroundColor: "#1A381F",
   color: "#fff",
   padding: "5px 12px",
   borderRadius: "4px",
@@ -14,6 +14,17 @@ const btnAcao = {
   fontWeight: "500",
   textDecoration: "none",
   marginRight: "5px",
+};
+
+const btnExcluir = {
+  backgroundColor: "#daf4d0",
+  color: "#143018",
+  padding: "5px 12px",
+  borderRadius: "4px",
+  fontSize: "0.75rem",
+  border: "none",
+  cursor: "pointer",
+  fontWeight: "500",
 };
 
 export default function ListOperadores() {
@@ -70,7 +81,7 @@ export default function ListOperadores() {
             padding: "10px",
             borderRadius: "5px",
             border: "1px solid #ccc",
-            outlineColor: "#1c3d21",
+            outlineColor: "#1A381F",
             fontSize: "0.85rem",
             marginBottom: "15px",
           }}
@@ -112,8 +123,8 @@ export default function ListOperadores() {
                 <td style={{ padding: "12px 8px" }}>{op.cpf}</td>
                 <td style={{ padding: "12px 8px" }}>{op.email || "—"}</td>
                 <td style={{ padding: "12px 8px" }}>
-                  <Link to={`/editar-operador/${op._id}`} style={btnAcao}>Editar</Link>
-                  <button onClick={() => excluirOperador(op._id)} style={btnAcao}>Excluir</button>
+                  <Link to={`/editar-operador/${op._id}`} style={btnEditar}>Editar</Link>
+                  <button onClick={() => excluirOperador(op._id)} style={btnExcluir}>Excluir</button>
                 </td>
               </tr>
             ))
