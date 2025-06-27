@@ -47,25 +47,25 @@ function getStatusStyle(status) {
   }
 }
 
-export default function ListImplementos() {
-  const [implementos, setImplementos] = useState([]);
+export default function ListMaquinas() {
+  const [Maquinas, setMaquinas] = useState([]);
   const [busca, setBusca] = useState("");
 
   useEffect(() => {
-    async function getImplementos() {
+    async function getMaquinas() {
       try {
-        const response = await fetch(`${API_URL}/implementos`);
-        if (!response.ok) throw new Error("Erro ao buscar implementos");
+        const response = await fetch(`${API_URL}/Maquinas`);
+        if (!response.ok) throw new Error("Erro ao buscar Maquinas");
         const data = await response.json();
-        setImplementos(data);
+        setMaquinas(data);
       } catch (error) {
-        alert("Erro ao buscar implementos: " + error.message);
+        alert("Erro ao buscar Maquinas: " + error.message);
       }
     }
-    getImplementos();
+    getMaquinas();
   }, []);
 
-  const implementosFiltrados = implementos.filter((imp) =>
+  const MaquinasFiltrados = Maquinas.filter((imp) =>
     imp.tipo?.toLowerCase().includes(busca.toLowerCase()) ||
     imp.marca?.toLowerCase().includes(busca.toLowerCase()) ||
     imp.modelo?.toLowerCase().includes(busca.toLowerCase()) ||
@@ -108,14 +108,14 @@ export default function ListImplementos() {
           </tr>
         </thead>
         <tbody>
-          {implementosFiltrados.length === 0 ? (
+          {MaquinasFiltrados.length === 0 ? (
             <tr>
               <td colSpan={6} style={{ padding: "12px 0" }}>
                 Nenhum implemento encontrado.
               </td>
             </tr>
           ) : (
-            implementosFiltrados.map((imp, idx) => (
+            MaquinasFiltrados.map((imp, idx) => (
               <tr key={imp._id} style={{ borderBottom: "1px solid #ccc" }}>
                 <td style={{ padding: "12px 8px" }}>{idx + 1}</td>
                 <td style={{ padding: "12px 8px" }}>{imp.tipo?.toUpperCase()}</td>
@@ -125,7 +125,7 @@ export default function ListImplementos() {
                   <span style={getStatusStyle(imp.status)}>{imp.status}</span>
                 </td>
                 <td style={{ textAlign: "center", padding: "12px 8px" }}>
-                  <Link to={`/implementos/${imp._id}`} style={btnDetalhes}>
+                  <Link to={`/Maquinas/${imp._id}`} style={btnDetalhes}>
                     Mais detalhes
                   </Link>
                 </td>
