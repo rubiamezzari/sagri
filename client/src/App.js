@@ -1,8 +1,14 @@
-import React, { useEffect } from "react";
-import { Route, Routes } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Route, Routes, Navigate, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/footer";
 import Home from "./components/Home";
+import Login from "./components/Login";
+//serviços
+import Servicos from "./components/serviços/Servicos";
+import CreateServico from "./components/serviços/CreateServico";
+import ListServicos from "./components/serviços/ListServicos";
+
 
 // Associados
 import Associados from "./components/associados/Associados";
@@ -18,8 +24,7 @@ import EditImplemento from "./components/implementos/EditImplemento";
 import ListImplemento from "./components/implementos/ListImplemento";
 import DetalhesImplemento from "./components/implementos/DetalhesImplemento";
 
-
-// Maquinas
+// Máquinas
 import Maquinas from "./components/maquinas/maquinas";
 import CreateMaquina from "./components/maquinas/CreateMaquina";
 import EditMaquina from "./components/maquinas/EditMaquina";
@@ -31,58 +36,80 @@ import Operadores from "./components/operadores/operadores";
 import CreateOperador from "./components/operadores/CreateOperador";
 import EditOperador from "./components/operadores/EditOperador";
 import UserListOperador from "./components/operadores/userListOperador";
-import DetalhesOperador from "./components/operadores/DetalhesOperador";
 
 const App = () => {
+  const [token, setToken] = useState(localStorage.getItem("token"));
+  const location = useLocation();
+
   useEffect(() => {
-    document.body.style.backgroundColor = "#F1F9F2"; 
-document.body.style.fontFamily = "'segoe ui', sans-serif"; 
+    document.body.style.backgroundColor = "#F1F9F2";
+    document.body.style.fontFamily = "'segoe ui', sans-serif";
     return () => {
       document.body.style.backgroundColor = null;
       document.body.style.fontFamily = null;
     };
   }, []);
 
+  const isLoginPage = location.pathname === "/login";
+
   return (
     <div className="d-flex flex-column min-vh-100">
-      <Navbar />
-      <main className="flex-fill container my-4">
+      {!isLoginPage && <Navbar />}
+      <main className={isLoginPage ? "" : "flex-fill container my-4"}>
         <Routes>
-          <Route path="/" element={<Home />} />
+          {/* Login */}
+          <Route
+            path="/login"
+            element={
+              <Login
+                onLogin={(newToken) => {
+                  localStorage.setItem("token", newToken);
+                  setToken(newToken);
+                }}
+              />
+            }
+          />
 
-          {/* Rotas para Associados */}
-          <Route path="/associados" element={<Associados />} />
-          <Route path="/associados/create" element={<CreateAssociado />} />
-          <Route path="/associados/edit/:id" element={<EditAssociado />} />
-          <Route path="/associados/list" element={<UserListAssociado />} />
-          <Route path="/associados/:id" element={<DetalhesAssociado />} />
- 
+          {/* Página inicial */}
+          <Route path="/" element={token ? <Home /> : <Navigate to="/login" replace />} />
 
-          {/* Rotas para Implementos */}
-          <Route path="/implementos" element={<Implementos />} />
-          <Route path="/implementos/create" element={<CreateImplemento />} />
-          <Route path="/implementos/edit/:id" element={<EditImplemento />} />
-          <Route path="/implementos/list" element={<ListImplemento />} />
-          <Route path="/implementos/:id" element={<DetalhesImplemento />} />
+           {/* servicos */}
+          <Route path="/servicos" element={token ? <Servicos/> : <Navigate to="/login" replace />} />
+          <Route path="/servicos/create" element={token ? <CreateServico/> : <Navigate to="/login" replace />} />
+          <Route path="/servicos/list" element={token ? <ListServicos/> : <Navigate to="/login" replace />} />
 
+          {/* Associados */}
+          <Route path="/associados" element={token ? <Associados /> : <Navigate to="/login" replace />} />
+          <Route path="/associados/create" element={token ? <CreateAssociado /> : <Navigate to="/login" replace />} />
+          <Route path="/associados/edit/:id" element={token ? <EditAssociado /> : <Navigate to="/login" replace />} />
+          <Route path="/associados/list" element={token ? <UserListAssociado /> : <Navigate to="/login" replace />} />
+          <Route path="/associados/:id" element={token ? <DetalhesAssociado /> : <Navigate to="/login" replace />} />
 
-          {/* Rotas para Maquinas */}
-          <Route path="/maquinas" element={<Maquinas />} />
-          <Route path="/maquinas/create" element={<CreateMaquina />} />
-          <Route path="/maquinas/edit/:id" element={<EditMaquina />} />
-          <Route path="/maquinas/list" element={<ListMaquinas />} />
-          <Route path="/maquinas/:id" element={<DetalhesMaquina />} />
+          {/* Implementos */}
+          <Route path="/implementos" element={token ? <Implementos /> : <Navigate to="/login" replace />} />
+          <Route path="/implementos/create" element={token ? <CreateImplemento /> : <Navigate to="/login" replace />} />
+          <Route path="/implementos/edit/:id" element={token ? <EditImplemento /> : <Navigate to="/login" replace />} />
+          <Route path="/implementos/list" element={token ? <ListImplemento /> : <Navigate to="/login" replace />} />
+          <Route path="/implementos/:id" element={token ? <DetalhesImplemento /> : <Navigate to="/login" replace />} />
 
-          {/* Rotas para Operadores */}
-          <Route path="/operadores" element={<Operadores />} />
-          <Route path="/operadores/create" element={<CreateOperador />} />
-          <Route path="/operadores/edit/:id" element={<EditOperador />} />
-          <Route path="/operadores/list" element={<UserListOperador />} />
-          <Route path="/operadores/:id" element={<DetalhesOperador />} />
-          
+          {/* Máquinas */}
+          <Route path="/maquinas" element={token ? <Maquinas /> : <Navigate to="/login" replace />} />
+          <Route path="/maquinas/create" element={token ? <CreateMaquina /> : <Navigate to="/login" replace />} />
+          <Route path="/maquinas/edit/:id" element={token ? <EditMaquina /> : <Navigate to="/login" replace />} />
+          <Route path="/maquinas/list" element={token ? <ListMaquinas /> : <Navigate to="/login" replace />} />
+          <Route path="/maquinas/:id" element={token ? <DetalhesMaquina /> : <Navigate to="/login" replace />} />
+
+          {/* Operadores */}
+          <Route path="/operadores" element={token ? <Operadores /> : <Navigate to="/login" replace />} />
+          <Route path="/operadores/create" element={token ? <CreateOperador /> : <Navigate to="/login" replace />} />
+          <Route path="/operadores/edit/:id" element={token ? <EditOperador /> : <Navigate to="/login" replace />} />
+          <Route path="/operadores/list" element={token ? <UserListOperador /> : <Navigate to="/login" replace />} />
+
+          {/* Redirecionamento padrão */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
-      <Footer />
+      {!isLoginPage && <Footer />}
     </div>
   );
 };

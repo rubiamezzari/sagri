@@ -43,33 +43,12 @@ const inputStyle = {
 };
 
 const inputFocus = {
-  borderColor: "#1A381F",
+  borderColor: "#1c3d21",
   outline: "none",
 };
 
-const uploadContainerStyle = {
-  backgroundColor: "#F1F9F2",
-  borderRadius: "8px",
-  padding: "8px 10px",
-  marginBottom: "10px",
-  display: "flex",
-  alignItems: "center",
-  gap: "12px",
-};
-
-const uploadLabelStyle = {
-  backgroundColor: "#c7e5cc",
-  padding: "6px 12px",
-  borderRadius: "6px",
-  cursor: "pointer",
-  fontSize: "0.85rem",
-  fontWeight: "500",
-  color: "#1A381F",
-  whiteSpace: "nowrap",
-};
-
 const getBtnCadastrarStyle = (hover) => ({
-  backgroundColor: hover ? "#143018" : "#1A381F",
+  backgroundColor: hover ? "#143018" : "#1c3d21",
   color: "#daf4d0",
   padding: "8px 10px",
   borderRadius: "5px",
@@ -82,7 +61,7 @@ const getBtnCadastrarStyle = (hover) => ({
 });
 
 const getBtnCancelarStyle = (hover) => ({
-  backgroundColor: hover ? "#c7e5cc" : "#daf4d0",
+  backgroundColor: hover ? "#ccedbf" : "#daf4d0",
   color: "#143018",
   padding: "8px 10px",
   borderRadius: "5px",
@@ -95,14 +74,11 @@ const getBtnCancelarStyle = (hover) => ({
   transition: "background-color 0.3s",
 });
 
-export default function CreateMaquina() {
+export default function CreateServico() {
   const [form, setForm] = useState({
-    tipo: "",
-    marca: "",
-    modelo: "",
-    potencia: "",
-    status: "Disponível", 
-    n_serie: "",
+    nome: "",
+    maquina_tipo: "",
+    implemento_tipo: "",
     observacao: "",
   });
 
@@ -118,39 +94,21 @@ export default function CreateMaquina() {
   async function onSubmit(e) {
     e.preventDefault();
 
-    const formData = new FormData();
-    const formCopy = { ...form, foto: null };
-    formData.append("dados", JSON.stringify(formCopy));
-    if (form.foto) {
-      formData.append("foto", form.foto);
-    }
-
     try {
-      const response = await fetch(`${API_URL}/maquinas/create`, {
+      const response = await fetch(`${API_URL}/servicos/create`, {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        alert("Erro ao cadastrar máquina: " + errorText);
+        alert("Erro ao cadastrar serviço: " + errorText);
         return;
       }
 
-      alert("Máquina cadastrada com sucesso!");
-
-      setForm({
-        tipo: "",
-        marca: "",
-        modelo: "",
-        potencia: "",
-        status: "Disponível",
-        n_serie: "",
-        observacao: "",
-        foto: null,
-      });
-
-      navigate("/maquinas", { replace: true });
+      alert("Serviço cadastrado com sucesso!");
+      navigate("/servicos", { replace: true });
     } catch (error) {
       alert("Erro na comunicação com o servidor.");
     }
@@ -163,13 +121,15 @@ export default function CreateMaquina() {
   return (
     <div style={containerStyle}>
       <form onSubmit={onSubmit}>
-        <h5 style={sectionTitle}>DADOS DA MÁQUINA</h5>
+        <h5 style={sectionTitle}>DADOS DO SERVIÇO</h5>
 
-        {["tipo", "marca", "modelo", "potencia", "n_serie"].map((name) => (
+        {[ 
+          { name: "nome", label: "Nome do Serviço" },
+          { name: "maquina_tipo", label: "Tipo de Máquina" },
+          { name: "implemento_tipo", label: "Tipo de Implemento" },
+        ].map(({ name, label }) => (
           <div key={name}>
-            <label style={labelStyle} htmlFor={name}>
-              {name.charAt(0).toUpperCase() + name.slice(1).replace("_", " ")}
-            </label>
+            <label style={labelStyle} htmlFor={name}>{label}</label>
             <input
               id={name}
               type="text"
@@ -178,41 +138,20 @@ export default function CreateMaquina() {
               onChange={(e) => updateForm({ [name]: e.target.value })}
               onFocus={() => setFocusField(name)}
               onBlur={() => setFocusField(null)}
-              required={name === "tipo" || name === "marca"}
+              required
             />
           </div>
         ))}
 
-        <label style={labelStyle} htmlFor="observacao">
-          Observação
-        </label>
+        <label style={labelStyle} htmlFor="observacao">Observação</label>
         <textarea
           id="observacao"
-          style={{ ...getInputStyle("observacao"), height: "80px" }}
+          style={{ ...getInputStyle("observacao"), height: "80px", resize: "none" }}
           value={form.observacao}
           onChange={(e) => updateForm({ observacao: e.target.value })}
           onFocus={() => setFocusField("observacao")}
           onBlur={() => setFocusField(null)}
         />
-
-        <label style={labelStyle} htmlFor="foto">
-          Foto da Máquina
-        </label>
-        <div style={uploadContainerStyle}>
-          <label htmlFor="foto" style={uploadLabelStyle}>
-            Selecionar imagem
-          </label>
-          <input
-            id="foto"
-            type="file"
-            accept=".jpg,.jpeg,.png"
-            style={{ display: "none" }}
-            onChange={(e) => updateForm({ foto: e.target.files[0] || null })}
-          />
-          <span style={{ fontSize: "0.85rem", color: "#000" }}>
-            {form.foto ? form.foto.name : "Nenhum arquivo selecionado"}
-          </span>
-        </div>
 
         <div style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
           <button
@@ -225,7 +164,7 @@ export default function CreateMaquina() {
           </button>
           <button
             type="button"
-            onClick={() => navigate("/maquinas")}
+            onClick={() => navigate("/servicos")}
             style={getBtnCancelarStyle(hoverCancelar)}
             onMouseEnter={() => setHoverCancelar(true)}
             onMouseLeave={() => setHoverCancelar(false)}

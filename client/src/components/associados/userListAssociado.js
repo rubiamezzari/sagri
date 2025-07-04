@@ -16,7 +16,6 @@ const btnDetalhes = {
 export default function UserListAssociado({ associados }) {
   const [busca, setBusca] = useState("");
 
-  // Filtra e inverte a lista (pra mostrar do mais novo pro mais antigo)
   const associadosFiltrados = associados
     .filter((associado) =>
       associado.nome?.toLowerCase().includes(busca.toLowerCase()) ||
@@ -24,8 +23,7 @@ export default function UserListAssociado({ associados }) {
       associado.cpf?.toLowerCase().includes(busca.toLowerCase()) ||
       associado.endereco?.bairro?.toLowerCase().includes(busca.toLowerCase())
     )
-    .reverse(); // inverte a ordem
-
+    .reverse(); 
   return (
     <div style={{ width: "100%", backgroundColor: "#fff", padding: "20px", borderRadius: "5px", }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", }}>

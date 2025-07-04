@@ -69,7 +69,6 @@ const uploadLabelStyle = {
   whiteSpace: "nowrap",
 };
 
-// Funções para gerar estilos dinâmicos dos botões
 const getBtnCadastrarStyle = (hover) => ({
   backgroundColor: hover ? "#143018" : "#1A381F",
   color: "#daf4d0",

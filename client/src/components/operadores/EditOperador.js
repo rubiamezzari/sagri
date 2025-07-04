@@ -4,51 +4,75 @@ import { useParams, useNavigate } from "react-router-dom";
 const API_URL = "http://localhost:5050";
 
 const containerStyle = {
-  maxWidth: "700px",
+  maxWidth: "800px",
   margin: "40px auto",
-  padding: "30px",
+  padding: "30px 40px",
   backgroundColor: "#ffffff",
   borderRadius: "5px",
+  textAlign: "center",
+};
+
+const sectionTitle = {
+  color: "#100f0d",
+  marginBottom: "16px",
+  fontWeight: "500",
+  fontSize: "1rem",
+  borderBottom: "0.5px solid rgb(131, 148, 131)",
+  paddingBottom: "6px",
 };
 
 const labelStyle = {
-  fontWeight: "600",
-  fontSize: "0.85rem",
-  marginBottom: "6px",
   display: "block",
+  marginBottom: "6px",
+  fontWeight: "600",
+  color: "#100f0d",
+  fontSize: "0.8rem",
+  textAlign: "left",
 };
 
 const inputStyle = {
   width: "100%",
-  padding: "8px",
-  borderRadius: "4px",
-  border: "1px solid #ccc",
-  fontSize: "0.95rem",
+  padding: "5px 6px",
+  marginBottom: "10px",
+  borderRadius: "5px",
+  border: "0.1px solid #e8e8e8",
+  fontSize: "1rem",
   boxSizing: "border-box",
+  transition: "border-color 0.3s",
 };
 
-const btnSalvarStyle = (hover) => ({
+const inputFocus = {
+  borderColor: "#e8e8e8",
+  outline: "none",
+};
+
+const getBtnSalvarStyle = (hover) => ({
   backgroundColor: hover ? "#143018" : "#1A381F",
-  color: "#fff",
-  padding: "8px 20px",
-  borderRadius: "4px",
+  color: "#daf4d0",
+  padding: "8px 10px",
+  borderRadius: "5px",
   border: "none",
-  fontWeight: "500",
   cursor: "pointer",
+  fontWeight: "500",
+  fontSize: "1.1rem",
+  width: "30%",
+  marginTop: "10px",
   transition: "background-color 0.3s",
-  flex: 1,
 });
 
-const btnCancelarStyle = (hover) => ({
-  backgroundColor: hover ? "#d6d6d6" : "#eaeaea",
-  color: "#444",
-  padding: "8px 20px",
-  borderRadius: "4px",
-  border: "1px solid #ccc",
-  fontWeight: "500",
+const getBtnCancelarStyle = (hover) => ({
+  backgroundColor: hover ? "#c2dbac" : "#daf4d0",
+  color: "#86a479",
+  padding: "8px 10px",
+  borderRadius: "5px",
+  border: "none",
   cursor: "pointer",
+  fontWeight: "500",
+  fontSize: "1.1rem",
+  width: "30%",
+  marginTop: "10px",
+  marginLeft: "10px",
   transition: "background-color 0.3s",
-  flex: 1,
 });
 
 export default function EditOperador() {
@@ -62,6 +86,7 @@ export default function EditOperador() {
     cpf: "",
   });
 
+  const [focusField, setFocusField] = useState(null);
   const [hoverSalvar, setHoverSalvar] = useState(false);
   const [hoverCancelar, setHoverCancelar] = useState(false);
 
@@ -86,6 +111,10 @@ export default function EditOperador() {
     setForm((prev) => ({ ...prev, ...value }));
   }
 
+  function getInputStyle(name) {
+    return focusField === name ? { ...inputStyle, ...inputFocus } : inputStyle;
+  }
+
   async function onSubmit(e) {
     e.preventDefault();
     try {
@@ -107,35 +136,32 @@ export default function EditOperador() {
   return (
     <div style={containerStyle}>
       <form onSubmit={onSubmit}>
-        <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
-          Editar Operador
-        </h2>
+        <h5 style={sectionTitle}>DADOS DO OPERADOR</h5>
 
-        {["nome", "email", "telefone", "cpf"].map((field) => (
-          <div key={field} style={{ marginBottom: "16px" }}>
-            <label style={labelStyle}>
-              {field.charAt(0).toUpperCase() + field.slice(1)}:
-            </label>
+        {[
+          ["nome", "Nome"],
+          ["email", "Email"],
+          ["telefone", "Telefone"],
+          ["cpf", "CPF"],
+        ].map(([name, label]) => (
+          <div key={name}>
+            <label style={labelStyle}>{label}</label>
             <input
               type="text"
-              value={form[field]}
-              onChange={(e) => updateForm({ [field]: e.target.value })}
+              style={getInputStyle(name)}
+              value={form[name]}
+              onChange={(e) => updateForm({ [name]: e.target.value })}
+              onFocus={() => setFocusField(name)}
+              onBlur={() => setFocusField(null)}
               required
-              style={inputStyle}
             />
           </div>
         ))}
 
-        <div
-          style={{
-            marginTop: "20px",
-            display: "flex",
-            gap: "10px",
-          }}
-        >
+        <div style={{ display: "flex", justifyContent: "center", gap: "12px" }}>
           <button
             type="submit"
-            style={btnSalvarStyle(hoverSalvar)}
+            style={getBtnSalvarStyle(hoverSalvar)}
             onMouseEnter={() => setHoverSalvar(true)}
             onMouseLeave={() => setHoverSalvar(false)}
           >
@@ -145,7 +171,7 @@ export default function EditOperador() {
           <button
             type="button"
             onClick={() => navigate("/operadores")}
-            style={btnCancelarStyle(hoverCancelar)}
+            style={getBtnCancelarStyle(hoverCancelar)}
             onMouseEnter={() => setHoverCancelar(true)}
             onMouseLeave={() => setHoverCancelar(false)}
           >

@@ -46,27 +46,6 @@ const inputFocus = {
   outline: "none",
 };
 
-const uploadContainerStyle = {
-  backgroundColor: "#F1F9F2",
-  borderRadius: "8px",
-  padding: "8px 10px",
-  marginBottom: "10px",
-  display: "flex",
-  alignItems: "center",
-  gap: "12px",
-};
-
-const uploadLabelStyle = {
-  backgroundColor: "#c7e5cc",
-  padding: "6px 12px",
-  borderRadius: "6px",
-  cursor: "pointer",
-  fontSize: "0.85rem",
-  fontWeight: "500",
-  color: "#1A381F",
-  whiteSpace: "nowrap",
-};
-
 const getBtnSalvarStyle = (hover) => ({
   backgroundColor: hover ? "#143018" : "#1A381F",
   color: "#daf4d0",
@@ -102,10 +81,8 @@ export default function EditMaquina() {
     marca: "",
     modelo: "",
     potencia: "",
-    status: "",
     n_serie: "",
     observacao: "",
-    foto: null,
   });
 
   const [focusField, setFocusField] = useState(null);
@@ -125,7 +102,10 @@ export default function EditMaquina() {
       }
 
       const maquina = await response.json();
-      setForm(maquina);
+
+      const { status, foto, ...semStatusEFoto } = maquina;
+
+      setForm(semStatusEFoto);
     }
 
     fetchData();
@@ -142,18 +122,11 @@ export default function EditMaquina() {
   async function onSubmit(e) {
     e.preventDefault();
 
-    const formData = new FormData();
-    const formCopy = { ...form, foto: null };
-    formData.append("dados", JSON.stringify(formCopy));
-
-    if (form.foto instanceof File) {
-      formData.append("foto", form.foto);
-    }
-
     try {
       const response = await fetch(`${API_URL}/maquinas/update/${params.id}`, {
         method: "PATCH",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
       });
 
       if (!response.ok) {
@@ -178,7 +151,6 @@ export default function EditMaquina() {
           ["marca", "Marca"],
           ["modelo", "Modelo"],
           ["potencia", "Potência"],
-          ["status", "Status"],
           ["n_serie", "Número de Série"],
         ].map(([name, label]) => (
           <div key={name}>
@@ -203,40 +175,25 @@ export default function EditMaquina() {
           onBlur={() => setFocusField(null)}
         />
 
-        <div style={uploadContainerStyle}>
-          <label htmlFor="foto" style={uploadLabelStyle}>
-            {form.foto instanceof File
-              ? "Foto: " + form.foto.name
-              : form.foto
-              ? "Foto selecionada"
-              : "Selecionar Foto"}
-          </label>
-          <input
-            id="foto"
-            type="file"
-            accept="image/*"
-            style={{ display: "none" }}
-            onChange={(e) => updateForm({ foto: e.target.files[0] || null })}
-          />
+        <div style={{ display: "flex", justifyContent: "center", gap: "12px" }}>
+          <button
+            type="submit"
+            style={getBtnSalvarStyle(hoverSalvar)}
+            onMouseEnter={() => setHoverSalvar(true)}
+            onMouseLeave={() => setHoverSalvar(false)}
+          >
+            Salvar
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("/maquinas")}
+            style={getBtnCancelarStyle(hoverCancelar)}
+            onMouseEnter={() => setHoverCancelar(true)}
+            onMouseLeave={() => setHoverCancelar(false)}
+          >
+            Cancelar
+          </button>
         </div>
-
-        <button
-          type="submit"
-          style={getBtnSalvarStyle(hoverSalvar)}
-          onMouseEnter={() => setHoverSalvar(true)}
-          onMouseLeave={() => setHoverSalvar(false)}
-        >
-          Salvar
-        </button>
-        <button
-          type="button"
-          onClick={() => navigate("/maquinas")}
-          style={getBtnCancelarStyle(hoverCancelar)}
-          onMouseEnter={() => setHoverCancelar(true)}
-          onMouseLeave={() => setHoverCancelar(false)}
-        >
-          Cancelar
-        </button>
       </form>
     </div>
   );

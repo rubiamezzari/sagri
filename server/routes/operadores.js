@@ -4,19 +4,27 @@ const dbo = require("../db/conn");
 
 const router = express.Router();
 
-// Criar operador (sem campo "usuario")
+// Criar operador (sem hash na senha)
 router.post("/operadores/create", async (req, res) => {
   const dbConnect = dbo.getDb();
 
-  const novoOperador = {
-    nome: req.body.nome,
-    senha: req.body.senha,
-    email: req.body.email,
-    telefone: req.body.telefone,
-    cpf: req.body.cpf,
-  };
-
   try {
+    const cpfLimpo = req.body.cpf.replace(/[^\d]/g, "");
+
+    // 🔒 Verifica se já existe operador com esse CPF
+    const existente = await dbConnect.collection("operadores").findOne({ cpf: cpfLimpo });
+    if (existente) {
+      return res.status(409).send({ mensagem: "CPF já cadastrado" });
+    }
+
+    const novoOperador = {
+      nome: req.body.nome,
+      senha: req.body.senha, // senha salva em texto simples
+      email: req.body.email,
+      telefone: req.body.telefone,
+      cpf: cpfLimpo,
+    };
+
     const result = await dbConnect.collection("operadores").insertOne(novoOperador);
     res.status(201).send(result);
   } catch (err) {
@@ -24,7 +32,7 @@ router.post("/operadores/create", async (req, res) => {
   }
 });
 
-// Listar todos operadores (sem senha e sem "usuario")
+// Listar todos os operadores
 router.get("/operadores", async (req, res) => {
   const dbConnect = dbo.getDb();
 
@@ -39,7 +47,7 @@ router.get("/operadores", async (req, res) => {
   }
 });
 
-// Buscar operador por id (sem senha e sem "usuario")
+// Buscar operador por ID
 router.get("/operadores/:id", async (req, res) => {
   const dbConnect = dbo.getDb();
   const query = { _id: new ObjectId(req.params.id) };
@@ -52,13 +60,14 @@ router.get("/operadores/:id", async (req, res) => {
     if (!operador) {
       return res.status(404).send("Operador não encontrado");
     }
+
     res.status(200).send(operador);
   } catch (err) {
     res.status(500).send({ error: "Erro ao buscar operador" });
   }
 });
 
-// Atualizar operador (sem "usuario")
+// Atualizar operador (sem hash)
 router.patch("/operadores/update/:id", async (req, res) => {
   const dbConnect = dbo.getDb();
   const query = { _id: new ObjectId(req.params.id) };

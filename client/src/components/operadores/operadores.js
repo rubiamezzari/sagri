@@ -4,11 +4,11 @@ import { Link } from "react-router-dom";
 
 export default function operadores() {
    const btnCadastrar = {
-    backgroundColor: "#c7e5cc",
+    backgroundColor: "#daf4d0",
     color: "#000",
     padding: "5px 15px",
     borderRadius: "5px",
-    border: "1px solid #1A381F",
+    border: "1px solid #1c3d21",
     cursor: "pointer",
     fontWeight: "500",
     textDecoration: "none",

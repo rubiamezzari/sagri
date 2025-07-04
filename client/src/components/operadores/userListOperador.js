@@ -27,7 +27,7 @@ const btnExcluir = {
   fontWeight: "500",
 };
 
-export default function ListOperadores() {
+export default function UserListOperador() {
   const [operadores, setOperadores] = useState([]);
   const [busca, setBusca] = useState("");
 
@@ -123,7 +123,7 @@ export default function ListOperadores() {
                 <td style={{ padding: "12px 8px" }}>{op.cpf}</td>
                 <td style={{ padding: "12px 8px" }}>{op.email || "—"}</td>
                 <td style={{ padding: "12px 8px" }}>
-                  <Link to={`/editar-operador/${op._id}`} style={btnEditar}>Editar</Link>
+                  <Link to={`/operadores/edit/${op._id}`} style={btnEditar}>Editar</Link>
                   <button onClick={() => excluirOperador(op._id)} style={btnExcluir}>Excluir</button>
                 </td>
               </tr>
