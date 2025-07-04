@@ -79,6 +79,7 @@ export default function Navbar() {
                                 Agendamentos
                             </NavLink>
                         </li>
+
                     </ul>
                 </div>
             </nav>
