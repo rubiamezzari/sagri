@@ -85,13 +85,11 @@ export default function EditImplemento() {
     marca: "",
     modelo: "",
     capacidade: "",
-    status: "",
     n_serie: "",
     observacao: "",
   });
 
   const [focusField, setFocusField] = useState(null);
-
   const [hoverSalvar, setHoverSalvar] = useState(false);
   const [hoverCancelar, setHoverCancelar] = useState(false);
 
@@ -99,14 +97,14 @@ export default function EditImplemento() {
     fetch(`${API_URL}/implementos/${id}`)
       .then((res) => res.json())
       .then((data) => {
+        const { status, ...semStatus } = data;
         setForm({
-          tipo: data.tipo || "",
-          marca: data.marca || "",
-          modelo: data.modelo || "",
-          capacidade: data.capacidade || "",
-          status: data.status || "",
-          n_serie: data.n_serie || "",
-          observacao: data.observacao || "",
+          tipo: semStatus.tipo || "",
+          marca: semStatus.marca || "",
+          modelo: semStatus.modelo || "",
+          capacidade: semStatus.capacidade || "",
+          n_serie: semStatus.n_serie || "",
+          observacao: semStatus.observacao || "",
         });
       })
       .catch(() => alert("Erro ao carregar dados do implemento"));
@@ -151,68 +149,26 @@ export default function EditImplemento() {
       <form onSubmit={onSubmit}>
         <h5 style={sectionTitle}>DADOS DO IMPLEMENTO</h5>
 
-        <label style={labelStyle}>Tipo</label>
-        <input
-          type="text"
-          style={getInputStyle("tipo")}
-          value={form.tipo}
-          onChange={(e) => updateForm({ tipo: e.target.value })}
-          onFocus={() => setFocusField("tipo")}
-          onBlur={() => setFocusField(null)}
-          required
-        />
-
-        <label style={labelStyle}>Marca</label>
-        <input
-          type="text"
-          style={getInputStyle("marca")}
-          value={form.marca}
-          onChange={(e) => updateForm({ marca: e.target.value })}
-          onFocus={() => setFocusField("marca")}
-          onBlur={() => setFocusField(null)}
-          required
-        />
-
-        <label style={labelStyle}>Modelo</label>
-        <input
-          type="text"
-          style={getInputStyle("modelo")}
-          value={form.modelo}
-          onChange={(e) => updateForm({ modelo: e.target.value })}
-          onFocus={() => setFocusField("modelo")}
-          onBlur={() => setFocusField(null)}
-        />
-
-        <label style={labelStyle}>Capacidade</label>
-        <input
-          type="text"
-          style={getInputStyle("capacidade")}
-          value={form.capacidade}
-          onChange={(e) => updateForm({ capacidade: e.target.value })}
-          onFocus={() => setFocusField("capacidade")}
-          onBlur={() => setFocusField(null)}
-        />
-
-        <label style={labelStyle}>Status</label>
-        <input
-          type="text"
-          style={getInputStyle("status")}
-          value={form.status}
-          onChange={(e) => updateForm({ status: e.target.value })}
-          onFocus={() => setFocusField("status")}
-          onBlur={() => setFocusField(null)}
-          required
-        />
-
-        <label style={labelStyle}>Número de Série</label>
-        <input
-          type="text"
-          style={getInputStyle("n_serie")}
-          value={form.n_serie}
-          onChange={(e) => updateForm({ n_serie: e.target.value })}
-          onFocus={() => setFocusField("n_serie")}
-          onBlur={() => setFocusField(null)}
-        />
+        {[
+          ["tipo", "Tipo"],
+          ["marca", "Marca"],
+          ["modelo", "Modelo"],
+          ["capacidade", "Capacidade"],
+          ["n_serie", "Número de Série"],
+        ].map(([name, label]) => (
+          <div key={name}>
+            <label style={labelStyle}>{label}</label>
+            <input
+              type="text"
+              style={getInputStyle(name)}
+              value={form[name]}
+              onChange={(e) => updateForm({ [name]: e.target.value })}
+              onFocus={() => setFocusField(name)}
+              onBlur={() => setFocusField(null)}
+              required={name === "tipo" || name === "marca"} 
+            />
+          </div>
+        ))}
 
         <label style={labelStyle}>Observação</label>
         <textarea

@@ -111,7 +111,7 @@ export default function ListMaquinas() {
           {MaquinasFiltrados.length === 0 ? (
             <tr>
               <td colSpan={6} style={{ padding: "12px 0" }}>
-                Nenhum implemento encontrado.
+                Nenhuma máquina encontrada.
               </td>
             </tr>
           ) : (

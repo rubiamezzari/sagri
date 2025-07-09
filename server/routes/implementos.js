@@ -7,7 +7,6 @@ const router = express.Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// GET todos implementos com status atualizado conforme agendamento
 router.get("/implementos", async (req, res) => {
   const dbConnect = dbo.getDb();
 
@@ -24,15 +23,15 @@ router.get("/implementos", async (req, res) => {
     );
 
     const implementosAtualizados = implementos.map((implemento) => {
-      // Verifica se o implemento está agendado
+     
       if (implementosAgendadosIds.has(implemento._id.toString())) {
         implemento.status = "indisponível";
       } else {
-        // Define "disponível" se status estiver ausente
+        
         implemento.status = implemento.status || "disponível";
       }
 
-      // Converte a imagem para base64 se necessário
+     
       if (implemento.foto && Buffer.isBuffer(implemento.foto)) {
         implemento.foto = `data:image/jpeg;base64,${implemento.foto.toString("base64")}`;
       } else {
@@ -49,7 +48,7 @@ router.get("/implementos", async (req, res) => {
   }
 });
 
-// GET implemento por id
+
 router.get("/implementos/:id", async (req, res) => {
   const dbConnect = dbo.getDb();
   const query = { _id: new ObjectId(req.params.id) };
@@ -74,7 +73,6 @@ router.get("/implementos/:id", async (req, res) => {
   }
 });
 
-// POST criar novo implemento
 router.post("/implementos/create", upload.single("foto"), async (req, res) => {
   const dbConnect = dbo.getDb();
 
@@ -103,7 +101,6 @@ router.post("/implementos/create", upload.single("foto"), async (req, res) => {
   }
 });
 
-// PATCH atualizar implemento por id
 router.patch("/implementos/update/:id", upload.single("foto"), async (req, res) => {
   const dbConnect = dbo.getDb();
   const query = { _id: new ObjectId(req.params.id) };
@@ -140,7 +137,7 @@ router.patch("/implementos/update/:id", upload.single("foto"), async (req, res) 
   }
 });
 
-// DELETE implemento
+
 router.delete("/implementos/:id", async (req, res) => {
   const dbConnect = dbo.getDb();
 

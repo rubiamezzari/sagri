@@ -7,44 +7,50 @@ const fs = require("fs");
 
 const router = express.Router();
 
+// === CONFIGURAÇÃO MULTER ===
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     let folder = "uploads/";
-
     if (file.fieldname === "anuidade") folder += "anuidade";
     else if (file.fieldname === "caf") folder += "caf";
-
     if (!fs.existsSync(folder)) fs.mkdirSync(folder, { recursive: true });
-
     cb(null, folder);
   },
   filename: function (req, file, cb) {
     const ext = path.extname(file.originalname);
     const name = `${Date.now()}${ext}`;
     cb(null, name);
-  }
+  },
 });
-
 const upload = multer({ storage });
 
+// === CADASTRO COM ARQUIVOS ===
 router.post(
   "/associados/create",
   upload.fields([
     { name: "anuidade", maxCount: 1 },
-    { name: "caf", maxCount: 1 }
+    { name: "caf", maxCount: 1 },
   ]),
   async (req, res) => {
     const dbConnect = dbo.getDb();
-
     try {
       const dados = JSON.parse(req.body.dados);
+      const cpfLimpo = dados.cpf.replace(/[^\d]/g, "");
+
+      // Verifica se CPF já existe
+      const existente = await dbConnect.collection("associados").findOne({ cpf: cpfLimpo });
+      if (existente) {
+        return res.status(409).send({ mensagem: "CPF já cadastrado" });
+      }
 
       const novoAssociado = {
         ...dados,
+        cpf: cpfLimpo,
+        senha: dados.senha,
         documentos: {
           anuidade: req.files?.anuidade?.[0]?.filename || null,
-          caf: req.files?.caf?.[0]?.filename || null
-        }
+          caf: req.files?.caf?.[0]?.filename || null,
+        },
       };
 
       const result = await dbConnect.collection("associados").insertOne(novoAssociado);
@@ -56,21 +62,29 @@ router.post(
   }
 );
 
+// === CADASTRO SEM ARQUIVOS ===
 router.post("/associados", async (req, res) => {
   const dbConnect = dbo.getDb();
-
-  const novoAssociado = {
-    nome: req.body.nome,
-    cpf: req.body.cpf,
-    email: req.body.email,
-    telefone: req.body.telefone,
-    senha: req.body.senha,
-    data_associacao: req.body.data_associacao,
-    endereco: req.body.endereco,
-    documentos: req.body.documentos,
-  };
-
   try {
+    const cpfLimpo = req.body.cpf.replace(/[^\d]/g, "");
+
+    // Verifica se CPF já existe
+    const existente = await dbConnect.collection("associados").findOne({ cpf: cpfLimpo });
+    if (existente) {
+      return res.status(409).send({ mensagem: "CPF já cadastrado" });
+    }
+
+    const novoAssociado = {
+      nome: req.body.nome,
+      cpf: cpfLimpo,
+      email: req.body.email,
+      telefone: req.body.telefone,
+      senha: req.body.senha,
+      data_associacao: req.body.data_associacao,
+      endereco: req.body.endereco,
+      documentos: req.body.documentos,
+    };
+
     const result = await dbConnect.collection("associados").insertOne(novoAssociado);
     res.status(201).send(result);
   } catch (err) {
@@ -78,9 +92,9 @@ router.post("/associados", async (req, res) => {
   }
 });
 
+// === LISTAR TODOS ===
 router.get("/associados", async (req, res) => {
   const dbConnect = dbo.getDb();
-
   try {
     const result = await dbConnect.collection("associados").find({}).toArray();
     res.status(200).send(result);
@@ -89,10 +103,10 @@ router.get("/associados", async (req, res) => {
   }
 });
 
+// === DETALHES POR ID ===
 router.get("/associados/:id", async (req, res) => {
   const dbConnect = dbo.getDb();
   const query = { _id: new ObjectId(req.params.id) };
-
   try {
     const result = await dbConnect.collection("associados").findOne(query);
     if (!result) {
@@ -105,10 +119,10 @@ router.get("/associados/:id", async (req, res) => {
   }
 });
 
+// === DELETAR ASSOCIADO ===
 router.delete("/associados/:id", async (req, res) => {
   const dbConnect = dbo.getDb();
   const query = { _id: new ObjectId(req.params.id) };
-
   try {
     const result = await dbConnect.collection("associados").deleteOne(query);
     res.status(200).send(result);
@@ -117,17 +131,15 @@ router.delete("/associados/:id", async (req, res) => {
   }
 });
 
+// === FUNÇÃO DE AJUSTE PARA UPDATE PROFUNDO ===
 function flattenObject(ob) {
   const toReturn = {};
-
   for (const i in ob) {
     if (!Object.prototype.hasOwnProperty.call(ob, i)) continue;
-
     if (typeof ob[i] === "object" && ob[i] !== null && !Array.isArray(ob[i])) {
       const flatObject = flattenObject(ob[i]);
       for (const x in flatObject) {
         if (!Object.prototype.hasOwnProperty.call(flatObject, x)) continue;
-
         toReturn[i + "." + x] = flatObject[x];
       }
     } else {
@@ -137,85 +149,25 @@ function flattenObject(ob) {
   return toReturn;
 }
 
+// === ATUALIZAR ASSOCIADO ===
 router.patch("/associados/update/:id", async (req, res) => {
   const dbConnect = dbo.getDb();
   const query = { _id: new ObjectId(req.params.id) };
-
   delete req.body._id;
 
-  const updates = {
-    $set: flattenObject(req.body),
-  };
-
-  console.log(query);
-  console.log(updates);
+  const updates = { $set: flattenObject(req.body) };
 
   try {
     const result = await dbConnect.collection("associados").updateOne(query, updates);
-
     if (result.matchedCount === 0) {
       return res.status(404).send({ error: "Associado não encontrado" });
     }
 
-    const associadoAtualizado = await dbConnect.collection("associados").findOne(query);
-    res.status(200).send(associadoAtualizado);
-  } catch (err) {
-    console.log(err.message);
-    res.status(500).send({ error: "Erro ao atualizar associado!!", details: err.message });
-  }
-});
-router.patch("/associados/update/:id", async (req, res) => {
-  const dbConnect = dbo.getDb();
-  const query = { _id: new ObjectId(req.params.id) };
-
-  delete req.body._id;
-
-  const updates = {
-    $set: flattenObject(req.body),
-  };
-
-  console.log(query);
-  console.log(updates);
-
-  try {
-    const result = await dbConnect.collection("associados").updateOne(query, updates);
-
-    if (result.matchedCount === 0) {
-      return res.status(404).send({ error: "Associado não encontrado" });
-    }
-
-    const associadoAtualizado = await dbConnect.collection("associados").findOne(query);
-    res.status(200).send(associadoAtualizado);
-  } catch (err) {
-    console.log(err.message);
-    res.status(500).send({ error: "Erro ao atualizar associado!!", details: err.message });
-  }
-});
-
-
-router.post("/associados/update/:id", async (req, res) => {
-  const dbConnect = dbo.getDb();
-  const query = { _id: new ObjectId(req.params.id) };
-
-  console.log(query)
-
-  const updates = {
-    $set: flattenObject(req.body),
-  };
-
-  try {
-    const result = await dbConnect.collection("associados").updateOne(query, updates);
-
-    if (result.matchedCount === 0) {
-      return res.status(404).send({ error: "Associado não encontrado" });
-    }
-
-    const associadoAtualizado = await dbConnect.collection("associados").findOne(query);
-    res.status(200).send(associadoAtualizado);
+    const atualizado = await dbConnect.collection("associados").findOne(query);
+    res.status(200).send(atualizado);
   } catch (err) {
     res.status(500).send({ error: "Erro ao atualizar associado", details: err.message });
   }
 });
-
 
 module.exports = router;

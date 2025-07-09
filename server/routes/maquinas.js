@@ -7,20 +7,16 @@ const router = express.Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// GET todas as máquinas com status atualizado baseado em agendamento do dia
 router.get("/maquinas", async (req, res) => {
   const dbConnect = dbo.getDb();
 
   try {
-    // Pega todas as máquinas
     const maquinas = await dbConnect.collection("maquinas").find({}).toArray();
 
-    // Define início e fim do dia atual para comparação
     const hoje = new Date();
     const inicioDoDia = new Date(hoje.setHours(0, 0, 0, 0));
     const fimDoDia = new Date(hoje.setHours(23, 59, 59, 999));
 
-    // Busca agendamentos que estejam ativos hoje
     const agendamentosHoje = await dbConnect
       .collection("agendamentos")
       .find({
@@ -29,7 +25,6 @@ router.get("/maquinas", async (req, res) => {
       })
       .toArray();
 
-    // Atualiza status da máquina para "em uso" caso esteja agendada hoje
     const maquinasComStatusAtualizado = maquinas.map((maquina) => {
       const estaEmUso = agendamentosHoje.some(
         (ag) => ag.maquinaId.toString() === maquina._id.toString()
@@ -56,7 +51,6 @@ router.get("/maquinas", async (req, res) => {
   }
 });
 
-// GET máquina por id
 router.get("/maquinas/:id", async (req, res) => {
   const dbConnect = dbo.getDb();
   const query = { _id: new ObjectId(req.params.id) };
@@ -81,7 +75,6 @@ router.get("/maquinas/:id", async (req, res) => {
   }
 });
 
-// POST criar nova máquina
 router.post("/maquinas/create", upload.single("foto"), async (req, res) => {
   const dbConnect = dbo.getDb();
 
@@ -116,14 +109,13 @@ router.post("/maquinas/create", upload.single("foto"), async (req, res) => {
   }
 });
 
-// PATCH atualizar máquina por id
 router.patch("/maquinas/update/:id", upload.single("foto"), async (req, res) => {
   const dbConnect = dbo.getDb();
   const query = { _id: new ObjectId(req.params.id) };
 
   try {
     const dados = req.body.dados ? JSON.parse(req.body.dados) : {};
-    delete dados._id; // evita atualização do _id
+    delete dados._id; 
 
     const updateFields = { ...dados };
 
@@ -154,7 +146,6 @@ router.patch("/maquinas/update/:id", upload.single("foto"), async (req, res) => 
   }
 });
 
-// DELETE máquina
 router.delete("/maquinas/:id", async (req, res) => {
   const dbConnect = dbo.getDb();
 

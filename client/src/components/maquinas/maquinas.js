@@ -13,7 +13,7 @@ export default function Maquinas() {
   }, []);
 
     const btnCadastrar = {
-    backgroundColor: "#c7e5cc",
+    backgroundColor: "#daf4d0",
     color: "#000",
     padding: "5px 15px",
     borderRadius: "5px",

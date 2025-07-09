@@ -3,6 +3,8 @@ const cors = require("cors");
 const path = require("path");
 const dbo = require("./db/conn");
 
+
+
 const app = express();
 const port = 5050;
 
@@ -18,6 +20,10 @@ app.use(require("./routes/associados"));
 app.use(require("./routes/operadores"));
 app.use(require("./routes/maquinas"));
 app.use(require("./routes/implementos"));
+app.use(require("./routes/auth"));
+app.use(require("./routes/administrador"));
+app.use(require("./routes/agendamentos"));
+app.use(require("./routes/servicos"));
 
 app.get("/", (req, res) => {
   res.send("Servidor rodando!");

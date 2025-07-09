@@ -27,9 +27,10 @@ const btnExcluir = {
   fontWeight: "500",
 };
 
-export default function ListOperadores() {
+export default function UserListOperador() {
   const [operadores, setOperadores] = useState([]);
   const [busca, setBusca] = useState("");
+  const [paginaAtual, setPaginaAtual] = useState(1);
 
   useEffect(() => {
     buscarOperadores();
@@ -61,32 +62,49 @@ export default function ListOperadores() {
     }
   }
 
-  const operadoresFiltrados = operadores.filter((op) =>
-    op.nome?.toLowerCase().includes(busca.toLowerCase()) ||
-    op.telefone?.toLowerCase().includes(busca.toLowerCase()) ||
-    op.cpf?.toLowerCase().includes(busca.toLowerCase()) ||
-    op.email?.toLowerCase().includes(busca.toLowerCase())
+  const operadoresFiltrados = operadores
+    .filter((op) =>
+      op.nome?.toLowerCase().includes(busca.toLowerCase()) ||
+      op.telefone?.toLowerCase().includes(busca.toLowerCase()) ||
+      op.cpf?.toLowerCase().includes(busca.toLowerCase()) ||
+      op.email?.toLowerCase().includes(busca.toLowerCase())
+    )
+    .reverse();
+
+  const itensPorPagina = 10;
+  const totalPaginas = Math.ceil(operadoresFiltrados.length / itensPorPagina);
+
+  const operadoresPaginados = operadoresFiltrados.slice(
+    (paginaAtual - 1) * itensPorPagina,
+    paginaAtual * itensPorPagina
   );
+
+  const mudarPagina = (novaPagina) => {
+    if (novaPagina >= 1 && novaPagina <= totalPaginas) {
+      setPaginaAtual(novaPagina);
+    }
+  };
 
   return (
     <div style={{ width: "100%", backgroundColor: "#fff", padding: "20px", borderRadius: "5px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <input
-          type="text"
-          placeholder="Pesquisar operador..."
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-          style={{
-            width: "100%",
-            padding: "10px",
-            borderRadius: "5px",
-            border: "1px solid #ccc",
-            outlineColor: "#1A381F",
-            fontSize: "0.85rem",
-            marginBottom: "15px",
-          }}
-        />
-      </div>
+      <input
+        type="text"
+        placeholder="Pesquisar operador..."
+        value={busca}
+        onChange={(e) => {
+          setBusca(e.target.value);
+          setPaginaAtual(1); // reinicia página ao buscar
+        }}
+        style={{
+          width: "100%",
+          padding: "10px",
+          borderRadius: "5px",
+          border: "1px solid #ccc",
+          outlineColor: "#1A381F",
+          fontSize: "0.85rem",
+          marginBottom: "15px",
+        }}
+      />
 
       <table style={{
         width: "100%",
@@ -108,22 +126,24 @@ export default function ListOperadores() {
           </tr>
         </thead>
         <tbody>
-          {operadoresFiltrados.length === 0 ? (
+          {operadoresPaginados.length === 0 ? (
             <tr>
               <td colSpan={6} style={{ padding: "12px 0" }}>
                 Nenhum operador encontrado.
               </td>
             </tr>
           ) : (
-            operadoresFiltrados.map((op, index) => (
+            operadoresPaginados.map((op, index) => (
               <tr key={op._id} style={{ borderBottom: "1px solid #ccc" }}>
-                <td style={{ padding: "12px 8px" }}>{index + 1}</td>
+                <td style={{ padding: "12px 8px" }}>
+                  {(paginaAtual - 1) * itensPorPagina + index + 1}
+                </td>
                 <td style={{ padding: "12px 8px" }}>{op.nome?.toUpperCase()}</td>
                 <td style={{ padding: "12px 8px" }}>{op.telefone}</td>
                 <td style={{ padding: "12px 8px" }}>{op.cpf}</td>
                 <td style={{ padding: "12px 8px" }}>{op.email || "—"}</td>
                 <td style={{ padding: "12px 8px" }}>
-                  <Link to={`/editar-operador/${op._id}`} style={btnEditar}>Editar</Link>
+                  <Link to={`/operadores/edit/${op._id}`} style={btnEditar}>Editar</Link>
                   <button onClick={() => excluirOperador(op._id)} style={btnExcluir}>Excluir</button>
                 </td>
               </tr>
@@ -131,6 +151,52 @@ export default function ListOperadores() {
           )}
         </tbody>
       </table>
+
+      {/* Paginação com setas */}
+      {totalPaginas > 1 && (
+        <div style={{
+          marginTop: "20px",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "20px",
+          fontSize: "0.95rem",
+        }}>
+          <button
+            onClick={() => mudarPagina(paginaAtual - 1)}
+            disabled={paginaAtual === 1}
+            style={{
+              fontSize: "1.4rem",
+              backgroundColor: "transparent",
+              border: "none",
+              cursor: paginaAtual === 1 ? "not-allowed" : "pointer",
+              opacity: paginaAtual === 1 ? 0.4 : 1,
+              color: "#1A381F",
+            }}
+          >
+            ←
+          </button>
+
+          <span style={{ color: "#1A381F" }}>
+            Página {paginaAtual} de {totalPaginas}
+          </span>
+
+          <button
+            onClick={() => mudarPagina(paginaAtual + 1)}
+            disabled={paginaAtual === totalPaginas}
+            style={{
+              fontSize: "1.4rem",
+              backgroundColor: "transparent",
+              border: "none",
+              cursor: paginaAtual === totalPaginas ? "not-allowed" : "pointer",
+              opacity: paginaAtual === totalPaginas ? 0.4 : 1,
+              color: "#1A381F",
+            }}
+          >
+            →
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -101,7 +101,7 @@ export default function CreateMaquina() {
     marca: "",
     modelo: "",
     potencia: "",
-    status: "Disponível", // valor fixo
+    status: "Disponível", 
     n_serie: "",
     observacao: "",
   });
