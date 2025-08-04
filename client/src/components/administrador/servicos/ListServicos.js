@@ -2,15 +2,14 @@ import React, { useEffect, useState } from "react";
 
 const containerStyle = {
   padding: "20px",
-  backgroundColor: "#f5f9f4",
+  backgroundColor: "#fff",
   minHeight: "100vh",
-  maxWidth: "1200px", 
+  maxWidth: "1200px",
   width: "100%",
   marginLeft: "auto",
   marginRight: "auto",
   boxSizing: "border-box",
 };
-
 
 const searchStyle = {
   width: "100%",
@@ -24,7 +23,7 @@ const searchStyle = {
 
 const gridStyle = {
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", // responsivo
+  gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
   gap: "20px",
 };
 
@@ -64,7 +63,10 @@ export default function ListServicos() {
   useEffect(() => {
     fetch(`${API_URL}/servicos`)
       .then((res) => res.json())
-      .then((data) => setServicos(data))
+      .then((data) => {
+        console.log("SERVIÇOS:", data);
+        setServicos(data);
+      })
       .catch((err) => console.error("Erro ao buscar serviços:", err));
   }, []);
 
@@ -96,12 +98,21 @@ export default function ListServicos() {
             onMouseLeave={() => setHoveredId(null)}
           >
             <h3 style={titleStyle}>{servico.nome}</h3>
+
             <p style={textStyle}>
-              <strong>Máquina:</strong> {servico.maquina_tipo}
+              <strong>Máquina:</strong>{" "}
+              {typeof servico.maquina_tipo === "string"
+                ? servico.maquina_tipo
+                : JSON.stringify(servico.maquina_tipo)}
             </p>
+
             <p style={textStyle}>
-              <strong>Implemento:</strong> {servico.implemento_tipo}
+              <strong>Implemento:</strong>{" "}
+              {typeof servico.implemento_tipo === "string"
+                ? servico.implemento_tipo
+                : JSON.stringify(servico.implemento_tipo)}
             </p>
+
             {servico.observacao && (
               <p style={textStyle}>
                 <em>{servico.observacao}</em>

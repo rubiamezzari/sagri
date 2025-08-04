@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ListServicos from "./ListServicos"; 
 
-// Estilos em JS (inline)
 const containerStyle = {
   padding: "20px",
   maxWidth: "1000px",
@@ -37,7 +36,7 @@ export default function Servicos() {
   const [hover, setHover] = useState(false);
 
   const handleCadastrarClick = () => {
-    navigate("/servicos/create"); // essa rota precisa estar configurada no App.js
+    navigate("/servicos/create");
   };
 
   return (
@@ -53,7 +52,7 @@ export default function Servicos() {
         </button>
       </header>
 
-      <ListServicos /> {/* Lista de serviços em quadrados */}
+      <ListServicos /> 
     </div>
   );
 }

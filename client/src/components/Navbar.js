@@ -7,63 +7,80 @@ import Logo from "./Logo.png";
 export default function Navbar() {
     const [dropdownOpen, setDropdownOpen] = useState(false);
 
+    const baseStyle = {
+        fontFamily: '"Inter", sans-serif',
+        fontWeight: 500,
+        textTransform: "uppercase",
+        letterSpacing: "0.5px",
+        fontSize: "13px",
+        color: "#1B4D3E",
+        textDecoration: "none",
+        transition: "color 0.3s ease",
+    };
+
     const linkStyle = ({ isActive }) => ({
-        color: "white",
-        borderBottom: isActive ? "3px solid #81c58d" : "none",
-        paddingBottom: "2px",
-        transition: "border-bottom 0.3s",
+        ...baseStyle,
+        color: isActive ? "#2f755e" : baseStyle.color,
     });
 
     const dropdownToggleStyle = {
-        backgroundColor: "#1A381F",
-        color: "white",
-        borderRadius: "5px",
-        padding: "8px 12px",
-        cursor: "pointer",
-        fontWeight: "normal",
+        ...baseStyle,
+        background: "none",
         border: "none",
-        userSelect: "none",
+        cursor: "pointer",
         display: "flex",
-        alignItems: "center",      
-        lineHeight: "1.5",   
+        alignItems: "center",
+        gap: "4px",
+        padding: "4px 0",
     };
 
     const dropdownMenuStyle = {
-        backgroundColor: dropdownOpen ? "#FFF" : "#daf4d0",
-        borderRadius: "3px",
-        marginTop: "0",
+        backgroundColor: "#fff",
+        borderRadius: "4px",
+        boxShadow: "0 4px 6px rgba(0,0,0,0.08)",
+        marginTop: "5px",
         minWidth: "160px",
+        padding: "6px 0",
     };
 
     const dropdownItemStyle = ({ isActive }) => ({
-        color: isActive ? "#1A381F" : "#000",
-        backgroundColor: isActive ? "#daf4d0" : "transparent",
-        padding: "10px 20px",
-        textDecoration: "none",
-        transition: "background-color 0.3s, color 0.3s",
+        ...baseStyle,
+        padding: "6px 16px",
+        color: isActive ? "#2f755e" : "#444",
+        backgroundColor: isActive ? "#f1f1f1" : "transparent",
+        fontSize: "13px",
+        display: "block",
     });
 
     return (
         <>
             <style>{`
-        .dropdown-toggle::after {
-          display: none !important;
-        }
-        .dropdown-item:hover {
-          background-color: #daf4d0 !important;
-        }
-      `}</style>
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap');
+
+                .dropdown-toggle::after {
+                    display: none !important;
+                }
+
+                .dropdown-item:hover {
+                    background-color: #f5f5f5 !important;
+                    color: #2f755e !important;
+                }
+
+                .navbar-nav .nav-link {
+                    padding: 4px 8px !important;
+                }
+            `}</style>
 
             <nav
                 className="navbar navbar-expand-lg"
                 style={{
-                    backgroundColor: "#1A381F",
-                    padding: "0 20px",
-                    boxShadow: "0 1px 2px rgba(0,0,0,0.4)",
+                    backgroundColor: "#fff",
+                    padding: "2px 20px",
+                    boxShadow: "0 1px 1px rgba(136, 136, 136, 0.2)",
                 }}
             >
                 <NavLink className="navbar-brand" to="/">
-                    <img style={{ width: "55px" }} src={Logo} alt="Logo do IFC" />
+                    <img style={{ width: "50px" }} src={Logo} alt="Logo" />
                 </NavLink>
 
                 <button
@@ -81,7 +98,7 @@ export default function Navbar() {
                 <div className="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul
                         className="navbar-nav me-auto mb-2 mb-lg-0"
-                        style={{ gap: "8px", display: "flex" }}
+                        style={{ gap: "14px", display: "flex", alignItems: "center" }}
                     >
                         <li className="nav-item">
                             <NavLink className="nav-link" to="/" style={linkStyle}>
@@ -106,43 +123,29 @@ export default function Navbar() {
                             onMouseEnter={() => setDropdownOpen(true)}
                             onMouseLeave={() => setDropdownOpen(false)}
                         >
-                            <span
+                            <button
                                 className="nav-link dropdown-toggle"
                                 role="button"
-                                data-bs-toggle="dropdown"
-                                aria-expanded={dropdownOpen}
                                 style={dropdownToggleStyle}
                             >
-                                Equipamentos
-                            </span>
+                                Equipamentos <span style={{ fontSize: "10px" }}>▼</span>
+                            </button>
                             <ul
                                 className={`dropdown-menu${dropdownOpen ? " show" : ""}`}
                                 style={dropdownMenuStyle}
                             >
                                 <li>
-                                    <NavLink
-                                        to="/maquinas"
-                                        className="dropdown-item"
-                                        style={dropdownItemStyle}
-                                    >
+                                    <NavLink to="/maquinas" className="dropdown-item" style={dropdownItemStyle}>
                                         Máquinas
                                     </NavLink>
                                 </li>
                                 <li>
-                                    <NavLink
-                                        to="/implementos"
-                                        className="dropdown-item"
-                                        style={dropdownItemStyle}
-                                    >
+                                    <NavLink to="/implementos" className="dropdown-item" style={dropdownItemStyle}>
                                         Implementos
                                     </NavLink>
                                 </li>
                                 <li>
-                                    <NavLink
-                                        to="/servicos"
-                                        className="dropdown-item"
-                                        style={dropdownItemStyle}
-                                    >
+                                    <NavLink to="/servicos" className="dropdown-item" style={dropdownItemStyle}>
                                         Serviços
                                     </NavLink>
                                 </li>
@@ -154,7 +157,6 @@ export default function Navbar() {
                                 Agendamentos
                             </NavLink>
                         </li>
-
                     </ul>
                 </div>
             </nav>

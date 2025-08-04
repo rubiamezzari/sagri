@@ -4,45 +4,48 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/footer";
 import Home from "./components/Home";
 import Login from "./components/Login";
+
+//usuario associado
+import CreateSolicitacao from "./components/associado/CreateSolicitacao"
 //serviços
-import Servicos from "./components/servicos/Servicos";
-import CreateServico from "./components/servicos/CreateServico";
-import ListServicos from "./components/servicos/ListServicos";
+import Servicos from "./components/administrador/servicos/Servicos";
+import CreateServico from "./components/administrador/servicos/CreateServico";
+import ListServicos from "./components/administrador/servicos/ListServicos";
 
 
 // Associados
-import Associados from "./components/associados/Associados";
-import CreateAssociado from "./components/associados/CreateAssociado";
-import EditAssociado from "./components/associados/EditAssociado";
-import UserListAssociado from "./components/associados/userListAssociado";
-import DetalhesAssociado from "./components/associados/DetalhesAssociado";
+import Associados from "./components/administrador/associados/Associados";
+import CreateAssociado from "./components/administrador/associados/CreateAssociado";
+import EditAssociado from "./components/administrador/associados/EditAssociado";
+import UserListAssociado from "./components/administrador/associados/userListAssociado";
+import DetalhesAssociado from "./components/administrador/associados/DetalhesAssociado";
 
 // Implementos
-import Implementos from "./components/implementos/implementos";
-import CreateImplemento from "./components/implementos/CreateImplemento";
-import EditImplemento from "./components/implementos/EditImplemento";
-import ListImplemento from "./components/implementos/ListImplemento";
-import DetalhesImplemento from "./components/implementos/DetalhesImplemento";
+import Implementos from "./components/administrador/implementos/implementos";
+import CreateImplemento from "./components/administrador/implementos/CreateImplemento";
+import EditImplemento from "./components/administrador/implementos/EditImplemento";
+import ListImplemento from "./components/administrador/implementos/ListImplemento";
+import DetalhesImplemento from "./components/administrador/implementos/DetalhesImplemento";
 
 // Máquinas
-import Maquinas from "./components/maquinas/maquinas";
-import CreateMaquina from "./components/maquinas/CreateMaquina";
-import EditMaquina from "./components/maquinas/EditMaquina";
-import ListMaquinas from "./components/maquinas/ListMaquinas";
-import DetalhesMaquina from "./components/maquinas/DetalhesMaquina";
+import Maquinas from "./components/administrador/maquinas/maquinas";
+import CreateMaquina from "./components/administrador/maquinas/CreateMaquina";
+import EditMaquina from "./components/administrador/maquinas/EditMaquina";
+import ListMaquinas from "./components/administrador/maquinas/ListMaquinas";
+import DetalhesMaquina from "./components/administrador/maquinas/DetalhesMaquina";
 
 // Operadores
-import Operadores from "./components/operadores/operadores";
-import CreateOperador from "./components/operadores/CreateOperador";
-import EditOperador from "./components/operadores/EditOperador";
-import UserListOperador from "./components/operadores/userListOperador";
+import Operadores from "./components/administrador/operadores/operadores";
+import CreateOperador from "./components/administrador/operadores/CreateOperador";
+import EditOperador from "./components/administrador/operadores/EditOperador";
+import UserListOperador from "./components/administrador/operadores/userListOperador";
 
 const App = () => {
   const [token, setToken] = useState(localStorage.getItem("token"));
   const location = useLocation();
 
   useEffect(() => {
-    document.body.style.backgroundColor = "#F1F9F2";
+    document.body.style.backgroundColor = "#Fff";
     document.body.style.fontFamily = "'segoe ui', sans-serif";
     return () => {
       document.body.style.backgroundColor = null;
@@ -72,6 +75,8 @@ const App = () => {
 
           {/* Página inicial */}
           <Route path="/" element={token ? <Home /> : <Navigate to="/login" replace />} />
+
+          <Route path="/solicitações/create" element={token ? <CreateSolicitacao/> : <Navigate to="/login" replace />} />
 
            {/* servicos */}
           <Route path="/servicos" element={token ? <Servicos/> : <Navigate to="/login" replace />} />
