@@ -44,7 +44,7 @@ const inputStyle = {
 };
 
 const inputFocus = {
-  borderColor: "#1A381F",
+  borderColor: "#1B4D3E",
   outline: "none",
 };
 
@@ -65,12 +65,12 @@ const uploadLabelStyle = {
   cursor: "pointer",
   fontSize: "0.85rem",
   fontWeight: "500",
-  color: "#1A381F",
+  color: "#1B4D3E",
   whiteSpace: "nowrap",
 };
 
 const getBtnCadastrarStyle = (hover) => ({
-  backgroundColor: hover ? "#143018" : "#1A381F",
+  backgroundColor: hover ? "#143018" : "#1B4D3E",
   color: "#daf4d0",
   padding: "8px 10px",
   borderRadius: "5px",

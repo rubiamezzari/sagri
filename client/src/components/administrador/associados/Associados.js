@@ -17,7 +17,7 @@ export default function Associados() {
     color: "#000",
     padding: "5px 15px",
     borderRadius: "5px",
-    border: "1px solid #1A381F",
+    border: "1px solid #1B4D3E",
     cursor: "pointer",
     fontWeight: "500",
     textDecoration: "none",

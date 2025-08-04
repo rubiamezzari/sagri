@@ -45,7 +45,7 @@ const App = () => {
   const location = useLocation();
 
   useEffect(() => {
-    document.body.style.backgroundColor = "#Fff";
+    document.body.style.backgroundColor = "#edf6ef";
     document.body.style.fontFamily = "'segoe ui', sans-serif";
     return () => {
       document.body.style.backgroundColor = null;

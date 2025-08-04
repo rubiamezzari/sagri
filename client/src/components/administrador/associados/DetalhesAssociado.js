@@ -43,7 +43,7 @@ const btnBase = {
 
 const btnEditar = {
     ...btnBase,
-    backgroundColor: "#1A381F",
+    backgroundColor: "#1B4D3E",
 };
 
 const btnExcluir = {
@@ -156,7 +156,7 @@ export default function DetalhesAssociado() {
                                 rel="noopener noreferrer"
                                 style={{
                                     backgroundColor: "#c8facc",
-                                    color: "#1A381F",
+                                    color: "#1B4D3E",
                                     padding: "4px 12px",
                                     borderRadius: "4px",
                                     textDecoration: "none",
@@ -181,7 +181,7 @@ export default function DetalhesAssociado() {
                                 rel="noopener noreferrer"
                                 style={{
                                     backgroundColor: "#c8facc",
-                                    color: "#1A381F",
+                                    color: "#1B4D3E",
                                     padding: "4px 12px",
                                     borderRadius: "4px",
                                     textDecoration: "none",

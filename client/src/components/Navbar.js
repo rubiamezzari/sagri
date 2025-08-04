@@ -13,14 +13,14 @@ export default function Navbar() {
         textTransform: "uppercase",
         letterSpacing: "0.5px",
         fontSize: "13px",
-        color: "#1B4D3E",
+        color: "#fff",
         textDecoration: "none",
         transition: "color 0.3s ease",
     };
 
     const linkStyle = ({ isActive }) => ({
         ...baseStyle,
-        color: isActive ? "#2f755e" : baseStyle.color,
+        color: isActive ? "#fff" : baseStyle.color,
     });
 
     const dropdownToggleStyle = {
@@ -74,13 +74,13 @@ export default function Navbar() {
             <nav
                 className="navbar navbar-expand-lg"
                 style={{
-                    backgroundColor: "#fff",
+                    backgroundColor: "#1B4D3E",
                     padding: "2px 20px",
                     boxShadow: "0 1px 1px rgba(136, 136, 136, 0.2)",
                 }}
             >
                 <NavLink className="navbar-brand" to="/">
-                    <img style={{ width: "50px" }} src={Logo} alt="Logo" />
+                    <img style={{ width: "45px" }} src={Logo} alt="Logo" />
                 </NavLink>
 
                 <button

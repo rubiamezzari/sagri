@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
 const btnDetalhes = {
-  backgroundColor: "#1A381F",
+  backgroundColor: "#1B4D3E",
   color: "#fff",
   padding: "5px 12px",
   borderRadius: "4px",
@@ -62,7 +62,7 @@ export default function UserListAssociado({ associados }) {
           padding: "10px",
           borderRadius: "5px",
           border: "1px solid #ccc",
-          outlineColor: "#1A381F",
+          outlineColor: "#1B4D3E",
           fontSize: "0.85rem",
           marginBottom: "15px",
         }}
@@ -148,13 +148,13 @@ export default function UserListAssociado({ associados }) {
               border: "none",
               cursor: paginaAtual === 1 ? "not-allowed" : "pointer",
               opacity: paginaAtual === 1 ? 0.4 : 1,
-              color: "#1A381F",
+              color: "#1B4D3E",
             }}
           >
             ←
           </button>
 
-          <span style={{ color: "#1A381F" }}>
+          <span style={{ color: "#1B4D3E" }}>
             Página {paginaAtual} de {totalPaginas}
           </span>
 
@@ -167,7 +167,7 @@ export default function UserListAssociado({ associados }) {
               border: "none",
               cursor: paginaAtual === totalPaginas ? "not-allowed" : "pointer",
               opacity: paginaAtual === totalPaginas ? 0.4 : 1,
-              color: "#1A381F",
+              color: "#1B4D3E",
             }}
           >
             →
