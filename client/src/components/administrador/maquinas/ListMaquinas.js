@@ -3,17 +3,7 @@ import { Link } from "react-router-dom";
 
 const API_URL = "http://localhost:5050";
 
-const btnDetalhes = {
-  backgroundColor: "#1A381F",
-  color: "#fff",
-  padding: "5px 12px",
-  borderRadius: "4px",
-  fontSize: "0.75rem",
-  border: "none",
-  cursor: "pointer",
-  fontWeight: "500",
-  textDecoration: "none",
-};
+// Removi btnDetalhes porque não vamos usar mais esse estilo
 
 function getStatusStyle(status) {
   const baseStyle = {
@@ -104,7 +94,7 @@ export default function ListMaquinas() {
             <th style={{ padding: "12px 0" }}>Marca</th>
             <th style={{ padding: "12px 0" }}>Modelo</th>
             <th style={{ padding: "12px 0" }}>Status</th>
-            <th style={{ padding: "12px 0" }}></th>
+            <th style={{ padding: "12px 0" }}>Mais detalhes</th> {/* título adicionado */}
           </tr>
         </thead>
         <tbody>
@@ -125,8 +115,19 @@ export default function ListMaquinas() {
                   <span style={getStatusStyle(imp.status)}>{imp.status}</span>
                 </td>
                 <td style={{ textAlign: "center", padding: "12px 8px" }}>
-                  <Link to={`/Maquinas/${imp._id}`} style={btnDetalhes}>
-                    Mais detalhes
+                  <Link
+                    to={`/Maquinas/${imp._id}`}
+                    style={{
+                      fontSize: "1.4rem",
+                      backgroundColor: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "#1A381F",
+                      textDecoration: "none",
+                    }}
+                    aria-label={`Mais detalhes da máquina ${imp.marca} ${imp.modelo}`}
+                  >
+                    →
                   </Link>
                 </td>
               </tr>

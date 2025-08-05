@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 const containerStyle = {
   padding: "20px",
-  backgroundColor: "#fff",
+  backgroundColor: "#edf6ef",
   minHeight: "100vh",
   maxWidth: "1200px",
   width: "100%",
@@ -28,7 +28,7 @@ const gridStyle = {
 };
 
 const cardStyle = {
-  backgroundColor: "#daf4d0",
+  backgroundColor: "#e0ffd5ff",
   borderRadius: "8px",
   padding: "20px",
   boxShadow: "0 1px 3px rgba(25, 58, 30, 0.1)",

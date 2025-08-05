@@ -2,15 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
 const btnDetalhes = {
-  backgroundColor: "#1B4D3E",
-  color: "#fff",
-  padding: "5px 12px",
-  borderRadius: "4px",
-  fontSize: "0.75rem",
-  border: "none",
-  cursor: "pointer",
-  fontWeight: "500",
-  textDecoration: "none",
+  // removi pois não usaremos mais o estilo desse botão
 };
 
 export default function UserListAssociado({ associados }) {
@@ -89,7 +81,7 @@ export default function UserListAssociado({ associados }) {
             <th style={{ padding: "12px 0" }}>Telefone</th>
             <th style={{ padding: "12px 0" }}>CPF</th>
             <th style={{ padding: "12px 0" }}>Bairro</th>
-            <th style={{ padding: "12px 0" }}></th>
+            <th style={{ padding: "12px 0" }}>Mais detalhes</th> {/* título adicionado */}
           </tr>
         </thead>
         <tbody>
@@ -117,8 +109,19 @@ export default function UserListAssociado({ associados }) {
                   {associado.endereco?.bairro?.toUpperCase()}
                 </td>
                 <td style={{ textAlign: "center", padding: "12px 8px" }}>
-                  <Link style={btnDetalhes} to={`/associados/${associado._id}`}>
-                    Mais detalhes
+                  <Link
+                    to={`/associados/${associado._id}`}
+                    style={{
+                      fontSize: "1.4rem",
+                      backgroundColor: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "#1B4D3E",
+                      textDecoration: "none",
+                    }}
+                    aria-label={`Mais detalhes do associado ${associado.nome}`}
+                  >
+                    →
                   </Link>
                 </td>
               </tr>
