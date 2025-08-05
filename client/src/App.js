@@ -5,12 +5,18 @@ import Footer from "./components/footer";
 import Home from "./components/Home";
 import Login from "./components/Login";
 
-//usuario associado
+
 import CreateSolicitacao from "./components/associado/CreateSolicitacao"
+import ListSolicitacao from "./components/administrador/agendamentos/ListSolicitacao"
+import DetalhesSolicitacao from "./components/administrador/agendamentos/ListSolicitacao"
+import Agendamentos from "./components/administrador/agendamentos/Agendamentos"
+
+
 //serviços
 import Servicos from "./components/administrador/servicos/Servicos";
 import CreateServico from "./components/administrador/servicos/CreateServico";
 import ListServicos from "./components/administrador/servicos/ListServicos";
+import DetalhesServico from "./components/administrador/servicos/DetalhesServico";
 
 
 // Associados
@@ -45,7 +51,7 @@ const App = () => {
   const location = useLocation();
 
   useEffect(() => {
-    document.body.style.backgroundColor = "#edf6ef";
+    document.body.style.backgroundColor = "#F0FAF7";
     document.body.style.fontFamily = "'segoe ui', sans-serif";
     return () => {
       document.body.style.backgroundColor = null;
@@ -77,11 +83,16 @@ const App = () => {
           <Route path="/" element={token ? <Home /> : <Navigate to="/login" replace />} />
 
           <Route path="/solicitações/create" element={token ? <CreateSolicitacao/> : <Navigate to="/login" replace />} />
-
+          <Route path="/agendamentos/list" element={token ? <ListSolicitacao/> : <Navigate to="/login" replace />} />
+          <Route path="/agendamentos/:id" element={token ? <DetalhesSolicitacao/> : <Navigate to="/login" replace />} />
+          <Route path="/agendamentos" element={token ? <Agendamentos/> : <Navigate to="/login" replace />} /> 
+           
+           
            {/* servicos */}
           <Route path="/servicos" element={token ? <Servicos/> : <Navigate to="/login" replace />} />
           <Route path="/servicos/create" element={token ? <CreateServico/> : <Navigate to="/login" replace />} />
           <Route path="/servicos/list" element={token ? <ListServicos/> : <Navigate to="/login" replace />} />
+          <Route path="/servicos/:id" element={token ? <DetalhesServico/> : <Navigate to="/login" replace />} />
 
           {/* Associados */}
           <Route path="/associados" element={token ? <Associados /> : <Navigate to="/login" replace />} />

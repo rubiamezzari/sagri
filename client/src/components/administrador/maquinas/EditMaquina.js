@@ -48,7 +48,7 @@ const inputFocus = {
 
 const getBtnSalvarStyle = (hover) => ({
   backgroundColor: hover ? "#143018" : "#1A381F",
-  color: "#daf4d0",
+  color: "#D2EFE6",
   padding: "8px 10px",
   borderRadius: "5px",
   border: "none",
@@ -61,7 +61,7 @@ const getBtnSalvarStyle = (hover) => ({
 });
 
 const getBtnCancelarStyle = (hover) => ({
-  backgroundColor: hover ? "#c2dbac" : "#daf4d0",
+  backgroundColor: hover ? "#c2dbac" : "#D2EFE6",
   color: "#86a479",
   padding: "8px 10px",
   borderRadius: "5px",

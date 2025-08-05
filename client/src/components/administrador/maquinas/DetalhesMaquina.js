@@ -54,10 +54,10 @@ const styles = {
   },
   btnEditar: {
     backgroundColor: "#1A381F",
-    color: "#daf4d0",
+    color: "#D2EFE6",
   },
   btnExcluir: {
-    backgroundColor: "#daf4d0",
+    backgroundColor: "#D2EFE6",
     color: "#143018",
   },
 };

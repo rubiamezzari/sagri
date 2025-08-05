@@ -13,7 +13,7 @@ const colors = {
 
 const layout = {
   page: {
-    backgroundColor: colors.softGreen,
+    backgroundColor: "#F0FAF7",
     padding: "60px 30px",
     maxWidth: "1200px",
     margin: "0 auto",

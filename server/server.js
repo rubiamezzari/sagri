@@ -22,7 +22,6 @@ app.use(require("./routes/maquinas"));
 app.use(require("./routes/implementos"));
 app.use(require("./routes/auth"));
 app.use(require("./routes/administrador"));
-app.use(require("./routes/agendamentos"));
 app.use(require("./routes/servicos"));
 
 app.get("/", (req, res) => {

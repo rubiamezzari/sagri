@@ -17,7 +17,7 @@ const headerStyle = {
 
 const buttonStyle = {
   padding: "6px 20px",
-  backgroundColor: "#daf4d0",
+  backgroundColor: "#D2EFE6",
   color: "#1a381f",
   border: "1.5px solid #1a381f",
   borderRadius: "5px",

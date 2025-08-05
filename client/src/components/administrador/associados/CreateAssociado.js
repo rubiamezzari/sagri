@@ -72,7 +72,7 @@ const uploadLabelStyle = {
 
   const getBtnCadastrarStyle = (hover) => ({
     backgroundColor: hover ? "#143018" : "#1B4D3E",
-    color: "#daf4d0",
+    color: "#D2EFE6",
     padding: "8px 10px",
     borderRadius: "5px",
     border: "none",
@@ -84,7 +84,7 @@ const uploadLabelStyle = {
   });
 
   const getBtnCancelarStyle = (hover) => ({
-    backgroundColor: hover ? "#c7e5cc" : "#daf4d0",
+    backgroundColor: hover ? "#c7e5cc" : "#D2EFE6",
     color: "#143018",
     padding: "8px 10px",
     borderRadius: "5px",

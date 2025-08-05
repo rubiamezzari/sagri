@@ -8,27 +8,65 @@ import {
   startOfWeek,
   endOfWeek,
   eachDayOfInterval,
-  isToday,
 } from "date-fns";
 import ptBR from "date-fns/locale/pt-BR";
 
 const API_URL = "http://localhost:5050";
 
+// Estilos reutilizados do CreateImplemento
 const containerStyle = {
   maxWidth: "800px",
-  margin: "40px auto",
-  padding: "30px 40px",
-  backgroundColor: "#fff",
-  boxShadow: "0 15px 30px rgba(0,0,0,0.05)",
+  margin: "60px auto",
+  backgroundColor: "#ffffff",
+  padding: "40px",
   borderRadius: "5px",
-  fontFamily: "Inter, sans-serif",
+  boxShadow: "0 5px 10px rgba(0,0,0,0.05)",
 };
 
+const calendarHeader = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: "20px",
+};
+
+const monthNavBtn = {
+  background: "none",
+  border: "none",
+  fontSize: "1.5rem",
+  cursor: "pointer",
+  color: "#1a381f",
+};
+
+const grid = {
+  display: "grid",
+  gridTemplateColumns: "repeat(7, 1fr)",
+  gap: "10px",
+};
+
+const dayNameStyle = {
+  fontWeight: "600",
+  fontSize: "0.85rem",
+  color: "#1a381f",
+  textAlign: "center",
+};
+
+const dayStyle = (disponivel) => ({
+  backgroundColor: disponivel ? "#d2efc8" : "#1a381f",
+  color: disponivel ? "#1a381f" : "#ffffff",
+  padding: "18px 0",
+  textAlign: "center",
+  borderRadius: "6px",
+  cursor: disponivel ? "pointer" : "not-allowed",
+  fontWeight: "500",
+  minHeight: "45px",
+});
+
 const sectionTitle = {
-  color: "#1B4D3E",
+  color: "#100f0d",
   marginBottom: "16px",
   fontWeight: "500",
-  fontSize: "1rem",
+  fontSize: "1.2rem",
   borderBottom: "0.5px solid rgb(131, 148, 131)",
   paddingBottom: "6px",
   textAlign: "center",
@@ -56,69 +94,38 @@ const inputStyle = {
 };
 
 const inputFocus = {
-  borderColor: "#1B4D3E",
+  borderColor: "#e8e8e8",
   outline: "none",
 };
 
 const getBtnCadastrarStyle = (hover) => ({
-    backgroundColor: hover ? "#143018" : "#1B4D3E",
-    color: "#D2EFE6",
-    padding: "8px 10px",
-    borderRadius: "5px",
-    border: "none",
-    cursor: "pointer",
-    fontWeight: "500",
-    fontSize: "1.1rem",
-    width: "30%",
-    transition: "background-color 0.3s",
-  });
-
-  const getBtnCancelarStyle = (hover) => ({
-    backgroundColor: hover ? "#c7e5cc" : "#D2EFE6",
-    color: "#143018",
-    padding: "8px 10px",
-    borderRadius: "5px",
-    border: "none",
-    cursor: "pointer",
-    fontWeight: "500",
-    fontSize: "1.1rem",
-    width: "30%",
-    marginLeft: "20px",
-    transition: "background-color 0.3s",
-  });
-
-const calendarHeader = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  marginBottom: "20px",
-};
-
-const grid = {
-  display: "grid",
-  gridTemplateColumns: "repeat(7, 1fr)",
-  gap: "8px",
-};
-
-const dayNameStyle = {
-  fontWeight: "600",
-  fontSize: "0.75rem",
-  color: "#1B4D3E",
-  textAlign: "center",
-};
-
-const dayStyle = (disponivel, isHoje) => ({
-  backgroundColor: disponivel ? "#D2EFE6" : "#d8d8d8",
-  color: disponivel ? "#143018" : "#888",
-  padding: "16px 0",
-  textAlign: "center",
-  borderRadius: "6px",
-  cursor: disponivel ? "pointer" : "not-allowed",
+  backgroundColor: hover ? "#174436ff" : "#1B4D3E",
+  color: "#daf4d0",
+  padding: "8px 10px",
+  borderRadius: "5px",
+  border: "none",
+  cursor: "pointer",
   fontWeight: "500",
-  border: isHoje ? "2px solid #1B4D3E" : "none",
-  transition: "transform 0.1s",
+  fontSize: "1.1rem",
+  width: "30%",
+  transition: "background-color 0.3s",
 });
 
+const getBtnCancelarStyle = (hover) => ({
+  backgroundColor: hover ? "#ccedbf" : "#daf4d0",
+  color: "#1B4D3E",
+  padding: "8px 10px",
+  borderRadius: "5px",
+  border: "none",
+  cursor: "pointer",
+  fontWeight: "500",
+  fontSize: "1.1rem",
+  width: "30%",
+  marginLeft: "20px",
+  transition: "background-color 0.3s",
+});
+
+// --- Componente ---
 export default function CreateSolicitacao() {
   const [etapa, setEtapa] = useState(1);
   const [dataSelecionada, setDataSelecionada] = useState(null);
@@ -130,7 +137,6 @@ export default function CreateSolicitacao() {
     tempo: "",
     observacao: "",
   });
-
   const [hoverCadastrar, setHoverCadastrar] = useState(false);
   const [hoverCancelar, setHoverCancelar] = useState(false);
   const [focusField, setFocusField] = useState(null);
@@ -161,6 +167,7 @@ export default function CreateSolicitacao() {
   }
 
   function enviarFormulario() {
+    // Aqui você pode fazer a chamada para API pra enviar a solicitação real
     alert("Solicitação enviada com sucesso!");
     setForm({
       tipoServico: "",
@@ -168,6 +175,7 @@ export default function CreateSolicitacao() {
       tempo: "",
       observacao: "",
     });
+    setDataSelecionada(null);
     setEtapa(1);
   }
 
@@ -178,44 +186,41 @@ export default function CreateSolicitacao() {
       {etapa === 1 && (
         <>
           <div style={calendarHeader}>
-            <button style={getBtnCancelarStyle(false)} onClick={() => setMesAtual(subMonths(mesAtual, 1))}>
+            <button
+              style={monthNavBtn}
+              onClick={() => setMesAtual(subMonths(mesAtual, 1))}
+            >
               ←
             </button>
-            <h3 style={{ margin: 0, color: "#1B4D3E" }}>
+            <h3 style={{ color: "#1a381f", margin: 0 }}>
               {format(mesAtual, "MMMM yyyy", { locale: ptBR })}
             </h3>
-            <button style={getBtnCancelarStyle(false)} onClick={() => setMesAtual(addMonths(mesAtual, 1))}>
+            <button
+              style={monthNavBtn}
+              onClick={() => setMesAtual(addMonths(mesAtual, 1))}
+            >
               →
             </button>
           </div>
-          <div style={{ textAlign: "center", marginBottom: "10px" }}>
-            <button
-              style={{
-                ...getBtnCadastrarStyle(false),
-                padding: "6px 10px",
-                width: "auto",
-                fontSize: "0.85rem",
-              }}
-              onClick={() => setMesAtual(new Date())}
-            >
-              Hoje
-            </button>
-          </div>
+
           <div style={grid}>
             {nomesDias.map((dia) => (
               <div key={dia} style={dayNameStyle}>
                 {dia}
               </div>
             ))}
-            {dias.map((dia, index) => (
-              <div
-                key={index}
-                style={dayStyle(true, isToday(dia))}
-                onClick={() => selecionarData(dia)}
-              >
-                {dia.getMonth() === mesAtual.getMonth() ? dia.getDate() : ""}
-              </div>
-            ))}
+            {dias.map((dia, index) => {
+              const isMesAtual = dia.getMonth() === mesAtual.getMonth();
+              return (
+                <div
+                  key={index}
+                  style={dayStyle(isMesAtual)}
+                  onClick={() => isMesAtual && selecionarData(dia)}
+                >
+                  {isMesAtual ? dia.getDate() : ""}
+                </div>
+              );
+            })}
           </div>
         </>
       )}
@@ -248,12 +253,18 @@ export default function CreateSolicitacao() {
             onChange={handleInput}
             onFocus={() => setFocusField("tipoServico")}
             onBlur={() => setFocusField(null)}
-            style={focusField === "tipoServico" ? { ...inputStyle, ...inputFocus } : inputStyle}
+            style={
+              focusField === "tipoServico"
+                ? { ...inputStyle, ...inputFocus }
+                : inputStyle
+            }
             required
           >
-            <option value="">Selecione...</option>
+            <option value="" disabled>
+              -- Selecione --
+            </option>
             {servicosDisponiveis.map((s) => (
-              <option key={s._id} value={s.nome}>
+              <option key={s._id} value={s._id}>
                 {s.nome}
               </option>
             ))}
@@ -297,20 +308,24 @@ export default function CreateSolicitacao() {
             }
           />
 
-          <div style={{ marginTop: "30px", display: "flex", justifyContent: "center" }}>
-          <button
-            type="submit"
-            style={getBtnCadastrarStyle(hoverCadastrar)}
-            onMouseEnter={() => setHoverCadastrar(true)}
-            onMouseLeave={() => setHoverCadastrar(false)}
+          <div
+            style={{ display: "flex", justifyContent: "space-between", marginTop: "20px" }}
           >
-            Cadastrar
-          </button>
-          <button
-            type="button"
-            style={getBtnCancelarStyle(hoverCancelar)}
-            onMouseEnter={() => setHoverCancelar(true)}
-            onMouseLeave={() => setHoverCancelar(false)}
+            <button
+              type="button"
+              style={getBtnCancelarStyle(hoverCancelar)}
+              onMouseEnter={() => setHoverCancelar(true)}
+              onMouseLeave={() => setHoverCancelar(false)}
+              onClick={() => setEtapa(1)}
+            >
+              Voltar
+            </button>
+
+            <button
+              type="submit"
+              style={getBtnCadastrarStyle(hoverCadastrar)}
+              onMouseEnter={() => setHoverCadastrar(true)}
+              onMouseLeave={() => setHoverCadastrar(false)}
             >
               Enviar
             </button>

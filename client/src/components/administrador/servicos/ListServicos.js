@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
+import DetalhesServico from "./DetalhesServico";
 
 const containerStyle = {
   padding: "20px",
-  backgroundColor: "#edf6ef",
+  backgroundColor: "#F0FAF7",
   minHeight: "100vh",
   maxWidth: "1200px",
   width: "100%",
@@ -28,11 +29,12 @@ const gridStyle = {
 };
 
 const cardStyle = {
-  backgroundColor: "#e0ffd5ff",
+  backgroundColor: "#fff",
   borderRadius: "8px",
   padding: "20px",
   boxShadow: "0 1px 3px rgba(25, 58, 30, 0.1)",
   transition: "transform 0.1s",
+  cursor: "pointer",
 };
 
 const cardHoverStyle = {
@@ -59,6 +61,8 @@ export default function ListServicos() {
   const [servicos, setServicos] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [hoveredId, setHoveredId] = useState(null);
+  const [servicoSelecionado, setServicoSelecionado] = useState(null);
+  const [mostrarModal, setMostrarModal] = useState(false);
 
   useEffect(() => {
     fetch(`${API_URL}/servicos`)
@@ -73,6 +77,11 @@ export default function ListServicos() {
   const filteredServicos = servicos.filter((s) =>
     s.nome.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const abrirDetalhes = (servico) => {
+    setServicoSelecionado(servico);
+    setMostrarModal(true);
+  };
 
   return (
     <div style={containerStyle}>
@@ -96,6 +105,7 @@ export default function ListServicos() {
             }}
             onMouseEnter={() => setHoveredId(servico._id)}
             onMouseLeave={() => setHoveredId(null)}
+            onClick={() => abrirDetalhes(servico)}
           >
             <h3 style={titleStyle}>{servico.nome}</h3>
 
@@ -121,6 +131,14 @@ export default function ListServicos() {
           </div>
         ))}
       </div>
+
+      {mostrarModal && servicoSelecionado && (
+        <DetalhesServico
+          servico={servicoSelecionado}
+          onClose={() => setMostrarModal(false)}
+          onAtualizar={() => setMostrarModal(false)}
+        />
+      )}
     </div>
   );
 }

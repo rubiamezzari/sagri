@@ -48,7 +48,7 @@ const btnEditar = {
 
 const btnExcluir = {
     ...btnBase,
-    backgroundColor: "#daf4d0",
+    backgroundColor: "#D2EFE6",
     color: "#143018",
 };
 

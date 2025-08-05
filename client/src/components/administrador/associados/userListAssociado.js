@@ -1,10 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
-const btnDetalhes = {
-  // removi pois não usaremos mais o estilo desse botão
-};
-
 export default function UserListAssociado({ associados }) {
   const [busca, setBusca] = useState("");
   const [paginaAtual, setPaginaAtual] = useState(1);
@@ -52,7 +48,7 @@ export default function UserListAssociado({ associados }) {
         style={{
           width: "100%",
           padding: "10px",
-          borderRadius: "5px",
+          borderRadius: "7px",
           border: "1px solid #ccc",
           outlineColor: "#1B4D3E",
           fontSize: "0.85rem",

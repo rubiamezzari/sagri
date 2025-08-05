@@ -12,7 +12,7 @@ export default function Navbar() {
         fontWeight: 500,
         textTransform: "uppercase",
         letterSpacing: "0.5px",
-        fontSize: "13px",
+        fontSize: "12px",
         color: "#fff",
         textDecoration: "none",
         transition: "color 0.3s ease",
@@ -27,6 +27,7 @@ export default function Navbar() {
         ...baseStyle,
         background: "none",
         border: "none",
+        borderRadius: "5px",
         cursor: "pointer",
         display: "flex",
         alignItems: "center",
@@ -36,9 +37,9 @@ export default function Navbar() {
 
     const dropdownMenuStyle = {
         backgroundColor: "#fff",
-        borderRadius: "4px",
+        borderRadius: "8px",
         boxShadow: "0 4px 6px rgba(0,0,0,0.08)",
-        marginTop: "5px",
+        marginTop: "3px",
         minWidth: "160px",
         padding: "6px 0",
     };
