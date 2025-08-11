@@ -1,7 +1,4 @@
-import React from "react";
-import ListSolicitacao from "./ListSolicitacao";
-import { Link } from "react-router-dom";
-import ListServicos from "../servicos/ListServicos";
+import ListSolicitacao from "./ListAgendamentos";
 
 export default function agendamento() {
   

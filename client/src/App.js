@@ -1,24 +1,31 @@
 import React, { useEffect, useState } from "react";
 import { Route, Routes, Navigate, useLocation } from "react-router-dom";
-import Navbar from "./components/Navbar";
+
+// Importa os três navbars
+import NavbarAdmin from "./NavbarAdmin";
+import NavbarAssociado from "./NavbarAssociado";
+import NavbarOperador from "./NavbarOperador";
+
 import Footer from "./components/footer";
 import Home from "./components/Home";
 import Login from "./components/Login";
 
+// Associado
+import CreateSolicitacao from "./components/associado/CreateSolicitacao";
+import ListSolicitacao from "./components/associado/ListSolicitacao";
+import HomeAssociado from "./components/associado/HomeAssociado";
 
-import CreateSolicitacao from "./components/associado/CreateSolicitacao"
-import ListSolicitacao from "./components/administrador/agendamentos/ListSolicitacao"
-import DetalhesSolicitacao from "./components/administrador/agendamentos/ListSolicitacao"
-import Agendamentos from "./components/administrador/agendamentos/Agendamentos"
-import HomeAssociado from "./components/associado/HomeAssociado"
+// Admin
+import ListAgendamentos from "./components/administrador/agendamentos/ListAgendamentos";
+import DetalhesSolicitacao from "./components/administrador/agendamentos/ListAgendamentos";
+import Agendamentos from "./components/administrador/agendamentos/Agendamentos";
+import HomeAdmin from "./components/Home";
 
-
-//serviços
+// Serviços
 import Servicos from "./components/administrador/servicos/Servicos";
 import CreateServico from "./components/administrador/servicos/CreateServico";
 import ListServicos from "./components/administrador/servicos/ListServicos";
 import DetalhesServico from "./components/administrador/servicos/DetalhesServico";
-
 
 // Associados
 import Associados from "./components/administrador/associados/Associados";
@@ -62,9 +69,21 @@ const App = () => {
 
   const isLoginPage = location.pathname === "/login";
 
+  // Função para decidir qual navbar mostrar
+  const renderNavbar = () => {
+    if (isLoginPage) return null;
+    if (location.pathname.startsWith("/associado") || location.pathname.startsWith("/solicitações")) {
+      return <NavbarAssociado />;
+    }
+    if (location.pathname.startsWith("/operadores")) {
+      return <NavbarOperador />;
+    }
+    return <NavbarAdmin />;
+  };
+
   return (
     <div className="d-flex flex-column min-vh-100">
-      {!isLoginPage && <Navbar />}
+      {renderNavbar()}
       <main className={isLoginPage ? "" : "flex-fill container my-4"}>
         <Routes>
           {/* Login */}
@@ -81,20 +100,23 @@ const App = () => {
           />
 
           {/* Página inicial */}
-          <Route path="/" element={token ? <Home /> : <Navigate to="/login" replace />} />
-           <Route path="/home/associado" element={token ? <HomeAssociado /> : <Navigate to="/login" replace />} />
+          <Route path="/" element={token ? <HomeAdmin /> : <Navigate to="/login" replace />} />
 
-          <Route path="/solicitações/create" element={token ? <CreateSolicitacao/> : <Navigate to="/login" replace />} />
-          <Route path="/agendamentos/list" element={token ? <ListSolicitacao/> : <Navigate to="/login" replace />} />
-          <Route path="/agendamentos/:id" element={token ? <DetalhesSolicitacao/> : <Navigate to="/login" replace />} />
-          <Route path="/agendamentos" element={token ? <Agendamentos/> : <Navigate to="/login" replace />} /> 
-           
-           
-           {/* servicos */}
-          <Route path="/servicos" element={token ? <Servicos/> : <Navigate to="/login" replace />} />
-          <Route path="/servicos/create" element={token ? <CreateServico/> : <Navigate to="/login" replace />} />
-          <Route path="/servicos/list" element={token ? <ListServicos/> : <Navigate to="/login" replace />} />
-          <Route path="/servicos/:id" element={token ? <DetalhesServico/> : <Navigate to="/login" replace />} />
+          {/* Associado */}
+          <Route path="/associado" element={token ? <HomeAssociado /> : <Navigate to="/login" replace />} />
+          <Route path="/solicitações/create" element={token ? <CreateSolicitacao /> : <Navigate to="/login" replace />} />
+          <Route path="/solicitações/list" element={token ? <ListSolicitacao /> : <Navigate to="/login" replace />} />
+
+          {/* Agendamentos */}
+          <Route path="/agendamentos/list" element={token ? <ListAgendamentos /> : <Navigate to="/login" replace />} />
+          <Route path="/agendamentos/:id" element={token ? <DetalhesSolicitacao /> : <Navigate to="/login" replace />} />
+          <Route path="/agendamentos" element={token ? <Agendamentos /> : <Navigate to="/login" replace />} />
+
+          {/* Serviços */}
+          <Route path="/servicos" element={token ? <Servicos /> : <Navigate to="/login" replace />} />
+          <Route path="/servicos/create" element={token ? <CreateServico /> : <Navigate to="/login" replace />} />
+          <Route path="/servicos/list" element={token ? <ListServicos /> : <Navigate to="/login" replace />} />
+          <Route path="/servicos/:id" element={token ? <DetalhesServico /> : <Navigate to="/login" replace />} />
 
           {/* Associados */}
           <Route path="/associados" element={token ? <Associados /> : <Navigate to="/login" replace />} />
@@ -132,4 +154,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default App;
