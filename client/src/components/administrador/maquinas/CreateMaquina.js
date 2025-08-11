@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const API_URL = "http://localhost:5050";
+const REACT_APP_YOUR_HOSTNAME = "http://localhost:5050";
 
 const containerStyle = {
   maxWidth: "800px",
@@ -43,35 +43,14 @@ const inputStyle = {
 };
 
 const inputFocus = {
-  borderColor: "#1A381F",
+  borderColor: "#e8e8e8",
   outline: "none",
-};
-
-const uploadContainerStyle = {
-  backgroundColor: "#F1F9F2",
-  borderRadius: "8px",
-  padding: "8px 10px",
-  marginBottom: "10px",
-  display: "flex",
-  alignItems: "center",
-  gap: "12px",
-};
-
-const uploadLabelStyle = {
-  backgroundColor: "#c7e5cc",
-  padding: "6px 12px",
-  borderRadius: "6px",
-  cursor: "pointer",
-  fontSize: "0.85rem",
-  fontWeight: "500",
-  color: "#1A381F",
-  whiteSpace: "nowrap",
 };
 
 const getBtnCadastrarStyle = (hover) => ({
   backgroundColor: hover ? "#143018" : "#1A381F",
   color: "#D2EFE6",
-  padding: "8px 10px",
+  padding: "5px 15px",
   borderRadius: "5px",
   border: "none",
   cursor: "pointer",
@@ -82,9 +61,9 @@ const getBtnCadastrarStyle = (hover) => ({
 });
 
 const getBtnCancelarStyle = (hover) => ({
-  backgroundColor: hover ? "#c7e5cc" : "#D2EFE6",
+  backgroundColor: hover ? "#ccedbf" : "#D2EFE6",
   color: "#143018",
-  padding: "8px 10px",
+  padding: "5px 15px",
   borderRadius: "5px",
   border: "none",
   cursor: "pointer",
@@ -101,14 +80,14 @@ export default function CreateMaquina() {
     marca: "",
     modelo: "",
     potencia: "",
-    status: "Disponível", 
     n_serie: "",
     observacao: "",
   });
 
-  const [focusField, setFocusField] = useState(null);
   const [hoverCadastrar, setHoverCadastrar] = useState(false);
   const [hoverCancelar, setHoverCancelar] = useState(false);
+  const [focusField, setFocusField] = useState(null);
+
   const navigate = useNavigate();
 
   function updateForm(value) {
@@ -118,17 +97,11 @@ export default function CreateMaquina() {
   async function onSubmit(e) {
     e.preventDefault();
 
-    const formData = new FormData();
-    const formCopy = { ...form, foto: null };
-    formData.append("dados", JSON.stringify(formCopy));
-    if (form.foto) {
-      formData.append("foto", form.foto);
-    }
-
     try {
-      const response = await fetch(`${API_URL}/maquinas/create`, {
+      const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/maquinas/create`, {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
       });
 
       if (!response.ok) {
@@ -137,22 +110,22 @@ export default function CreateMaquina() {
         return;
       }
 
-      alert("Máquina cadastrada com sucesso!");
+      const data = await response.json();
+      alert(data.message || "Máquina cadastrada com sucesso!");
 
       setForm({
         tipo: "",
         marca: "",
         modelo: "",
         potencia: "",
-        status: "Disponível",
         n_serie: "",
         observacao: "",
-        foto: null,
       });
 
       navigate("/maquinas", { replace: true });
     } catch (error) {
       alert("Erro na comunicação com o servidor.");
+      console.error(error);
     }
   }
 
@@ -165,29 +138,60 @@ export default function CreateMaquina() {
       <form onSubmit={onSubmit}>
         <h5 style={sectionTitle}>DADOS DA MÁQUINA</h5>
 
-        {["tipo", "marca", "modelo", "potencia", "n_serie"].map((name) => (
-          <div key={name}>
-            <label style={labelStyle} htmlFor={name}>
-              {name.charAt(0).toUpperCase() + name.slice(1).replace("_", " ")}
-            </label>
-            <input
-              id={name}
-              type="text"
-              style={getInputStyle(name)}
-              value={form[name]}
-              onChange={(e) => updateForm({ [name]: e.target.value })}
-              onFocus={() => setFocusField(name)}
-              onBlur={() => setFocusField(null)}
-              required={name === "tipo" || name === "marca"}
-            />
-          </div>
-        ))}
+        <label style={labelStyle}>Tipo</label>
+        <input
+          type="text"
+          style={getInputStyle("tipo")}
+          value={form.tipo}
+          onChange={(e) => updateForm({ tipo: e.target.value })}
+          onFocus={() => setFocusField("tipo")}
+          onBlur={() => setFocusField(null)}
+          required
+        />
 
-        <label style={labelStyle} htmlFor="observacao">
-          Observação
-        </label>
+        <label style={labelStyle}>Marca</label>
+        <input
+          type="text"
+          style={getInputStyle("marca")}
+          value={form.marca}
+          onChange={(e) => updateForm({ marca: e.target.value })}
+          onFocus={() => setFocusField("marca")}
+          onBlur={() => setFocusField(null)}
+          required
+        />
+
+        <label style={labelStyle}>Modelo</label>
+        <input
+          type="text"
+          style={getInputStyle("modelo")}
+          value={form.modelo}
+          onChange={(e) => updateForm({ modelo: e.target.value })}
+          onFocus={() => setFocusField("modelo")}
+          onBlur={() => setFocusField(null)}
+        />
+
+        <label style={labelStyle}>Potência</label>
+        <input
+          type="text"
+          style={getInputStyle("potencia")}
+          value={form.potencia}
+          onChange={(e) => updateForm({ potencia: e.target.value })}
+          onFocus={() => setFocusField("potencia")}
+          onBlur={() => setFocusField(null)}
+        />
+
+        <label style={labelStyle}>Número de Série</label>
+        <input
+          type="text"
+          style={getInputStyle("n_serie")}
+          value={form.n_serie}
+          onChange={(e) => updateForm({ n_serie: e.target.value })}
+          onFocus={() => setFocusField("n_serie")}
+          onBlur={() => setFocusField(null)}
+        />
+
+        <label style={labelStyle}>Observação</label>
         <textarea
-          id="observacao"
           style={{ ...getInputStyle("observacao"), height: "80px" }}
           value={form.observacao}
           onChange={(e) => updateForm({ observacao: e.target.value })}
@@ -195,26 +199,7 @@ export default function CreateMaquina() {
           onBlur={() => setFocusField(null)}
         />
 
-        <label style={labelStyle} htmlFor="foto">
-          Foto da Máquina
-        </label>
-        <div style={uploadContainerStyle}>
-          <label htmlFor="foto" style={uploadLabelStyle}>
-            Selecionar imagem
-          </label>
-          <input
-            id="foto"
-            type="file"
-            accept=".jpg,.jpeg,.png"
-            style={{ display: "none" }}
-            onChange={(e) => updateForm({ foto: e.target.files[0] || null })}
-          />
-          <span style={{ fontSize: "0.85rem", color: "#000" }}>
-            {form.foto ? form.foto.name : "Nenhum arquivo selecionado"}
-          </span>
-        </div>
-
-        <div style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
           <button
             type="submit"
             style={getBtnCadastrarStyle(hoverCadastrar)}
@@ -223,12 +208,13 @@ export default function CreateMaquina() {
           >
             Cadastrar
           </button>
+
           <button
             type="button"
-            onClick={() => navigate("/maquinas")}
             style={getBtnCancelarStyle(hoverCancelar)}
             onMouseEnter={() => setHoverCancelar(true)}
             onMouseLeave={() => setHoverCancelar(false)}
+            onClick={() => navigate("/maquinas")}
           >
             Cancelar
           </button>

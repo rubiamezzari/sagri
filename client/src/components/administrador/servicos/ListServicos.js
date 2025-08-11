@@ -5,11 +5,10 @@ const containerStyle = {
   padding: "20px",
   backgroundColor: "#F0FAF7",
   minHeight: "100vh",
-  maxWidth: "1200px",
+  maxWidth: "1800px",
   width: "100%",
   marginLeft: "auto",
   marginRight: "auto",
-  boxSizing: "border-box",
 };
 
 const searchStyle = {
@@ -68,7 +67,6 @@ export default function ListServicos() {
     fetch(`${API_URL}/servicos`)
       .then((res) => res.json())
       .then((data) => {
-        console.log("SERVIÇOS:", data);
         setServicos(data);
       })
       .catch((err) => console.error("Erro ao buscar serviços:", err));
@@ -82,6 +80,18 @@ export default function ListServicos() {
     setServicoSelecionado(servico);
     setMostrarModal(true);
   };
+
+  function handleDelete(idDeleted) {
+    setServicos((old) => old.filter((s) => s._id !== idDeleted));
+    setMostrarModal(false);
+  }
+
+  function handleUpdate(servicoAtualizado) {
+    setServicos((old) =>
+      old.map((s) => (s._id === servicoAtualizado._id ? servicoAtualizado : s))
+    );
+    setMostrarModal(false);
+  }
 
   return (
     <div style={containerStyle}>
@@ -136,7 +146,8 @@ export default function ListServicos() {
         <DetalhesServico
           servico={servicoSelecionado}
           onClose={() => setMostrarModal(false)}
-          onAtualizar={() => setMostrarModal(false)}
+          onDeleted={handleDelete} 
+          onUpdated={handleUpdate}  
         />
       )}
     </div>

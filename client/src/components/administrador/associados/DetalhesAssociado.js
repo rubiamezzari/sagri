@@ -27,7 +27,7 @@ const tituloNome = {
 };
 
 const btnBase = {
-    padding: "5px 18px",
+    padding: "4px 20px",
     borderRadius: "5px",
     fontWeight: "500",
     fontSize: "1rem",

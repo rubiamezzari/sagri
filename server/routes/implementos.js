@@ -108,6 +108,11 @@ router.patch("/implementos/update/:id", upload.single("foto"), async (req, res) 
   try {
     const dados = req.body.dados ? JSON.parse(req.body.dados) : {};
 
+    // Remove _id se existir para evitar erro no MongoDB
+    if (dados._id) {
+      delete dados._id;
+    }
+
     const updateFields = { ...dados };
 
     if (req.file) {
@@ -136,6 +141,7 @@ router.patch("/implementos/update/:id", upload.single("foto"), async (req, res) 
     res.status(500).json({ error: "Erro ao atualizar implemento", details: err.message });
   }
 });
+
 
 
 router.delete("/implementos/:id", async (req, res) => {

@@ -1,167 +1,111 @@
 import React, { useState } from "react";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import Logo from "./Logo.png";
-
-const containerStyle = {
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  minHeight: "100vh",
-  backgroundColor: "#ffffff",
-};
-
-const cardStyle = {
-  display: "flex",
-  width: "700px",
-  height: "400px",
-  boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-  borderRadius: "8px",
-  overflow: "hidden",
-};
-
-const leftStyle = {
-  backgroundColor: "#1c3d21",
-  width: "40%",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  padding: "20px",
-};
-
-const logoStyle = {
-  maxWidth: "100%",
-  maxHeight: "120px",
-};
-
-const rightStyle = {
-  backgroundColor: "#DFF2E0",
-  width: "60%",
-  padding: "30px 40px",
-  display: "flex",
-  flexDirection: "column",
-  justifyContent: "center",
-};
-
-const titleStyle = {
-  marginBottom: "20px",
-  color: "#1c3d21",
-  fontWeight: "bold",
-  fontSize: "1.4rem",
-};
-
-const labelStyle = {
-  display: "block",
-  marginBottom: "6px",
-  fontWeight: "600",
-  color: "#1c3d21",
-  fontSize: "0.85rem",
-};
-
-const inputStyle = {
-  width: "100%",
-  padding: "10px",
-  borderRadius: "5px",
-  border: "1px solid #ccc",
-  backgroundColor: "#E7F6E8",
-  marginBottom: "15px",
-  fontSize: "1rem",
-};
-
-const getBtnStyle = (hover) => ({
-  width: "100%",
-  padding: "10px",
-  backgroundColor: hover ? "#143018" : "#1A381F",
-  color: "#fff",
-  border: "none",
-  borderRadius: "5px",
-  fontWeight: "600",
-  fontSize: "1rem",
-  cursor: "pointer",
-  transition: "background-color 0.3s",
-});
 
 const API_URL = "http://localhost:5050";
 
-export default function Login({ onLogin }) {
+const Login = () => {
+  const navigate = useNavigate();
   const [cpf, setCpf] = useState("");
   const [senha, setSenha] = useState("");
-  const [error, setError] = useState("");
-  const [hover, setHover] = useState(false);
-  const navigate = useNavigate();
+  const [erro, setErro] = useState("");
 
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+
     try {
-      const response = await fetch(`${API_URL}/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cpf, senha }),
+      const response = await axios.post(`${API_URL}/login`, {
+        cpf,
+        senha,
       });
 
-      const data = await response.json();
+      const { usuario, tipo } = response.data;
 
-      if (!response.ok) {
-        setError(data.mensagem || "Erro no login");
-        return;
+      localStorage.setItem("usuarioLogado", JSON.stringify({ ...usuario, tipo }));
+setErro(tipo)
+if (tipo === "associado") {
+        navigate("/solicitações/create");
       }
-
-      // Aqui salvamos só tipo e id, sem token
-      localStorage.setItem("tipo", data.tipo);
-      localStorage.setItem("id", data.id);
-
-      onLogin(data.tipo);
-
-      if (data.tipo === "administrador") {
-        navigate("/");
-      } else if (data.tipo === "operador") {
-        navigate("/operadores");
+      if (tipo === "administrador") {
+       navigate("/admin");
+      } else if (tipo === "operador") {
+        navigate("/operador");
+      } else if (tipo === "associado") {
+        navigate("/home/associado");
       } else {
-        navigate("/associados");
+        setErro("Tipo de usuário não reconhecido.");
       }
     } catch (error) {
-      setError("Erro na conexão com o servidor");
+      setErro(error.response?.data?.mensagem || "Erro ao fazer login");
     }
   };
 
   return (
     <div style={containerStyle}>
-      <div style={cardStyle}>
-        <div style={leftStyle}>
-          <img src={Logo} alt="Logo" style={logoStyle} />
+      <h2 style={titleStyle}>Login</h2>
+      <form onSubmit={handleLogin}>
+        <div style={formGroupStyle}>
+          <label>CPF:</label>
+          <input
+            type="text"
+            value={cpf}
+            onChange={(e) => setCpf(e.target.value)}
+            required
+            style={inputStyle}
+          />
         </div>
-        <div style={rightStyle}>
-          <h2 style={titleStyle}>Bem vindo!</h2>
-          {error && <p style={{ color: "red" }}>{error}</p>}
-          <form onSubmit={handleSubmit}>
-            <label style={labelStyle}>CPF</label>
-            <input
-              type="text"
-              value={cpf}
-              onChange={(e) => setCpf(e.target.value)}
-              required
-              style={inputStyle}
-            />
-
-            <label style={labelStyle}>SENHA</label>
-            <input
-              type="password"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              required
-              style={inputStyle}
-            />
-
-            <button
-              type="submit"
-              style={getBtnStyle(hover)}
-              onMouseEnter={() => setHover(true)}
-              onMouseLeave={() => setHover(false)}
-            >
-              Entrar
-            </button>
-          </form>
+        <div style={formGroupStyle}>
+          <label>Senha:</label>
+          <input
+            type="password"
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            required
+            style={inputStyle}
+          />
         </div>
-      </div>
+        {erro && <p style={{ color: "red" }}>{erro}</p>}
+        <button type="submit" style={buttonStyle}>Entrar</button>
+      </form>
     </div>
   );
-}
+};
+
+const containerStyle = {
+  maxWidth: "400px",
+  margin: "80px auto",
+  padding: "30px",
+  backgroundColor: "#ffffff",
+  borderRadius: "8px",
+  boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+  textAlign: "center",
+};
+
+const titleStyle = {
+  fontSize: "24px",
+  marginBottom: "20px",
+};
+
+const formGroupStyle = {
+  marginBottom: "15px",
+  textAlign: "left",
+};
+
+const inputStyle = {
+  width: "100%",
+  padding: "10px",
+  borderRadius: "4px",
+  border: "1px solid #ccc",
+};
+
+const buttonStyle = {
+  padding: "10px 20px",
+  border: "none",
+  backgroundColor: "#4CAF50",
+  color: "#fff",
+  fontSize: "16px",
+  borderRadius: "4px",
+  cursor: "pointer",
+};
+
+export default Login;

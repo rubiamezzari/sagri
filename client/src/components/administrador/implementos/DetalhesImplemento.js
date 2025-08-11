@@ -1,7 +1,4 @@
-import React, { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
-
-const REACT_APP_YOUR_HOSTNAME = "http://localhost:5050";
+import React, { useState, useEffect } from "react";
 
 const linha = {
   padding: "6px 0",
@@ -11,9 +8,10 @@ const linha = {
   borderBottom: "1px solid #d5ecd0",
 };
 
-const campoLabel = {
-  minWidth: "160px",
+const campo = {
+  minWidth: "140px",
   fontWeight: "bold",
+  color: "#1a3c1a",
 };
 
 const tituloNome = {
@@ -27,120 +25,290 @@ const tituloNome = {
 };
 
 const btnBase = {
-  padding: "5px 18px",
+  padding: "4px 22px",
   borderRadius: "5px",
-  fontWeight: "500",
+  fontWeight: "600",
   fontSize: "1rem",
   border: "none",
   cursor: "pointer",
   transition: "all 0.3s ease",
   marginRight: "15px",
-  marginTop: "20px",
   color: "#fff",
-  textDecoration: "none",
-  display: "inline-block",
 };
 
 const btnEditar = {
   ...btnBase,
-  backgroundColor: "#1A381F",
+  backgroundColor: "#1B4D3E",
+  color: "#D2EFE6",
+};
+
+const btnSalvar = {
+  ...btnBase,
+  backgroundColor: "#1B4D3E",
+  color: "#D2EFE6",
 };
 
 const btnExcluir = {
   ...btnBase,
-  backgroundColor: "#D2EFE6",
-  color: "#143018",
+  backgroundColor: "#F9DCDE",
+  color: "#721C24",
 };
 
-export default function DetalhesImplemento() {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const [implemento, setImplemento] = useState(null);
+const closeBtnStyle = {
+  position: "absolute",
+  top: "15px",
+  right: "15px",
+  background: "none",
+  border: "none",
+  fontSize: "1.5rem",
+  cursor: "pointer",
+  color: "#555",
+};
+
+const boxStyle = {
+  backgroundColor: "#fff",
+  padding: "30px",
+  borderRadius: "8px",
+  width: "500px",
+  maxWidth: "90%",
+  boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+  fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+  maxHeight: "80vh",
+  overflowY: "auto",
+  position: "relative", 
+};
+
+const modalStyle = {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  width: "100vw",
+  height: "100vh",
+  backgroundColor: "rgba(0, 0, 0, 0.4)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 1000,
+};
+
+const inputStyle = {
+  width: "100%",
+  padding: "8px 10px",
+  marginBottom: "12px",
+  borderRadius: "3px",
+  border: "1px solid #ccc",
+  fontSize: "1rem",
+};
+
+const labelStyle = {
+  fontWeight: "600",
+  fontSize: "0.9rem",
+  marginBottom: "6px",
+  color: "#1a3c1a",
+  display: "block",
+};
+
+export default function DetalhesImplemento({ implemento, onClose, onDeleted }) {
+  const [modoEdicao, setModoEdicao] = useState(false);
+  const [form, setForm] = useState({ ...implemento });
 
   useEffect(() => {
-    async function fetchData() {
-      const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/implementos/${id}`);
-      if (!response.ok) {
-        const message = `Ocorreu um erro: ${response.statusText}`;
-        window.alert(message);
-        return;
-      }
-      const implemento = await response.json();
-      setImplemento(implemento);
-    }
-    fetchData();
-  }, [id]);
+    setForm({ ...implemento });
+    setModoEdicao(false);
+  }, [implemento]);
 
-  async function handleDelete() {
-    const confirmar = window.confirm("Tem certeza que deseja excluir este implemento?");
-    if (!confirmar) return;
+  function handleChange(e) {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  }
 
-    const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/implementos/${id}`, {
-      method: "DELETE",
+  async function handleSalvar() {
+  if (!implemento || !implemento._id) {
+    alert("Erro: ID do implemento não encontrado.");
+    return;
+  }
+
+  const dadosParaEnviar = { ...form };
+  delete dadosParaEnviar._id;
+
+  const formData = new FormData();
+  formData.append("dados", JSON.stringify(dadosParaEnviar));
+
+  try {
+    const response = await fetch(`http://localhost:5050/implementos/update/${implemento._id}`, {
+      method: "PATCH",
+      body: formData,
     });
 
     if (response.ok) {
-      alert("Implemento excluído com sucesso!");
-      navigate("/implementos/list");
+      alert("Implemento atualizado com sucesso!");
+      setModoEdicao(false);
+      onClose();
     } else {
-      alert("Erro ao excluir implemento.");
+      const errorText = await response.text();
+      alert(`Erro ao atualizar implemento. Status: ${response.status} - Mensagem: ${errorText}`);
+    }
+  } catch (error) {
+    alert("Erro de rede ao atualizar implemento: " + error.message);
+  }
+}
+
+
+  async function handleExcluir() {
+    if (!window.confirm("Tem certeza que deseja excluir este implemento?")) return;
+
+    try {
+      const response = await fetch(`http://localhost:5050/implementos/${implemento._id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        alert("Implemento excluído com sucesso!");
+        onDeleted && onDeleted(implemento._id);
+        onClose();
+      } else {
+        alert("Erro ao excluir implemento.");
+      }
+    } catch (error) {
+      alert("Erro ao excluir implemento: " + error.message);
     }
   }
 
-  if (!implemento) {
-    return <div>Carregando...</div>;
-  }
+  const renderContent = () => {
+    if (modoEdicao) {
+      return (
+        <>
+          <label style={labelStyle}>Tipo</label>
+          <input
+            style={inputStyle}
+            name="tipo"
+            value={form.tipo || ""}
+            onChange={handleChange}
+            type="text"
+          />
+          <label style={labelStyle}>Marca</label>
+          <input
+            style={inputStyle}
+            name="marca"
+            value={form.marca || ""}
+            onChange={handleChange}
+            type="text"
+          />
+          <label style={labelStyle}>Modelo</label>
+          <input
+            style={inputStyle}
+            name="modelo"
+            value={form.modelo || ""}
+            onChange={handleChange}
+            type="text"
+          />
+          <label style={labelStyle}>Capacidade</label>
+          <input
+            style={inputStyle}
+            name="capacidade"
+            value={form.capacidade || ""}
+            onChange={handleChange}
+            type="text"
+          />
+          <label style={labelStyle}>Número de Série</label>
+          <input
+            style={inputStyle}
+            name="n_serie"
+            value={form.n_serie || ""}
+            onChange={handleChange}
+            type="text"
+          />
+          <label style={labelStyle}>Status</label>
+          <input
+            style={inputStyle}
+            name="status"
+            value={form.status || ""}
+            onChange={handleChange}
+            type="text"
+          />
+          <label style={labelStyle}>Observação</label>
+          <textarea
+            style={{ ...inputStyle, height: "80px", resize: "vertical" }}
+            name="observacao"
+            value={form.observacao || ""}
+            onChange={handleChange}
+          />
+        </>
+      );
+    } else {
+      return (
+        <>
+          <div style={linha}>
+            <div style={campo}>Número:</div>
+            <div>{implemento.numero || "-"}</div>
+          </div>
+          <div style={linha}>
+            <div style={campo}>Tipo:</div>
+            <div>{implemento.tipo || "-"}</div>
+          </div>
+          <div style={linha}>
+            <div style={campo}>Marca:</div>
+            <div>{implemento.marca || "-"}</div>
+          </div>
+          <div style={linha}>
+            <div style={campo}>Modelo:</div>
+            <div>{implemento.modelo || "-"}</div>
+          </div>
+          <div style={linha}>
+            <div style={campo}>Capacidade:</div>
+            <div>{implemento.capacidade || "-"}</div>
+          </div>
+          <div style={linha}>
+            <div style={campo}>Número de Série:</div>
+            <div>{implemento.n_serie || "-"}</div>
+          </div>
+          <div style={linha}>
+            <div style={campo}>Status:</div>
+            <div>{implemento.status || "-"}</div>
+          </div>
+          {implemento.observacao && (
+            <div style={{ marginTop: "25px" }}>
+              <h4 style={{ fontSize: "1.05rem", color: "#1a3c1a" }}>Observações:</h4>
+              <p>{implemento.observacao}</p>
+            </div>
+          )}
+        </>
+      );
+    }
+  };
 
   return (
-    <div
-      style={{
-        backgroundColor: "#fff",
-        padding: "30px",
-        borderRadius: "5px",
-        maxWidth: "950px",
-        margin: "40px auto",
-        fontFamily: "'Segoe UI', sans-serif",
-        color: "#333",
-      }}
-    >
-      <h2 style={tituloNome}>{`${implemento.tipo} - ${implemento.marca} ${implemento.modelo}`}</h2>
-
-      <div style={linha}>
-        <div style={campoLabel}>ID:</div> #{implemento.numero}
-      </div>
-      <div style={linha}>
-        <div style={campoLabel}>Tipo:</div> {implemento.tipo}
-      </div>
-      <div style={linha}>
-        <div style={campoLabel}>Marca:</div> {implemento.marca}
-      </div>
-      <div style={linha}>
-        <div style={campoLabel}>Modelo:</div> {implemento.modelo}
-      </div>
-      <div style={linha}>
-        <div style={campoLabel}>Capacidade:</div> {implemento.capacidade}
-      </div>
-      <div style={linha}>
-        <div style={campoLabel}>Número de Série:</div> {implemento.n_serie}
-      </div>
-      <div style={linha}>
-        <div style={campoLabel}>Status:</div> {implemento.status}
-      </div>
-
-      {implemento.observacao && (
-        <div style={{ marginTop: "25px" }}>
-          <h4 style={{ fontSize: "1.05rem", color: "#1a3c1a" }}>Observações:</h4>
-          <p>{implemento.observacao}</p>
-        </div>
-      )}
-
-      <div style={{ marginTop: "30px" }}>
-        <Link to={`/implementos/edit/${id}`} style={btnEditar}>
-          Editar
-        </Link>
-        <button onClick={handleDelete} style={btnExcluir}>
-          Excluir
+    <div style={modalStyle} onClick={onClose}>
+      <div style={boxStyle} onClick={(e) => e.stopPropagation()}>
+        <button
+          style={closeBtnStyle}
+          onClick={onClose}
+          type="button"
+          aria-label="Fechar"
+        >
+          &times;
         </button>
+        <h3 style={tituloNome}>
+          {modoEdicao ? "Editar Implemento" : `${implemento.tipo} - ${implemento.marca} ${implemento.modelo}`}
+        </h3>
+
+        {renderContent()}
+
+        <div style={{ marginTop: "30px", textAlign: "right" }}>
+          {modoEdicao ? (
+            <button style={btnSalvar} onClick={handleSalvar} type="button">
+              Salvar
+            </button>
+          ) : (
+            <button style={btnEditar} onClick={() => setModoEdicao(true)} type="button">
+              Editar
+            </button>
+          )}
+
+          <button style={btnExcluir} onClick={handleExcluir} type="button">
+            Excluir
+          </button>
+        </div>
       </div>
     </div>
   );

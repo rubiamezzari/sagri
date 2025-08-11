@@ -1,9 +1,62 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import DetalhesImplemento from "./DetalhesImplemento";
 
 const API_URL = "http://localhost:5050";
 
-// Removi btnDetalhes porque não será mais usado
+const containerStyle = {
+  padding: "20px",
+  backgroundColor: "#F0FAF7",
+  minHeight: "100vh",
+  maxWidth: "1800px",
+  width: "100%",
+  marginLeft: "auto",
+  marginRight: "auto",
+};
+
+const searchStyle = {
+  width: "100%",
+  padding: "10px",
+  borderRadius: "5px",
+  border: "1px solid #ccc",
+  outlineColor: "#1A381F",
+  fontSize: "0.85rem",
+  marginBottom: "15px",
+};
+
+const gridStyle = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+  gap: "20px",
+};
+
+const cardStyle = {
+  position: "relative",
+  backgroundColor: "#fff",
+  borderRadius: "8px",
+  padding: "20px",
+  boxShadow: "0 1px 3px rgba(25, 58, 30, 0.1)",
+  transition: "transform 0.1s",
+  cursor: "pointer",
+};
+
+const cardHoverStyle = {
+  transform: "scale(1.03)",
+  boxShadow: "0 2px 5px rgba(49, 71, 48, 0.19)",
+};
+
+const titleStyle = {
+  marginBottom: "10px",
+  fontWeight: "bold",
+  fontSize: "1.3rem",
+  color: "#1A381F",
+  textTransform: "uppercase",
+};
+
+const textStyle = {
+  marginBottom: "6px",
+  color: "#335533",
+  fontSize: "1rem",
+};
 
 function getStatusStyle(status) {
   const baseStyle = {
@@ -40,6 +93,9 @@ function getStatusStyle(status) {
 export default function ListImplementos() {
   const [implementos, setImplementos] = useState([]);
   const [busca, setBusca] = useState("");
+  const [hoveredId, setHoveredId] = useState(null);
+  const [implementoSelecionado, setImplementoSelecionado] = useState(null);
+  const [mostrarModal, setMostrarModal] = useState(false);
 
   useEffect(() => {
     async function getImplementos() {
@@ -62,79 +118,80 @@ export default function ListImplementos() {
     imp.status?.toLowerCase().includes(busca.toLowerCase())
   );
 
+  const abrirDetalhes = (implemento) => {
+    setImplementoSelecionado(implemento);
+    setMostrarModal(true);
+  };
+
+  function handleDelete(idDeleted) {
+    setImplementos((old) => old.filter((i) => i._id !== idDeleted));
+    setMostrarModal(false);
+  }
+
+  // Função para atualizar um implemento na lista após edição
+  function handleUpdate(implementoAtualizado) {
+    setImplementos((old) =>
+      old.map((i) => (i._id === implementoAtualizado._id ? implementoAtualizado : i))
+    );
+    setMostrarModal(false);
+  }
+
   return (
-    <div style={{ width: "100%", backgroundColor: "#fff", padding: "20px", borderRadius: "5px" }}>
-      <div style={{ marginBottom: "15px" }}>
-        <input
-          type="text"
-          placeholder="Pesquisar implemento..."
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-          style={{
-            width: "100%",
-            padding: "10px",
-            borderRadius: "5px",
-            border: "1px solid #ccc",
-            outlineColor: "#1A381F",
-            fontSize: "0.85rem",
-          }}
-        />
+    <div style={containerStyle}>
+      <input
+        type="text"
+        placeholder="Pesquisar implemento..."
+        value={busca}
+        onChange={(e) => setBusca(e.target.value)}
+        style={searchStyle}
+      />
+
+      {implementosFiltrados.length === 0 && <p>Nenhum implemento encontrado.</p>}
+
+      <div style={gridStyle}>
+        {implementosFiltrados.map((imp) => (
+          <div
+            key={imp._id}
+            style={{
+              ...cardStyle,
+              ...(hoveredId === imp._id ? cardHoverStyle : {}),
+            }}
+            onMouseEnter={() => setHoveredId(imp._id)}
+            onMouseLeave={() => setHoveredId(null)}
+            onClick={() => abrirDetalhes(imp)}
+          >
+            <span
+              style={{
+                ...getStatusStyle(imp.status),
+                position: "absolute",
+                top: 15,
+                right: 15,
+              }}
+            >
+              {imp.status}
+            </span>
+
+            <h3 style={titleStyle}>{imp.tipo}</h3>
+
+            <p style={textStyle}>
+              <strong>Marca:</strong> {imp.marca}
+            </p>
+
+            <p style={textStyle}>
+              <strong>Modelo:</strong> {imp.modelo}
+            </p>
+          </div>
+        ))}
       </div>
 
-      <table style={{
-        width: "100%",
-        borderCollapse: "collapse",
-        fontSize: "0.85rem",
-        textAlign: "center"
-      }}>
-        <thead style={{ backgroundColor: "#f8f8f8", fontWeight: "600" }}>
-          <tr style={{ borderBottom: "1px solid #ccc" }}>
-            <th style={{ padding: "12px 0" }}>#</th>
-            <th style={{ padding: "12px 0" }}>Tipo</th>
-            <th style={{ padding: "12px 0" }}>Marca</th>
-            <th style={{ padding: "12px 0" }}>Modelo</th>
-            <th style={{ padding: "12px 0" }}>Status</th>
-            <th style={{ padding: "12px 0" }}>Mais detalhes</th> {/* título adicionado */}
-          </tr>
-        </thead>
-        <tbody>
-          {implementosFiltrados.length === 0 ? (
-            <tr>
-              <td colSpan={6} style={{ padding: "12px 0" }}>
-                Nenhum implemento encontrado.
-              </td>
-            </tr>
-          ) : (
-            implementosFiltrados.map((imp, idx) => (
-              <tr key={imp._id} style={{ borderBottom: "1px solid #ccc" }}>
-                <td style={{ padding: "12px 8px" }}>{idx + 1}</td>
-                <td style={{ padding: "12px 8px" }}>{imp.tipo?.toUpperCase()}</td>
-                <td style={{ padding: "12px 8px" }}>{imp.marca?.toUpperCase()}</td>
-                <td style={{ padding: "12px 8px" }}>{imp.modelo?.toUpperCase()}</td>
-                <td style={{ padding: "12px 8px" }}>
-                  <span style={getStatusStyle(imp.status)}>{imp.status}</span>
-                </td>
-                <td style={{ textAlign: "center", padding: "12px 8px" }}>
-                  <Link
-                    to={`/implementos/${imp._id}`}
-                    style={{
-                      fontSize: "1.4rem",
-                      backgroundColor: "transparent",
-                      border: "none",
-                      cursor: "pointer",
-                      color: "#1A381F",
-                      textDecoration: "none",
-                    }}
-                    aria-label={`Mais detalhes do implemento ${imp.marca} ${imp.modelo}`}
-                  >
-                    →
-                  </Link>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+      {mostrarModal && implementoSelecionado && (
+        <DetalhesImplemento
+          implemento={implementoSelecionado}
+          onClose={() => setMostrarModal(false)}
+          onDeleted={handleDelete}
+          onUpdated={handleUpdate}  // Passa a função para atualizar a lista após edição
+        />
+      )}
     </div>
   );
 }

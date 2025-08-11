@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 
+const API_URL = "http://localhost:5050";
+
 const linha = {
   padding: "6px 0",
   display: "flex",
@@ -39,25 +41,30 @@ const btnBase = {
 const btnEditar = {
   ...btnBase,
   backgroundColor: "#1B4D3E",
-color: "#D2EFE6"
+  color: "#D2EFE6",
 };
 
 const btnSalvar = {
   ...btnBase,
   backgroundColor: "#1B4D3E",
-  color: "#D2EFE6"
+  color: "#D2EFE6",
 };
 
 const btnExcluir = {
   ...btnBase,
-  backgroundColor: "#F9DCDE",
-  color: "#721C24"
+  backgroundColor: "#D2EFE6",
+  color: "#1B4D3E",
 };
 
-const btnFechar = {
-  ...btnBase,
-  backgroundColor: "#D2EFE6",
-  color:"#1B4D3E",
+const closeBtnStyle = {
+  position: "absolute",
+  top: "15px",
+  right: "15px",
+  background: "none",
+  border: "none",
+  fontSize: "1.5rem",
+  cursor: "pointer",
+  color: "#555",
 };
 
 const boxStyle = {
@@ -68,6 +75,9 @@ const boxStyle = {
   maxWidth: "90%",
   boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
   fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+  maxHeight: "80vh",
+  overflowY: "auto",
+  position: "relative",
 };
 
 const modalStyle = {
@@ -87,7 +97,7 @@ const inputStyle = {
   width: "100%",
   padding: "8px 10px",
   marginBottom: "12px",
-  borderRadius: "5px",
+  borderRadius: "3px",
   border: "1px solid #ccc",
   fontSize: "1rem",
 };
@@ -100,12 +110,13 @@ const labelStyle = {
   display: "block",
 };
 
-export default function DetalhesServicoModal({ servico, onClose, onEditar, onExcluir }) {
+export default function DetalhesServicoModal({ servico, onClose, onDeleted }) {
   const [modoEdicao, setModoEdicao] = useState(false);
   const [form, setForm] = useState({ ...servico });
 
   useEffect(() => {
     setForm({ ...servico });
+    setModoEdicao(false);
   }, [servico]);
 
   function handleChange(e) {
@@ -113,114 +124,141 @@ export default function DetalhesServicoModal({ servico, onClose, onEditar, onExc
     setForm((prev) => ({ ...prev, [name]: value }));
   }
 
-  function handleEditar() {
-    onEditar(form);
-    setModoEdicao(false);
-  }
+  async function handleSalvar() {
+    if (!servico || !servico._id) {
+      alert("Erro: ID do serviço não encontrado.");
+      return;
+    }
 
-  function handleExcluir() {
-    if (window.confirm("Tem certeza que deseja excluir este serviço?")) {
-      onExcluir(servico._id);
+    const dadosParaAtualizar = { ...form };
+    delete dadosParaAtualizar._id;
+
+    try {
+      const response = await fetch(`${API_URL}/servicos/update/${servico._id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dadosParaAtualizar),
+      });
+
+      if (response.ok) {
+        alert("Serviço atualizado com sucesso!");
+        setModoEdicao(false);
+        onClose();
+      } else {
+        const erroTexto = await response.text();
+        alert(`Erro ao atualizar serviço. Status: ${response.status} - ${erroTexto}`);
+      }
+    } catch (error) {
+      alert("Erro ao atualizar serviço: " + error.message);
     }
   }
 
+  async function handleExcluir() {
+    if (!window.confirm("Tem certeza que deseja excluir este serviço?")) return;
+
+    try {
+      const response = await fetch(`${API_URL}/servicos/${servico._id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        alert("Serviço excluído com sucesso!");
+        onDeleted && onDeleted(servico._id);
+        onClose();
+      } else {
+        alert("Erro ao excluir serviço.");
+      }
+    } catch (error) {
+      alert("Erro ao excluir serviço: " + error.message);
+    }
+  }
+
+  const renderContent = () => {
+    if (modoEdicao) {
+      return (
+        <>
+          <label style={labelStyle}>Nome do Serviço</label>
+          <input
+            style={inputStyle}
+            name="nome"
+            value={form.nome || ""}
+            onChange={handleChange}
+            type="text"
+          />
+          <label style={labelStyle}>Máquina</label>
+          <input
+            style={inputStyle}
+            name="maquina_tipo"
+            value={form.maquina_tipo || ""}
+            onChange={handleChange}
+            type="text"
+          />
+          <label style={labelStyle}>Implemento</label>
+          <input
+            style={inputStyle}
+            name="implemento_tipo"
+            value={form.implemento_tipo || ""}
+            onChange={handleChange}
+            type="text"
+          />
+          <label style={labelStyle}>Observação</label>
+          <textarea
+            style={{ ...inputStyle, height: "80px", resize: "vertical" }}
+            name="observacao"
+            value={form.observacao || ""}
+            onChange={handleChange}
+          />
+        </>
+      );
+    } else {
+      return (
+        <>
+          <div style={linha}>
+            <div style={campoLabel}>Nome:</div>
+            <div>{servico.nome || "-"}</div>
+          </div>
+          <div style={linha}>
+            <div style={campoLabel}>Máquina:</div>
+            <div>{servico.maquina_tipo || "-"}</div>
+          </div>
+          <div style={linha}>
+            <div style={campoLabel}>Implemento:</div>
+            <div>{servico.implemento_tipo || "-"}</div>
+          </div>
+          <div style={linha}>
+            <div style={campoLabel}>Observação:</div>
+            <div>{servico.observacao || "-"}</div>
+          </div>
+        </>
+      );
+    }
+  };
+
   return (
-    <div style={modalStyle}>
-      <div style={boxStyle}>
+    <div style={modalStyle} onClick={onClose}>
+      <div style={boxStyle} onClick={(e) => e.stopPropagation()}>
+        <button style={closeBtnStyle} onClick={onClose}>
+          &times;
+        </button>
         <h3 style={tituloNome}>
           {modoEdicao ? "Editar Serviço" : "Detalhes do Serviço"}
         </h3>
 
-        {modoEdicao ? (
-          <>
-            <label style={labelStyle}>Nome do serviço</label>
-            <input
-              type="text"
-              name="nome"
-              value={form.nome}
-              onChange={handleChange}
-              style={inputStyle}
-            />
-
-            <label style={labelStyle}>Máquina</label>
-            <input
-              type="text"
-              name="maquina_tipo"
-              value={form.maquina_tipo}
-              onChange={handleChange}
-              style={inputStyle}
-            />
-
-            <label style={labelStyle}>Implemento</label>
-            <input
-              type="text"
-              name="implemento_tipo"
-              value={form.implemento_tipo}
-              onChange={handleChange}
-              style={inputStyle}
-            />
-
-            <label style={labelStyle}>Observação</label>
-            <textarea
-              name="observacao"
-              value={form.observacao}
-              onChange={handleChange}
-              style={{ ...inputStyle, height: "80px", resize: "vertical" }}
-            />
-          </>
-        ) : (
-          <>
-            <div style={linha}>
-              <div style={campoLabel}>Nome:</div>
-              <div>{servico.nome || "-"}</div>
-            </div>
-            <div style={linha}>
-              <div style={campoLabel}>Máquina:</div>
-              <div>{servico.maquina_tipo || "-"}</div>
-            </div>
-            <div style={linha}>
-              <div style={campoLabel}>Implemento:</div>
-              <div>{servico.implemento_tipo || "-"}</div>
-            </div>
-            <div style={linha}>
-              <div style={campoLabel}>Observação:</div>
-              <div>{servico.observacao || "-"}</div>
-            </div>
-          </>
-        )}
+        {renderContent()}
 
         <div style={{ marginTop: "30px", textAlign: "right" }}>
-          <button
-            style={btnFechar}
-            onClick={onClose}
-            type="button"
-          >
-            Fechar
-          </button>
-
           {modoEdicao ? (
-            <button
-              style={btnSalvar}
-              onClick={handleEditar}
-              type="button"
-            >
+            <button style={btnSalvar} onClick={handleSalvar} type="button">
               Salvar
             </button>
           ) : (
-            <button
-              style={btnEditar}
-              onClick={() => setModoEdicao(true)}
-              type="button"
-            >
+            <button style={btnEditar} onClick={() => setModoEdicao(true)} type="button">
               Editar
             </button>
           )}
-
-          <button
-            style={btnExcluir}
-            onClick={handleExcluir}
-            type="button"
-          >
+          <button style={btnExcluir} onClick={handleExcluir} type="button">
             Excluir
           </button>
         </div>

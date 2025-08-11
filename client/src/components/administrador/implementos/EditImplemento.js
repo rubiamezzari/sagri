@@ -1,205 +1,305 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
 
-const API_URL = "http://localhost:5050";
+const linha = {
+  padding: "6px 0",
+  display: "flex",
+  gap: "8px",
+  fontSize: "0.95rem",
+  borderBottom: "1px solid #d5ecd0",
+};
 
-const containerStyle = {
-  maxWidth: "800px",
-  margin: "40px auto",
-  padding: "30px 40px",
-  backgroundColor: "#ffffff",
+const campoLabel = {
+  minWidth: "140px",
+  fontWeight: "bold",
+  color: "#1a3c1a",
+};
+
+const tituloNome = {
+  fontSize: "1.25rem",
+  fontWeight: "bold",
+  textTransform: "uppercase",
+  paddingBottom: "10px",
+  marginBottom: "20px",
+  borderBottom: "2px solid #a5d6a7",
+  color: "#1a3c1a",
+};
+
+const btnBase = {
+  padding: "4px 22px",
   borderRadius: "5px",
-  textAlign: "center",
-};
-
-const sectionTitle = {
-  color: "#100f0d",
-  marginBottom: "16px",
-  fontWeight: "500",
-  fontSize: "1rem",
-  borderBottom: "0.5px solid rgb(131, 148, 131)",
-  paddingBottom: "6px",
-};
-
-const labelStyle = {
-  display: "block",
-  marginBottom: "6px",
   fontWeight: "600",
-  color: "#100f0d",
-  fontSize: "0.8rem",
-  textAlign: "left",
+  fontSize: "1rem",
+  border: "none",
+  cursor: "pointer",
+  transition: "all 0.3s ease",
+  marginRight: "15px",
+  color: "#fff",
+};
+
+const btnEditar = {
+  ...btnBase,
+  backgroundColor: "#1B4D3E",
+  color: "#D2EFE6",
+};
+
+const btnSalvar = {
+  ...btnBase,
+  backgroundColor: "#1B4D3E",
+  color: "#D2EFE6",
+};
+
+const btnExcluir = {
+  ...btnBase,
+  backgroundColor: "#F9DCDE",
+  color: "#721C24",
+};
+
+const btnFechar = {
+  ...btnBase,
+  backgroundColor: "#D2EFE6",
+  color: "#1B4D3E",
+};
+
+const boxStyle = {
+  backgroundColor: "#fff",
+  padding: "30px",
+  borderRadius: "8px",
+  width: "500px",
+  maxWidth: "90%",
+  boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+  fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+  maxHeight: "80vh",
+  overflowY: "auto",
+};
+
+
+const modalStyle = {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  width: "100vw",
+  height: "100vh",
+  backgroundColor: "rgba(0, 0, 0, 0.4)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 1000,
 };
 
 const inputStyle = {
   width: "100%",
-  padding: "5px 6px",
-  marginBottom: "10px",
-  borderRadius: "5px",
-  border: "0.1px solid #e8e8e8",
+  padding: "8px 10px",
+  marginBottom: "12px",
+  borderRadius: "3px",
+  border: "1px solid #ccc",
   fontSize: "1rem",
-  boxSizing: "border-box",
-  transition: "border-color 0.3s",
-  maxWidth: "100%",
 };
 
-const inputFocus = {
-  borderColor: "#e8e8e8",
-  outline: "none",
+const labelStyle = {
+  fontWeight: "600",
+  fontSize: "0.9rem",
+  marginBottom: "6px",
+  color: "#1a3c1a",
+  display: "block",
 };
 
-const getBtnSalvarStyle = (hover) => ({
-  backgroundColor: hover ? "#143018" : "#1A381F",
-  color: "#D2EFE6",
-  padding: "8px 10px",
-  borderRadius: "5px",
-  border: "none",
-  cursor: "pointer",
-  fontWeight: "500",
-  fontSize: "1.1rem",
-  width: "48%",
-  marginTop: "10px",
-  transition: "background-color 0.3s",
-});
-
-const getBtnCancelarStyle = (hover) => ({
-  backgroundColor: hover ? "#ccedbf" : "#D2EFE6",
-  color: "#143018",
-  padding: "8px 10px",
-  borderRadius: "5px",
-  border: "none",
-  cursor: "pointer",
-  fontWeight: "500",
-  fontSize: "1.1rem",
-  width: "48%",
-  marginTop: "10px",
-  marginLeft: "4%",
-  transition: "background-color 0.3s",
-});
-
-export default function EditImplemento() {
-  const { id } = useParams();
-  const navigate = useNavigate();
-
-  const [form, setForm] = useState({
-    tipo: "",
-    marca: "",
-    modelo: "",
-    capacidade: "",
-    n_serie: "",
-    observacao: "",
-  });
-
-  const [focusField, setFocusField] = useState(null);
-  const [hoverSalvar, setHoverSalvar] = useState(false);
-  const [hoverCancelar, setHoverCancelar] = useState(false);
+export default function DetalhesImplemento({ implemento, onClose, onDeleted }) {
+  const [modoEdicao, setModoEdicao] = useState(false);
+  const [form, setForm] = useState({ ...implemento });
 
   useEffect(() => {
-    fetch(`${API_URL}/implementos/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        const { status, ...semStatus } = data;
-        setForm({
-          tipo: semStatus.tipo || "",
-          marca: semStatus.marca || "",
-          modelo: semStatus.modelo || "",
-          capacidade: semStatus.capacidade || "",
-          n_serie: semStatus.n_serie || "",
-          observacao: semStatus.observacao || "",
-        });
-      })
-      .catch(() => alert("Erro ao carregar dados do implemento"));
-  }, [id]);
+    setForm({ ...implemento });
+    setModoEdicao(false);
+  }, [implemento]);
 
-  function updateForm(value) {
-    setForm((prev) => ({ ...prev, ...value }));
+  function handleChange(e) {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   }
 
-  async function onSubmit(e) {
-    e.preventDefault();
+  async function handleSalvar() {
+    if (!implemento || !implemento._id) {
+        alert("Erro: ID do implemento não encontrado.");
+        return;
+    }
+
+    const dadosParaAtualizar = { ...form };
+    delete dadosParaAtualizar._id;
+
+    const formData = new FormData();
+    formData.append("dados", JSON.stringify(dadosParaAtualizar));
 
     try {
-      const response = await fetch(`${API_URL}/implementos/update/${id}`, {
+      const response = await fetch(`http://localhost:5050/implementos/update/${implemento._id}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
+        body: formData,
       });
 
-      if (!response.ok) {
+      if (response.ok) {
+        alert("Implemento atualizado com sucesso!");
+        setModoEdicao(false);
+        onClose();
+      } else {
         const errorText = await response.text();
-        alert("Erro ao atualizar implemento: " + errorText);
-        return;
+        alert(`Erro ao atualizar implemento. Status: ${response.status} - Mensagem: ${errorText}`);
       }
-
-      const data = await response.json();
-      alert(data.message || "Implemento atualizado com sucesso!");
-      navigate("/implementos", { replace: true });
     } catch (error) {
-      alert("Erro na comunicação com o servidor.");
+      alert("Erro de rede ao atualizar implemento: " + error.message);
     }
   }
 
-  function getInputStyle(name) {
-    return focusField === name ? { ...inputStyle, ...inputFocus } : inputStyle;
+  async function handleExcluir() {
+    if (!window.confirm("Tem certeza que deseja excluir este implemento?")) return;
+
+    try {
+      const response = await fetch(`http://localhost:5050/implementos/${implemento._id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        alert("Implemento excluído com sucesso!");
+        onDeleted && onDeleted(implemento._id);
+        onClose();
+      } else {
+        alert("Erro ao excluir implemento.");
+      }
+    } catch (error) {
+      alert("Erro ao excluir implemento: " + error.message);
+    }
   }
 
-  return (
-    <div style={containerStyle}>
-      <form onSubmit={onSubmit}>
-        <h5 style={sectionTitle}>DADOS DO IMPLEMENTO</h5>
-
-        {[
-          ["tipo", "Tipo"],
-          ["marca", "Marca"],
-          ["modelo", "Modelo"],
-          ["capacidade", "Capacidade"],
-          ["n_serie", "Número de Série"],
-        ].map(([name, label]) => (
-          <div key={name}>
-            <label style={labelStyle}>{label}</label>
-            <input
-              type="text"
-              style={getInputStyle(name)}
-              value={form[name]}
-              onChange={(e) => updateForm({ [name]: e.target.value })}
-              onFocus={() => setFocusField(name)}
-              onBlur={() => setFocusField(null)}
-              required={name === "tipo" || name === "marca"} 
-            />
+  const renderContent = () => {
+    if (modoEdicao) {
+      return (
+        <>
+          <label style={labelStyle}>Tipo</label>
+          <input
+            style={inputStyle}
+            name="tipo"
+            value={form.tipo || ""}
+            onChange={handleChange}
+            type="text"
+          />
+          <label style={labelStyle}>Marca</label>
+          <input
+            style={inputStyle}
+            name="marca"
+            value={form.marca || ""}
+            onChange={handleChange}
+            type="text"
+          />
+          <label style={labelStyle}>Modelo</label>
+          <input
+            style={inputStyle}
+            name="modelo"
+            value={form.modelo || ""}
+            onChange={handleChange}
+            type="text"
+          />
+          <label style={labelStyle}>Capacidade</label>
+          <input
+            style={inputStyle}
+            name="capacidade"
+            value={form.capacidade || ""}
+            onChange={handleChange}
+            type="text"
+          />
+          <label style={labelStyle}>Número de Série</label>
+          <input
+            style={inputStyle}
+            name="n_serie"
+            value={form.n_serie || ""}
+            onChange={handleChange}
+            type="text"
+          />
+          <label style={labelStyle}>Status</label>
+          <input
+            style={inputStyle}
+            name="status"
+            value={form.status || ""}
+            onChange={handleChange}
+            type="text"
+          />
+          <label style={labelStyle}>Observação</label>
+          <textarea
+            style={{ ...inputStyle, height: "80px", resize: "vertical" }}
+            name="observacao"
+            value={form.observacao || ""}
+            onChange={handleChange}
+          />
+        </>
+      );
+    } else {
+      return (
+        <>
+          <div style={linha}>
+            <div style={campoLabel}>Número:</div>
+            <div>{implemento.numero || "-"}</div>
           </div>
-        ))}
+          <div style={linha}>
+            <div style={campoLabel}>Tipo:</div>
+            <div>{implemento.tipo || "-"}</div>
+          </div>
+          <div style={linha}>
+            <div style={campoLabel}>Marca:</div>
+            <div>{implemento.marca || "-"}</div>
+          </div>
+          <div style={linha}>
+            <div style={campoLabel}>Modelo:</div>
+            <div>{implemento.modelo || "-"}</div>
+          </div>
+          <div style={linha}>
+            <div style={campoLabel}>Capacidade:</div>
+            <div>{implemento.capacidade || "-"}</div>
+          </div>
+          <div style={linha}>
+            <div style={campoLabel}>Número de Série:</div>
+            <div>{implemento.n_serie || "-"}</div>
+          </div>
+          <div style={linha}>
+            <div style={campoLabel}>Status:</div>
+            <div>{implemento.status || "-"}</div>
+          </div>
+          {implemento.observacao && (
+            <div style={{ marginTop: "25px" }}>
+              <h4 style={{ fontSize: "1.05rem", color: "#1a3c1a" }}>Observações:</h4>
+              <p>{implemento.observacao}</p>
+            </div>
+          )}
+        </>
+      );
+    }
+  };
 
-        <label style={labelStyle}>Observação</label>
-        <textarea
-          style={{ ...getInputStyle("observacao"), height: "80px" }}
-          value={form.observacao}
-          onChange={(e) => updateForm({ observacao: e.target.value })}
-          onFocus={() => setFocusField("observacao")}
-          onBlur={() => setFocusField(null)}
-        />
+  return (
+    <div style={modalStyle} onClick={onClose}>
+      <div style={boxStyle} onClick={(e) => e.stopPropagation()}>
+        <h3 style={tituloNome}>
+          {modoEdicao ? "Editar Implemento" : `${implemento.tipo} - ${implemento.marca} ${implemento.modelo}`}
+        </h3>
+        
+        {renderContent()}
 
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <button
-            type="submit"
-            style={getBtnSalvarStyle(hoverSalvar)}
-            onMouseEnter={() => setHoverSalvar(true)}
-            onMouseLeave={() => setHoverSalvar(false)}
-          >
-            Salvar
+        <div style={{ marginTop: "30px", textAlign: "right" }}>
+          <button style={btnFechar} onClick={onClose} type="button">
+            Fechar
           </button>
 
-          <button
-            type="button"
-            style={getBtnCancelarStyle(hoverCancelar)}
-            onClick={() => navigate("/implementos")}
-            onMouseEnter={() => setHoverCancelar(true)}
-            onMouseLeave={() => setHoverCancelar(false)}
-          >
-            Cancelar
+          {modoEdicao ? (
+            <button style={btnSalvar} onClick={handleSalvar} type="button">
+              Salvar
+            </button>
+          ) : (
+            <button style={btnEditar} onClick={() => setModoEdicao(true)} type="button">
+              Editar
+            </button>
+          )}
+
+          <button style={btnExcluir} onClick={handleExcluir} type="button">
+            Excluir
           </button>
         </div>
-      </form>
+      </div>
     </div>
   );
 }

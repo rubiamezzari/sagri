@@ -1,167 +1,276 @@
-import React, { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 
-const API_URL = "http://localhost:5050";
-
-const styles = {
-  container: {
-    backgroundColor: "#fff",
-    padding: "30px",
-    borderRadius: "5px",
-    maxWidth: "950px",
-    margin: "40px auto",
-    fontFamily: "'Segoe UI', sans-serif",
-  },
-  titulo: {
-    fontSize: "1.25rem",
-    fontWeight: "bold",
-    textTransform: "uppercase",
-    paddingBottom: "10px",
-    marginBottom: "20px",
-    borderBottom: "2px solid #a5d6a7",
-    color: "#1a3c1a",
-  },
-  linha: {
-    padding: "6px 0",
-    display: "flex",
-    gap: "8px",
-    fontSize: "0.95rem",
-    borderBottom: "1px solid #d5ecd0",
-  },
-  campoLabel: {
-    minWidth: "160px",
-    fontWeight: "bold",
-  },
-  imagem: {
-    marginTop: "20px",
-    maxWidth: "100%",
-    borderRadius: "8px",
-  },
-  botoes: {
-    marginTop: "30px",
-  },
-  btnBase: {
-    padding: "5px 18px",
-    borderRadius: "5px",
-    fontWeight: "500",
-    fontSize: "1rem",
-    border: "none",
-    cursor: "pointer",
-    transition: "all 0.3s ease",
-    marginRight: "15px",
-    textDecoration: "none",
-    display: "inline-block",
-  },
-  btnEditar: {
-    backgroundColor: "#1A381F",
-    color: "#D2EFE6",
-  },
-  btnExcluir: {
-    backgroundColor: "#D2EFE6",
-    color: "#143018",
-  },
+const linha = {
+  padding: "6px 0",
+  display: "flex",
+  gap: "8px",
+  fontSize: "0.95rem",
+  borderBottom: "1px solid #d5ecd0",
 };
 
-const statusStyle = {
-  padding: "4px 10px",
-  borderRadius: "12px",
+const campoLabel = {
+  minWidth: "140px",
   fontWeight: "bold",
-  textTransform: "capitalize",
-  display: "inline-block",
+  color: "#1a3c1a",
 };
 
-function getStatusStyle(status) {
-  switch (status?.toLowerCase()) {
-    case "disponivel":
-      return { ...statusStyle, backgroundColor: "#d0f0c0", color: "#1a3c1a" };
-    case "indisponivel":
-      return { ...statusStyle, backgroundColor: "#f9d5d3", color: "#a83232" };
-    case "manutencao":
-      return { ...statusStyle, backgroundColor: "#fff3cd", color: "#856404" };
-    default:
-      return { ...statusStyle, backgroundColor: "#eee", color: "#333" };
-  }
-}
+const tituloNome = {
+  fontSize: "1.25rem",
+  fontWeight: "bold",
+  textTransform: "uppercase",
+  paddingBottom: "10px",
+  marginBottom: "20px",
+  borderBottom: "2px solid #a5d6a7",
+  color: "#1a3c1a",
+};
 
-export default function DetalhesMaquina() {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const [maquina, setMaquina] = useState(null);
-  const [loading, setLoading] = useState(true);
+const btnBase = {
+  padding: "4px 22px",
+  borderRadius: "5px",
+  fontWeight: "600",
+  fontSize: "1rem",
+  border: "none",
+  cursor: "pointer",
+  transition: "all 0.3s ease",
+  marginRight: "15px",
+  color: "#fff",
+};
+
+const btnEditar = {
+  ...btnBase,
+  backgroundColor: "#1B4D3E",
+  color: "#D2EFE6",
+};
+
+const btnSalvar = {
+  ...btnBase,
+  backgroundColor: "#1B4D3E",
+  color: "#D2EFE6",
+};
+
+const btnExcluir = {
+  ...btnBase,
+  backgroundColor: "#D2EFE6",
+  color: "#1B4D3E",
+};
+
+const closeBtnStyle = {
+  position: "absolute",
+  top: "15px",
+  right: "15px",
+  background: "none",
+  border: "none",
+  fontSize: "1.5rem",
+  cursor: "pointer",
+  color: "#555",
+};
+
+const boxStyle = {
+  backgroundColor: "#fff",
+  padding: "30px",
+  borderRadius: "8px",
+  width: "500px",
+  maxWidth: "90%",
+  boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+  fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+  maxHeight: "80vh",
+  overflowY: "auto",
+  position: "relative",
+};
+
+const modalStyle = {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  width: "100vw",
+  height: "100vh",
+  backgroundColor: "rgba(0, 0, 0, 0.4)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 1000,
+};
+
+const inputStyle = {
+  width: "100%",
+  padding: "8px 10px",
+  marginBottom: "12px",
+  borderRadius: "3px",
+  border: "1px solid #ccc",
+  fontSize: "1rem",
+};
+
+const labelStyle = {
+  fontWeight: "600",
+  fontSize: "0.9rem",
+  marginBottom: "6px",
+  color: "#1a3c1a",
+  display: "block",
+};
+
+export default function DetalhesMaquina({ maquina, onClose, onDeleted, onUpdated }) {
+  const [modoEdicao, setModoEdicao] = useState(false);
+  const [form, setForm] = useState({ ...maquina });
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const res = await fetch(`${API_URL}/maquinas/${id}`);
-        const data = await res.json();
-        setMaquina(data);
-      } catch (err) {
-        alert("Erro ao carregar máquina.");
-      } finally {
-        setLoading(false);
-      }
+    setForm({ ...maquina });
+    setModoEdicao(false);
+  }, [maquina]);
+
+  function handleChange(e) {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  }
+
+  async function handleSalvar() {
+    if (!maquina || !maquina._id) {
+      alert("Erro: ID da máquina não encontrado.");
+      return;
     }
-    fetchData();
-  }, [id]);
 
-  async function handleDelete() {
-    const confirmar = window.confirm("Tem certeza que deseja excluir esta máquina?");
-    if (!confirmar) return;
-
+    // Aqui você faria a chamada real à API para salvar
     try {
-      const res = await fetch(`${API_URL}/maquinas/${id}`, { method: "DELETE" });
-      if (res.ok) {
-        alert("Máquina excluída com sucesso!");
-        navigate("/maquinas/list");
-      } else {
-        alert("Erro ao excluir máquina.");
-      }
+      console.log("Salvar máquina (simulado):", form);
+      alert("Máquina atualizada com sucesso!");
+
+      onUpdated(form);
+      setModoEdicao(false);
+      onClose();
     } catch (error) {
-      alert("Erro na conexão com o servidor.");
+      alert("Erro ao atualizar máquina: " + error.message);
     }
   }
 
-  if (loading || !maquina) return <div style={{ textAlign: "center" }}>Carregando...</div>;
+  async function handleExcluir() {
+    if (!window.confirm("Tem certeza que deseja excluir esta máquina?")) return;
 
-  return (
-    <div style={styles.container}>
-      <h2 style={styles.titulo}>{maquina.tipo || maquina.nome}</h2>
+    try {
+      console.log("Excluir máquina (simulado) id:", maquina._id);
+      alert("Máquina excluída com sucesso!");
 
-      <div style={styles.linha}>
-        <div style={styles.campoLabel}>Marca:</div> {maquina.marca || "N/A"}
-      </div>
-      <div style={styles.linha}>
-        <div style={styles.campoLabel}>Modelo:</div> {maquina.modelo || "N/A"}
-      </div>
-      <div style={styles.linha}>
-        <div style={styles.campoLabel}>Potência:</div> {maquina.potencia || "N/A"}
-      </div>
-      <div style={styles.linha}>
-        <div style={styles.campoLabel}>Número de Série:</div> {maquina.n_serie || "N/A"}
-      </div>
-      <div style={styles.linha}>
-        <div style={styles.campoLabel}>Status:</div>
-        <span style={getStatusStyle(maquina.status)}>{maquina.status || "Não informado"}</span>
-      </div>
-      <div style={styles.linha}>
-        <div style={styles.campoLabel}>Observação:</div>{" "}
-        {maquina.observacao?.trim() ? maquina.observacao : "Sem observações"}
-      </div>
+      onDeleted(maquina._id);
+      onClose();
+    } catch (error) {
+      alert("Erro ao excluir máquina: " + error.message);
+    }
+  }
 
-      {maquina.foto && (
-        <div>
-          <img src={maquina.foto} alt="Foto da máquina" style={styles.imagem} />
-        </div>
-      )}
-
-      <div style={styles.botoes}>
-        <Link to={`/maquinas/edit/${id}`} style={{ ...styles.btnBase, ...styles.btnEditar }}>
-          Editar
-        </Link>
-        <button onClick={handleDelete} style={{ ...styles.btnBase, ...styles.btnExcluir }}>
-          Excluir
+  return createPortal(
+    <div style={modalStyle} onClick={onClose}>
+      <div style={boxStyle} onClick={(e) => e.stopPropagation()}>
+        <button style={closeBtnStyle} onClick={onClose}>
+          &times;
         </button>
+        <h3 style={tituloNome}>
+          {modoEdicao
+            ? "Editar Máquina"
+            : `${maquina.tipo} - ${maquina.marca} ${maquina.modelo}`}
+        </h3>
+
+        {modoEdicao ? (
+          <>
+            <label style={labelStyle}>Tipo</label>
+            <input
+              style={inputStyle}
+              name="tipo"
+              value={form.tipo || ""}
+              onChange={handleChange}
+              type="text"
+            />
+            <label style={labelStyle}>Marca</label>
+            <input
+              style={inputStyle}
+              name="marca"
+              value={form.marca || ""}
+              onChange={handleChange}
+              type="text"
+            />
+            <label style={labelStyle}>Modelo</label>
+            <input
+              style={inputStyle}
+              name="modelo"
+              value={form.modelo || ""}
+              onChange={handleChange}
+              type="text"
+            />
+            <label style={labelStyle}>Potência</label>
+            <input
+              style={inputStyle}
+              name="potencia"
+              value={form.potencia || ""}
+              onChange={handleChange}
+              type="text"
+            />
+            <label style={labelStyle}>Número de Série</label>
+            <input
+              style={inputStyle}
+              name="n_serie"
+              value={form.n_serie || ""}
+              onChange={handleChange}
+              type="text"
+            />
+            <label style={labelStyle}>Observação</label>
+            <textarea
+              style={{ ...inputStyle, height: "80px", resize: "vertical" }}
+              name="observacao"
+              value={form.observacao || ""}
+              onChange={handleChange}
+            />
+          </>
+        ) : (
+          <>
+            <div style={linha}>
+              <div style={campoLabel}>Tipo:</div>
+              <div>{maquina.tipo || "-"}</div>
+            </div>
+            <div style={linha}>
+              <div style={campoLabel}>Marca:</div>
+              <div>{maquina.marca || "-"}</div>
+            </div>
+            <div style={linha}>
+              <div style={campoLabel}>Modelo:</div>
+              <div>{maquina.modelo || "-"}</div>
+            </div>
+            <div style={linha}>
+              <div style={campoLabel}>Potência:</div>
+              <div>{maquina.potencia || "-"}</div>
+            </div>
+            <div style={linha}>
+              <div style={campoLabel}>Número de Série:</div>
+              <div>{maquina.n_serie || "-"}</div>
+            </div>
+            {maquina.observacao?.trim() && (
+              <div style={{ marginTop: "25px" }}>
+                <h4 style={{ fontSize: "1.05rem", color: "#1a3c1a" }}>
+                  Observações:
+                </h4>
+                <p>{maquina.observacao}</p>
+              </div>
+            )}
+          </>
+        )}
+
+        <div style={{ marginTop: "30px", textAlign: "right" }}>
+          {modoEdicao ? (
+            <button style={btnSalvar} onClick={handleSalvar} type="button">
+              Salvar
+            </button>
+          ) : (
+            <button
+              style={btnEditar}
+              onClick={() => setModoEdicao(true)}
+              type="button"
+            >
+              Editar
+            </button>
+          )}
+          <button style={btnExcluir} onClick={handleExcluir} type="button">
+            Excluir
+          </button>
+        </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -4,6 +4,13 @@ import { Link } from "react-router-dom";
 export default function UserListAssociado({ associados }) {
   const [busca, setBusca] = useState("");
   const [paginaAtual, setPaginaAtual] = useState(1);
+  const tipoUsuario = localStorage.getItem("tipoUsuario");
+  const usuarioId = localStorage.getItem("usuarioId");
+  let associadosVisiveis = associados;
+
+  if (tipoUsuario === "associado") {
+    associadosVisiveis = associados.filter(a => a._id === usuarioId);
+  }
 
   const associadosFiltrados = associados
     .filter((associado) =>
@@ -43,7 +50,7 @@ export default function UserListAssociado({ associados }) {
         value={busca}
         onChange={(e) => {
           setBusca(e.target.value);
-          setPaginaAtual(1); // reinicia pra página 1 ao buscar
+          setPaginaAtual(1);
         }}
         style={{
           width: "100%",

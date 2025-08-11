@@ -8,7 +8,16 @@ export default function ListSolicitacao() {
   useEffect(() => {
     async function carregarSolicitacoes() {
       try {
-        const res = await fetch("http://localhost:5050/solicitacoes");
+        const tipoUsuario = localStorage.getItem("tipoUsuario");
+        const usuarioId = localStorage.getItem("usuarioId");
+
+        let url = "http://localhost:5050/solicitacoes";
+
+        if (tipoUsuario === "associado") {
+          url = `http://localhost:5050/solicitacoes/usuario/${usuarioId}`;
+        }
+
+        const res = await fetch(url);
         const data = await res.json();
         setSolicitacoes(data);
       } catch (err) {
@@ -35,7 +44,15 @@ export default function ListSolicitacao() {
         body: JSON.stringify({ status: novoStatus }),
       });
 
-      const res = await fetch("http://localhost:5050/solicitacoes");
+      const tipoUsuario = localStorage.getItem("tipoUsuario");
+      const usuarioId = localStorage.getItem("usuarioId");
+
+      let url = "http://localhost:5050/solicitacoes";
+      if (tipoUsuario === "associado") {
+        url = `http://localhost:5050/solicitacoes/usuario/${usuarioId}`;
+      }
+
+      const res = await fetch(url);
       const data = await res.json();
       setSolicitacoes(data);
       fecharDetalhes();

@@ -93,7 +93,7 @@ export default function UserListOperador() {
         value={busca}
         onChange={(e) => {
           setBusca(e.target.value);
-          setPaginaAtual(1); // reinicia página ao buscar
+          setPaginaAtual(1); 
         }}
         style={{
           width: "100%",

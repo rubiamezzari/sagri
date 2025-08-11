@@ -1,4 +1,3 @@
-// routes/solicitacoes.js
 const express = require("express");
 const { ObjectId } = require("mongodb");
 const dbo = require("../db/conn");
@@ -39,7 +38,7 @@ router.post("/solicitacoes", async (req, res) => {
   }
 });
 
-// GET - Buscar todas solicitações
+// GET - Buscar todas solicitações (admin)
 router.get("/solicitacoes", async (req, res) => {
   try {
     const dbConnect = dbo.getDb();
@@ -53,6 +52,25 @@ router.get("/solicitacoes", async (req, res) => {
   } catch (err) {
     console.error("Erro ao buscar solicitações:", err);
     res.status(500).json({ error: "Erro ao buscar solicitações" });
+  }
+});
+
+// GET - Buscar solicitações por ID do usuário (associado)
+router.get("/solicitacoes/usuario/:usuarioId", async (req, res) => {
+  const { usuarioId } = req.params;
+
+  try {
+    const dbConnect = dbo.getDb();
+    const solicitacoes = await dbConnect
+      .collection("solicitacoes")
+      .find({ usuario_id: new ObjectId(usuarioId) })
+      .sort({ criadoEm: -1 })
+      .toArray();
+
+    res.json(solicitacoes);
+  } catch (err) {
+    console.error("Erro ao buscar solicitações por usuário:", err);
+    res.status(500).json({ error: "Erro ao buscar solicitações do usuário" });
   }
 });
 

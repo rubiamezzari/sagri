@@ -108,7 +108,7 @@ const dayNameStyle = {
 };
 
 const dayStyle = (disponivel, isHoje) => ({
-  backgroundColor: disponivel ? "#D2EFE6" : "#d8d8d8",
+  backgroundColor: disponivel ? "#D2EFE6" : "#f1f1f1",
   color: disponivel ? "#143018" : "#888",
   padding: "16px 0",
   textAlign: "center",
@@ -131,6 +131,8 @@ export default function CreateSolicitacao() {
     observacao: "",
   });
 
+  console.log(localStorage.getItem("usuarioLogado"))
+  
   const [hoverCadastrar, setHoverCadastrar] = useState(false);
   const [hoverCancelar, setHoverCancelar] = useState(false);
   const [focusField, setFocusField] = useState(null);
@@ -188,19 +190,6 @@ export default function CreateSolicitacao() {
               →
             </button>
           </div>
-          <div style={{ textAlign: "center", marginBottom: "10px" }}>
-            <button
-              style={{
-                ...getBtnCadastrarStyle(false),
-                padding: "6px 10px",
-                width: "auto",
-                fontSize: "0.85rem",
-              }}
-              onClick={() => setMesAtual(new Date())}
-            >
-              Hoje
-            </button>
-          </div>
           <div style={grid}>
             {nomesDias.map((dia) => (
               <div key={dia} style={dayNameStyle}>
@@ -233,7 +222,7 @@ export default function CreateSolicitacao() {
             style={{
               marginBottom: "20px",
               color: "#143018",
-              fontWeight: "600",
+              fontWeight: "600", 
               textAlign: "center",
               fontSize: "0.9rem",
             }}
@@ -304,7 +293,7 @@ export default function CreateSolicitacao() {
             onMouseEnter={() => setHoverCadastrar(true)}
             onMouseLeave={() => setHoverCadastrar(false)}
           >
-            Cadastrar
+            Enviar
           </button>
           <button
             type="button"
@@ -312,7 +301,7 @@ export default function CreateSolicitacao() {
             onMouseEnter={() => setHoverCancelar(true)}
             onMouseLeave={() => setHoverCancelar(false)}
             >
-              Enviar
+              Cancelar
             </button>
           </div>
         </form>

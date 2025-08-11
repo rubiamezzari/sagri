@@ -1,12 +1,10 @@
 const express = require("express");
 const { ObjectId } = require("mongodb");
 const dbo = require("../db/conn");
-const multer = require("multer");
 
 const router = express.Router();
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
 
+// GET todas as máquinas com status atualizado conforme agendamentos no dia
 router.get("/maquinas", async (req, res) => {
   const dbConnect = dbo.getDb();
 
@@ -27,11 +25,12 @@ router.get("/maquinas", async (req, res) => {
 
     const maquinasComStatusAtualizado = maquinas.map((maquina) => {
       const estaEmUso = agendamentosHoje.some(
-        (ag) => ag.maquinaId.toString() === maquina._id.toString()
+        (ag) => ag.maquinaId?.toString() === maquina._id.toString()
       );
 
-      const statusAtualizado = estaEmUso ? "em uso" : maquina.status;
+      const statusAtualizado = estaEmUso ? "em uso" : maquina.status || "disponível";
 
+      // Se tiver foto em buffer, converte para base64 (se não tiver foto, fica null)
       let fotoBase64 = null;
       if (maquina.foto && Buffer.isBuffer(maquina.foto)) {
         fotoBase64 = `data:image/jpeg;base64,${maquina.foto.toString("base64")}`;
@@ -44,57 +43,61 @@ router.get("/maquinas", async (req, res) => {
       };
     });
 
-    res.status(200).send(maquinasComStatusAtualizado);
+    res.status(200).json(maquinasComStatusAtualizado);
   } catch (err) {
     console.error("Erro ao buscar máquinas:", err);
-    res.status(500).send({ error: "Erro ao buscar máquinas", details: err.message });
+    res.status(500).json({ error: "Erro ao buscar máquinas", details: err.message });
   }
 });
 
+// GET máquina por ID
 router.get("/maquinas/:id", async (req, res) => {
   const dbConnect = dbo.getDb();
   const query = { _id: new ObjectId(req.params.id) };
 
   try {
-    const result = await dbConnect.collection("maquinas").findOne(query);
+    const maquina = await dbConnect.collection("maquinas").findOne(query);
 
-    if (!result) {
-      return res.status(404).send("Máquina não encontrada");
+    if (!maquina) {
+      return res.status(404).json({ error: "Máquina não encontrada" });
     }
 
-    if (result.foto && Buffer.isBuffer(result.foto)) {
-      result.foto = `data:image/jpeg;base64,${result.foto.toString("base64")}`;
+    if (maquina.foto && Buffer.isBuffer(maquina.foto)) {
+      maquina.foto = `data:image/jpeg;base64,${maquina.foto.toString("base64")}`;
     } else {
-      result.foto = null;
+      maquina.foto = null;
     }
 
-    res.status(200).send(result);
+    res.status(200).json(maquina);
   } catch (err) {
     console.error("Erro ao buscar máquina por ID:", err);
-    res.status(500).send({ error: "Erro ao buscar máquina", details: err.message });
+    res.status(500).json({ error: "Erro ao buscar máquina", details: err.message });
   }
 });
 
-router.post("/maquinas/create", upload.single("foto"), async (req, res) => {
+// POST criar nova máquina (sem multer, só JSON)
+router.post("/maquinas/create", async (req, res) => {
   const dbConnect = dbo.getDb();
 
   try {
-    const dados = JSON.parse(req.body.dados);
+    const dados = req.body;
+
+    if (!dados || !dados.tipo || !dados.marca) {
+      return res.status(400).json({ error: "Campos obrigatórios não preenchidos" });
+    }
 
     const novaMaquina = {
       tipo: dados.tipo,
       marca: dados.marca,
-      modelo: dados.modelo,
-      potencia: dados.potencia,
-      status: dados.status,
-      n_serie: dados.n_serie,
-      observacao: dados.observacao,
-      foto: req.file ? req.file.buffer : null,
+      modelo: dados.modelo || "",
+      potencia: dados.potencia || "",
+      status: "disponível", // default
+      n_serie: dados.n_serie || "",
+      observacao: dados.observacao || "",
+      foto: null, // sem foto porque tirou upload
     };
 
     const result = await dbConnect.collection("maquinas").insertOne(novaMaquina);
-
-    console.log("Máquina cadastrada:", result.insertedId);
 
     res.status(201).json({
       message: "Máquina cadastrada com sucesso!",
@@ -102,28 +105,21 @@ router.post("/maquinas/create", upload.single("foto"), async (req, res) => {
     });
   } catch (err) {
     console.error("Erro ao cadastrar máquina:", err);
-    res.status(500).json({
-      error: "Erro ao adicionar máquina",
-      details: err.message,
-    });
+    res.status(500).json({ error: "Erro ao adicionar máquina", details: err.message });
   }
 });
 
-router.patch("/maquinas/update/:id", upload.single("foto"), async (req, res) => {
+// PATCH atualizar máquina (sem multer)
+router.patch("/maquinas/update/:id", async (req, res) => {
   const dbConnect = dbo.getDb();
   const query = { _id: new ObjectId(req.params.id) };
+  const dados = req.body;
 
   try {
-    const dados = req.body.dados ? JSON.parse(req.body.dados) : {};
-    delete dados._id; 
+    if (dados._id) delete dados._id;
+    if (dados.foto) delete dados.foto; // não atualiza foto pois não tem upload
 
-    const updateFields = { ...dados };
-
-    if (req.file) {
-      updateFields.foto = req.file.buffer;
-    }
-
-    const updates = { $set: updateFields };
+    const updates = { $set: dados };
 
     const result = await dbConnect.collection("maquinas").updateOne(query, updates);
 
@@ -146,6 +142,7 @@ router.patch("/maquinas/update/:id", upload.single("foto"), async (req, res) => 
   }
 });
 
+// DELETE máquina
 router.delete("/maquinas/:id", async (req, res) => {
   const dbConnect = dbo.getDb();
 

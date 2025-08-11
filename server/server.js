@@ -20,7 +20,7 @@ app.use(require("./routes/associados"));
 app.use(require("./routes/operadores"));
 app.use(require("./routes/maquinas"));
 app.use(require("./routes/implementos"));
-app.use(require("./routes/auth"));
+app.use(require("./routes/login"));
 app.use(require("./routes/administrador"));
 app.use(require("./routes/servicos"));
 

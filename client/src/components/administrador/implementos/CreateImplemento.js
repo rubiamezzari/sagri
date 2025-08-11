@@ -50,7 +50,7 @@ const inputFocus = {
 const getBtnCadastrarStyle = (hover) => ({
   backgroundColor: hover ? "#143018" : "#1A381F",
   color: "#D2EFE6",
-  padding: "8px 10px",
+  padding: "5px 15px",
   borderRadius: "5px",
   border: "none",
   cursor: "pointer",
@@ -63,7 +63,7 @@ const getBtnCadastrarStyle = (hover) => ({
 const getBtnCancelarStyle = (hover) => ({
   backgroundColor: hover ? "#ccedbf" : "#D2EFE6",
   color: "#143018",
-  padding: "8px 10px",
+  padding: "5px 15px",
   borderRadius: "5px",
   border: "none",
   cursor: "pointer",

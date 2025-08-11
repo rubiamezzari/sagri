@@ -73,7 +73,7 @@ const uploadLabelStyle = {
   const getBtnCadastrarStyle = (hover) => ({
     backgroundColor: hover ? "#143018" : "#1B4D3E",
     color: "#D2EFE6",
-    padding: "8px 10px",
+    padding: "4px 22px",
     borderRadius: "5px",
     border: "none",
     cursor: "pointer",
@@ -161,71 +161,72 @@ export default function CreateAssociado() {
   }
 
   async function onSubmit(e) {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
- 
-      const telefoneFormatado = formatarTelefone(form.telefone);
-      const cpfFormatado = formatarCPF(form.cpf);
+  try {
+    const telefoneFormatado = formatarTelefone(form.telefone);
+    const cpfFormatado = formatarCPF(form.cpf);
 
-      const formCopy = {
-        ...form,
-        telefone: telefoneFormatado,
-        cpf: cpfFormatado,
-        documentos: { anuidade: null, caf: null },
-      };
+    const formCopy = {
+      ...form,
+      telefone: telefoneFormatado,
+      cpf: cpfFormatado,
+      tipo: "associado", 
+      documentos: { anuidade: null, caf: null },
+    };
 
-      const formData = new FormData();
-      formData.append("dados", JSON.stringify(formCopy));
+    const formData = new FormData();
+    formData.append("dados", JSON.stringify(formCopy));
 
-      if (form.documentos.anuidade) {
-        formData.append("anuidade", form.documentos.anuidade);
-      }
-      if (form.documentos.caf) {
-        formData.append("caf", form.documentos.caf);
-      }
-
-      const response = await fetch(
-        `${REACT_APP_YOUR_HOSTNAME}/associados/create`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      if (!response.ok) {
-        const message = `Erro: ${response.statusText}`;
-        window.alert(message);
-        return;
-      }
-
-      setForm({
-        nome: "",
-        email: "",
-        telefone: "",
-        cpf: "",
-        senha: "",
-        data_associacao: "",
-        endereco: {
-          rua: "",
-          numero: "",
-          complemento: "",
-          bairro: "",
-          cidade: "",
-          uf: "",
-          cep: "",
-        },
-        documentos: {
-          anuidade: null,
-          caf: null,
-        },
-      });
-
-      navigate("/associados");
-    } catch (error) {
-      window.alert("Erro no envio: " + error.message);
+    if (form.documentos.anuidade) {
+      formData.append("anuidade", form.documentos.anuidade);
     }
+    if (form.documentos.caf) {
+      formData.append("caf", form.documentos.caf);
+    }
+
+    const response = await fetch(
+      `${REACT_APP_YOUR_HOSTNAME}/associados/create`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    if (!response.ok) {
+      const message = `Erro: ${response.statusText}`;
+      window.alert(message);
+      return;
+    }
+
+    setForm({
+      nome: "",
+      email: "",
+      telefone: "",
+      cpf: "",
+      senha: "",
+      data_associacao: "",
+      endereco: {
+        rua: "",
+        numero: "",
+        complemento: "",
+        bairro: "",
+        cidade: "",
+        uf: "",
+        cep: "",
+      },
+      documentos: {
+        anuidade: null,
+        caf: null,
+      },
+    });
+
+    navigate("/associados");
+  } catch (error) {
+    window.alert("Erro no envio: " + error.message);
   }
+}
+
 
   function getInputStyle(name) {
     return focusField === name ? { ...inputStyle, ...inputFocus } : inputStyle;

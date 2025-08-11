@@ -10,6 +10,7 @@ import CreateSolicitacao from "./components/associado/CreateSolicitacao"
 import ListSolicitacao from "./components/administrador/agendamentos/ListSolicitacao"
 import DetalhesSolicitacao from "./components/administrador/agendamentos/ListSolicitacao"
 import Agendamentos from "./components/administrador/agendamentos/Agendamentos"
+import HomeAssociado from "./components/associado/HomeAssociado"
 
 
 //serviços
@@ -81,6 +82,7 @@ const App = () => {
 
           {/* Página inicial */}
           <Route path="/" element={token ? <Home /> : <Navigate to="/login" replace />} />
+           <Route path="/home/associado" element={token ? <HomeAssociado /> : <Navigate to="/login" replace />} />
 
           <Route path="/solicitações/create" element={token ? <CreateSolicitacao/> : <Navigate to="/login" replace />} />
           <Route path="/agendamentos/list" element={token ? <ListSolicitacao/> : <Navigate to="/login" replace />} />

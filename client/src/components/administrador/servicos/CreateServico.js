@@ -32,14 +32,13 @@ const labelStyle = {
 
 const inputStyle = {
   width: "100%",
-  padding: "5px 6px",
+  padding: "8px 10px",
   marginBottom: "10px",
   borderRadius: "5px",
-  border: "0.1px solid #e8e8e8",
+  border: "1px solid #e8e8e8",
   fontSize: "1rem",
   boxSizing: "border-box",
   transition: "border-color 0.3s",
-  maxWidth: "100%",
 };
 
 const inputFocus = {
@@ -50,7 +49,7 @@ const inputFocus = {
 const getBtnCadastrarStyle = (hover) => ({
   backgroundColor: hover ? "#143018" : "#1c3d21",
   color: "#D2EFE6",
-  padding: "8px 10px",
+  padding: "5px 15px",
   borderRadius: "5px",
   border: "none",
   cursor: "pointer",
@@ -63,7 +62,7 @@ const getBtnCadastrarStyle = (hover) => ({
 const getBtnCancelarStyle = (hover) => ({
   backgroundColor: hover ? "#ccedbf" : "#D2EFE6",
   color: "#143018",
-  padding: "8px 10px",
+  padding: "5px 15px",
   borderRadius: "5px",
   border: "none",
   cursor: "pointer",
@@ -82,8 +81,6 @@ export default function CreateServico() {
     observacao: "",
   });
 
-  const [maquinas, setMaquinas] = useState([]);
-  const [implementos, setImplementos] = useState([]);
   const [tiposMaquina, setTiposMaquina] = useState([]);
   const [tiposImplemento, setTiposImplemento] = useState([]);
   const [focusField, setFocusField] = useState(null);
@@ -95,7 +92,6 @@ export default function CreateServico() {
     fetch(`${API_URL}/maquinas`)
       .then((res) => res.json())
       .then((data) => {
-        setMaquinas(data);
         const tiposUnicos = [...new Set(data.map((m) => m.tipo))];
         setTiposMaquina(tiposUnicos);
       });
@@ -103,21 +99,10 @@ export default function CreateServico() {
     fetch(`${API_URL}/implementos`)
       .then((res) => res.json())
       .then((data) => {
-        setImplementos(data);
         const tiposUnicos = [...new Set(data.map((i) => i.tipo))];
         setTiposImplemento(tiposUnicos);
       });
   }, []);
-
-  function handleTipoMaquinaChange(e) {
-    const tipo = e.target.value;
-    setForm((prev) => ({ ...prev, maquina_tipo: tipo }));
-  }
-
-  function handleTipoImplementoChange(e) {
-    const tipo = e.target.value;
-    setForm((prev) => ({ ...prev, implemento_tipo: tipo }));
-  }
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -151,39 +136,47 @@ export default function CreateServico() {
       <form onSubmit={onSubmit}>
         <h5 style={sectionTitle}>DADOS DO SERVIÇO</h5>
 
-        <div>
-          <label style={labelStyle} htmlFor="nome">Nome do Serviço</label>
-          <input
-            id="nome"
-            type="text"
-            style={getInputStyle("nome")}
-            value={form.nome}
-            onChange={(e) => setForm({ ...form, nome: e.target.value })}
-            onFocus={() => setFocusField("nome")}
-            onBlur={() => setFocusField(null)}
-            required
-          />
-        </div>
+        <label style={labelStyle} htmlFor="nome">Nome do Serviço</label>
+        <input
+          id="nome"
+          type="text"
+          style={getInputStyle("nome")}
+          value={form.nome}
+          onChange={(e) => setForm({ ...form, nome: e.target.value })}
+          onFocus={() => setFocusField("nome")}
+          onBlur={() => setFocusField(null)}
+          required
+        />
 
-        <div>
-          <label style={labelStyle}>Tipo de Máquina</label>
-          <select onChange={handleTipoMaquinaChange} required style={{ ...inputStyle }}>
-            <option value="">Selecione...</option>
-            {tiposMaquina.map((tipo, index) => (
-              <option key={index} value={tipo}>{tipo}</option>
-            ))}
-          </select>
-        </div>
+        <label style={labelStyle}>Tipo de Máquina</label>
+        <select
+          style={getInputStyle("maquina_tipo")}
+          value={form.maquina_tipo}
+          onChange={(e) => setForm({ ...form, maquina_tipo: e.target.value })}
+          onFocus={() => setFocusField("maquina_tipo")}
+          onBlur={() => setFocusField(null)}
+          required
+        >
+          <option value="">Selecione...</option>
+          {tiposMaquina.map((tipo, index) => (
+            <option key={index} value={tipo}>{tipo}</option>
+          ))}
+        </select>
 
-        <div>
-          <label style={labelStyle}>Tipo de Implemento</label>
-          <select onChange={handleTipoImplementoChange} required style={{ ...inputStyle }}>
-            <option value="">Selecione...</option>
-            {tiposImplemento.map((tipo, index) => (
-              <option key={index} value={tipo}>{tipo}</option>
-            ))}
-          </select>
-        </div>
+        <label style={labelStyle}>Tipo de Implemento</label>
+        <select
+          style={getInputStyle("implemento_tipo")}
+          value={form.implemento_tipo}
+          onChange={(e) => setForm({ ...form, implemento_tipo: e.target.value })}
+          onFocus={() => setFocusField("implemento_tipo")}
+          onBlur={() => setFocusField(null)}
+          required
+        >
+          <option value="">Selecione...</option>
+          {tiposImplemento.map((tipo, index) => (
+            <option key={index} value={tipo}>{tipo}</option>
+          ))}
+        </select>
 
         <label style={labelStyle} htmlFor="observacao">Observação</label>
         <textarea
@@ -202,8 +195,9 @@ export default function CreateServico() {
             onMouseEnter={() => setHoverCadastrar(true)}
             onMouseLeave={() => setHoverCadastrar(false)}
           >
-            Cadastrar
+            Enviar
           </button>
+
           <button
             type="button"
             onClick={() => navigate("/servicos")}
