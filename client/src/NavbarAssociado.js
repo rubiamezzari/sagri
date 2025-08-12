@@ -4,7 +4,7 @@ import "bootstrap/dist/js/bootstrap.bundle";
 import { NavLink } from "react-router-dom";
 import Logo from "./Logo.png";
 
-export default function NavbarAdmin() {
+export default function NavbarAssociado() {
     const [dropdownOpen, setDropdownOpen] = useState(false);
 
     const baseStyle = {
@@ -79,26 +79,18 @@ export default function NavbarAdmin() {
                     className="navbar-toggler"
                     type="button"
                     data-bs-toggle="collapse"
-                    data-bs-target="#navbarAdmin"
+                    data-bs-target="#navbarAssociado"
                 >
                     <span className="navbar-toggler-icon"></span>
                 </button>
 
-                <div className="collapse navbar-collapse" id="navbarAdmin">
+                <div className="collapse navbar-collapse" id="navbarAssociado">
                     <ul
                         className="navbar-nav me-auto mb-2 mb-lg-0"
                         style={{ gap: "14px", display: "flex", alignItems: "center" }}
                     >
                         <li className="nav-item">
                             <NavLink className="nav-link" to="/" style={linkStyle}>Início</NavLink>
-                        </li>
-
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/associados" style={linkStyle}>Associados</NavLink>
-                        </li>
-
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/operadores" style={linkStyle}>Operadores</NavLink>
                         </li>
 
                         <li
@@ -111,20 +103,16 @@ export default function NavbarAdmin() {
                             </button>
                             <ul className={`dropdown-menu${dropdownOpen ? " show" : ""}`} style={dropdownMenuStyle}>
                                 <li>
-                                    <NavLink to="/solicitacoes/list" className="dropdown-item" style={dropdownItemStyle}>
+                                    <NavLink to="/solicitações/list" className="dropdown-item" style={dropdownItemStyle}>
                                         Listar Solicitações
                                     </NavLink>
                                 </li>
                                 <li>
-                                    <NavLink to="/solicitacoes/create" className="dropdown-item" style={dropdownItemStyle}>
+                                    <NavLink to="/solicitações/create" className="dropdown-item" style={dropdownItemStyle}>
                                         Criar Solicitação
                                     </NavLink>
                                 </li>
                             </ul>
-                        </li>
-
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/equipamentos" style={linkStyle}>Equipamentos</NavLink>
                         </li>
                     </ul>
                 </div>

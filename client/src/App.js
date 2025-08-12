@@ -7,7 +7,6 @@ import NavbarAssociado from "./NavbarAssociado";
 import NavbarOperador from "./NavbarOperador";
 
 import Footer from "./components/footer";
-import Home from "./components/Home";
 import Login from "./components/Login";
 
 // Associado
@@ -69,16 +68,38 @@ const App = () => {
 
   const isLoginPage = location.pathname === "/login";
 
-  // Função para decidir qual navbar mostrar
   const renderNavbar = () => {
     if (isLoginPage) return null;
-    if (location.pathname.startsWith("/associado") || location.pathname.startsWith("/solicitações")) {
-      return <NavbarAssociado />;
+
+    const tipoUsuario = localStorage.getItem("tipoUsuario");
+
+    switch (tipoUsuario) {
+      case "administrador":
+        return <NavbarAdmin />;
+      case "associado":
+        return <NavbarAssociado />;
+      case "operador":
+        return <NavbarOperador />;
+      default:
+        return null;
     }
-    if (location.pathname.startsWith("/operadores")) {
-      return <NavbarOperador />;
+  };
+
+  // Seleciona qual home exibir com base no tipo de usuário
+  const HomeSelector = () => {
+    const tipoUsuario = localStorage.getItem("tipoUsuario");
+
+    if (!token) return <Navigate to="/login" replace />;
+
+    switch (tipoUsuario) {
+      case "associado":
+        return <HomeAssociado />;
+      case "operador":
+        return <div>Home Operador</div>; // substitua pelo seu componente
+      case "administrador":
+      default:
+        return <HomeAdmin />;
     }
-    return <NavbarAdmin />;
   };
 
   return (
@@ -99,8 +120,8 @@ const App = () => {
             }
           />
 
-          {/* Página inicial */}
-          <Route path="/" element={token ? <HomeAdmin /> : <Navigate to="/login" replace />} />
+          {/* Página inicial - decide automaticamente */}
+          <Route path="/" element={<HomeSelector />} />
 
           {/* Associado */}
           <Route path="/associado" element={token ? <HomeAssociado /> : <Navigate to="/login" replace />} />

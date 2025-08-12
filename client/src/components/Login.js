@@ -19,21 +19,28 @@ const Login = () => {
         senha,
       });
 
-      const { usuario, tipo } = response.data;
+      const { usuario, tipo, token } = response.data;
 
-      localStorage.setItem("usuarioLogado", JSON.stringify({ ...usuario, tipo }));
-setErro(tipo)
-if (tipo === "associado") {
-        navigate("/solicitações/create");
+      // Salva os dados no localStorage
+      localStorage.setItem("usuarioLogado", JSON.stringify(usuario));
+      localStorage.setItem("tipoUsuario", tipo);
+      if (token) {
+        localStorage.setItem("token", token);
       }
-      if (tipo === "administrador") {
-       navigate("/admin");
-      } else if (tipo === "operador") {
-        navigate("/operador");
-      } else if (tipo === "associado") {
-        navigate("/home/associado");
-      } else {
-        setErro("Tipo de usuário não reconhecido.");
+
+      // Redireciona conforme o tipo de usuário
+      switch (tipo) {
+        case "associado":
+          navigate("/associado");
+          break;
+        case "administrador":
+          navigate("/");
+          break;
+        case "operador":
+          navigate("/operador");
+          break;
+        default:
+          setErro("Tipo de usuário não reconhecido.");
       }
     } catch (error) {
       setErro(error.response?.data?.mensagem || "Erro ao fazer login");
