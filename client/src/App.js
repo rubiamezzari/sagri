@@ -54,7 +54,6 @@ import EditOperador from "./components/administrador/operadores/EditOperador";
 import UserListOperador from "./components/administrador/operadores/userListOperador";
 
 const App = () => {
-  const [token, setToken] = useState(localStorage.getItem("token"));
   const location = useLocation();
 
   useEffect(() => {
@@ -68,13 +67,15 @@ const App = () => {
 
   const isLoginPage = location.pathname === "/login";
 
+  const isLoggedIn = () => !!localStorage.getItem("tipoUsuario");
+
   const renderNavbar = () => {
     if (isLoginPage) return null;
 
     const tipoUsuario = localStorage.getItem("tipoUsuario");
 
     switch (tipoUsuario) {
-      case "administrador":
+      case "admin":
         return <NavbarAdmin />;
       case "associado":
         return <NavbarAssociado />;
@@ -85,20 +86,20 @@ const App = () => {
     }
   };
 
-  // Seleciona qual home exibir com base no tipo de usuário
   const HomeSelector = () => {
     const tipoUsuario = localStorage.getItem("tipoUsuario");
 
-    if (!token) return <Navigate to="/login" replace />;
+    if (!tipoUsuario) return <Navigate to="/login" replace />;
 
     switch (tipoUsuario) {
       case "associado":
         return <HomeAssociado />;
       case "operador":
-        return <div>Home Operador</div>; // substitua pelo seu componente
-      case "administrador":
-      default:
+        return <div>Home Operador</div>;
+      case "admin":
         return <HomeAdmin />;
+      default:
+        return <Navigate to="/login" replace />;
     }
   };
 
@@ -110,61 +111,54 @@ const App = () => {
           {/* Login */}
           <Route
             path="/login"
-            element={
-              <Login
-                onLogin={(newToken) => {
-                  localStorage.setItem("token", newToken);
-                  setToken(newToken);
-                }}
-              />
-            }
+            element={<Login />}
           />
 
-          {/* Página inicial - decide automaticamente */}
+          {/* Página inicial */}
           <Route path="/" element={<HomeSelector />} />
 
           {/* Associado */}
-          <Route path="/associado" element={token ? <HomeAssociado /> : <Navigate to="/login" replace />} />
-          <Route path="/solicitações/create" element={token ? <CreateSolicitacao /> : <Navigate to="/login" replace />} />
-          <Route path="/solicitações/list" element={token ? <ListSolicitacao /> : <Navigate to="/login" replace />} />
+          <Route path="/associado" element={isLoggedIn() ? <HomeAssociado /> : <Navigate to="/login" replace />} />
+          <Route path="/solicitacoes/create" element={isLoggedIn() ? <CreateSolicitacao /> : <Navigate to="/login" replace />} />
+          <Route path="/solicitacoes/list" element={isLoggedIn() ? <ListSolicitacao /> : <Navigate to="/login" replace />} />
 
           {/* Agendamentos */}
-          <Route path="/agendamentos/list" element={token ? <ListAgendamentos /> : <Navigate to="/login" replace />} />
-          <Route path="/agendamentos/:id" element={token ? <DetalhesSolicitacao /> : <Navigate to="/login" replace />} />
-          <Route path="/agendamentos" element={token ? <Agendamentos /> : <Navigate to="/login" replace />} />
+          <Route path="/agendamentos/list" element={isLoggedIn() ? <ListAgendamentos /> : <Navigate to="/login" replace />} />
+          <Route path="/agendamentos/:id" element={isLoggedIn() ? <DetalhesSolicitacao /> : <Navigate to="/login" replace />} />
+          <Route path="/agendamentos" element={isLoggedIn() ? <Agendamentos /> : <Navigate to="/login" replace />} />
 
           {/* Serviços */}
-          <Route path="/servicos" element={token ? <Servicos /> : <Navigate to="/login" replace />} />
-          <Route path="/servicos/create" element={token ? <CreateServico /> : <Navigate to="/login" replace />} />
-          <Route path="/servicos/list" element={token ? <ListServicos /> : <Navigate to="/login" replace />} />
-          <Route path="/servicos/:id" element={token ? <DetalhesServico /> : <Navigate to="/login" replace />} />
+          <Route path="/servicos" element={isLoggedIn() ? <Servicos /> : <Navigate to="/login" replace />} />
+          <Route path="/servicos/create" element={isLoggedIn() ? <CreateServico /> : <Navigate to="/login" replace />} />
+          <Route path="/servicos/list" element={isLoggedIn() ? <ListServicos /> : <Navigate to="/login" replace />} />
+          <Route path="/servicos/:id" element={isLoggedIn() ? <DetalhesServico /> : <Navigate to="/login" replace />} />
 
           {/* Associados */}
-          <Route path="/associados" element={token ? <Associados /> : <Navigate to="/login" replace />} />
-          <Route path="/associados/create" element={token ? <CreateAssociado /> : <Navigate to="/login" replace />} />
-          <Route path="/associados/edit/:id" element={token ? <EditAssociado /> : <Navigate to="/login" replace />} />
-          <Route path="/associados/list" element={token ? <UserListAssociado /> : <Navigate to="/login" replace />} />
-          <Route path="/associados/:id" element={token ? <DetalhesAssociado /> : <Navigate to="/login" replace />} />
+          <Route path="/associados" element={isLoggedIn() ? <Associados /> : <Navigate to="/login" replace />} />
+          <Route path="/associados/create" element={isLoggedIn() ? <CreateAssociado /> : <Navigate to="/login" replace />} />
+          <Route path="/associados/edit/:id" element={isLoggedIn() ? <EditAssociado /> : <Navigate to="/login" replace />} />
+          <Route path="/associados/list" element={isLoggedIn() ? <UserListAssociado /> : <Navigate to="/login" replace />} />
+          <Route path="/associados/:id" element={isLoggedIn() ? <DetalhesAssociado /> : <Navigate to="/login" replace />} />
 
           {/* Implementos */}
-          <Route path="/implementos" element={token ? <Implementos /> : <Navigate to="/login" replace />} />
-          <Route path="/implementos/create" element={token ? <CreateImplemento /> : <Navigate to="/login" replace />} />
-          <Route path="/implementos/edit/:id" element={token ? <EditImplemento /> : <Navigate to="/login" replace />} />
-          <Route path="/implementos/list" element={token ? <ListImplemento /> : <Navigate to="/login" replace />} />
-          <Route path="/implementos/:id" element={token ? <DetalhesImplemento /> : <Navigate to="/login" replace />} />
+          <Route path="/implementos" element={isLoggedIn() ? <Implementos /> : <Navigate to="/login" replace />} />
+          <Route path="/implementos/create" element={isLoggedIn() ? <CreateImplemento /> : <Navigate to="/login" replace />} />
+          <Route path="/implementos/edit/:id" element={isLoggedIn() ? <EditImplemento /> : <Navigate to="/login" replace />} />
+          <Route path="/implementos/list" element={isLoggedIn() ? <ListImplemento /> : <Navigate to="/login" replace />} />
+          <Route path="/implementos/:id" element={isLoggedIn() ? <DetalhesImplemento /> : <Navigate to="/login" replace />} />
 
           {/* Máquinas */}
-          <Route path="/maquinas" element={token ? <Maquinas /> : <Navigate to="/login" replace />} />
-          <Route path="/maquinas/create" element={token ? <CreateMaquina /> : <Navigate to="/login" replace />} />
-          <Route path="/maquinas/edit/:id" element={token ? <EditMaquina /> : <Navigate to="/login" replace />} />
-          <Route path="/maquinas/list" element={token ? <ListMaquinas /> : <Navigate to="/login" replace />} />
-          <Route path="/maquinas/:id" element={token ? <DetalhesMaquina /> : <Navigate to="/login" replace />} />
+          <Route path="/maquinas" element={isLoggedIn() ? <Maquinas /> : <Navigate to="/login" replace />} />
+          <Route path="/maquinas/create" element={isLoggedIn() ? <CreateMaquina /> : <Navigate to="/login" replace />} />
+          <Route path="/maquinas/edit/:id" element={isLoggedIn() ? <EditMaquina /> : <Navigate to="/login" replace />} />
+          <Route path="/maquinas/list" element={isLoggedIn() ? <ListMaquinas /> : <Navigate to="/login" replace />} />
+          <Route path="/maquinas/:id" element={isLoggedIn() ? <DetalhesMaquina /> : <Navigate to="/login" replace />} />
 
           {/* Operadores */}
-          <Route path="/operadores" element={token ? <Operadores /> : <Navigate to="/login" replace />} />
-          <Route path="/operadores/create" element={token ? <CreateOperador /> : <Navigate to="/login" replace />} />
-          <Route path="/operadores/edit/:id" element={token ? <EditOperador /> : <Navigate to="/login" replace />} />
-          <Route path="/operadores/list" element={token ? <UserListOperador /> : <Navigate to="/login" replace />} />
+          <Route path="/operadores" element={isLoggedIn() ? <Operadores /> : <Navigate to="/login" replace />} />
+          <Route path="/operadores/create" element={isLoggedIn() ? <CreateOperador /> : <Navigate to="/login" replace />} />
+          <Route path="/operadores/edit/:id" element={isLoggedIn() ? <EditOperador /> : <Navigate to="/login" replace />} />
+          <Route path="/operadores/list" element={isLoggedIn() ? <UserListOperador /> : <Navigate to="/login" replace />} />
 
           {/* Redirecionamento padrão */}
           <Route path="*" element={<Navigate to="/" replace />} />

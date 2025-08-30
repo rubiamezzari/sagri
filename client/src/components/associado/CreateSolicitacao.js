@@ -52,7 +52,6 @@ const inputStyle = {
   fontSize: "1rem",
   boxSizing: "border-box",
   transition: "border-color 0.3s",
-  maxWidth: "100%",
 };
 
 const inputFocus = {
@@ -61,31 +60,31 @@ const inputFocus = {
 };
 
 const getBtnCadastrarStyle = (hover) => ({
-    backgroundColor: hover ? "#143018" : "#1B4D3E",
-    color: "#D2EFE6",
-    padding: "8px 10px",
-    borderRadius: "5px",
-    border: "none",
-    cursor: "pointer",
-    fontWeight: "500",
-    fontSize: "1.1rem",
-    width: "30%",
-    transition: "background-color 0.3s",
-  });
+  backgroundColor: hover ? "#143018" : "#1B4D3E",
+  color: "#D2EFE6",
+  padding: "8px 10px",
+  borderRadius: "5px",
+  border: "none",
+  cursor: "pointer",
+  fontWeight: "500",
+  fontSize: "1.1rem",
+  width: "30%",
+  transition: "background-color 0.3s",
+});
 
-  const getBtnCancelarStyle = (hover) => ({
-    backgroundColor: hover ? "#c7e5cc" : "#D2EFE6",
-    color: "#143018",
-    padding: "8px 10px",
-    borderRadius: "5px",
-    border: "none",
-    cursor: "pointer",
-    fontWeight: "500",
-    fontSize: "1.1rem",
-    width: "30%",
-    marginLeft: "20px",
-    transition: "background-color 0.3s",
-  });
+const getBtnCancelarStyle = (hover) => ({
+  backgroundColor: hover ? "#c7e5cc" : "#D2EFE6",
+  color: "#143018",
+  padding: "8px 10px",
+  borderRadius: "5px",
+  border: "none",
+  cursor: "pointer",
+  fontWeight: "500",
+  fontSize: "1.1rem",
+  width: "30%",
+  marginLeft: "20px",
+  transition: "background-color 0.3s",
+});
 
 const calendarHeader = {
   display: "flex",
@@ -131,8 +130,6 @@ export default function CreateSolicitacao() {
     observacao: "",
   });
 
-  console.log(localStorage.getItem("usuarioLogado"))
-  
   const [hoverCadastrar, setHoverCadastrar] = useState(false);
   const [hoverCancelar, setHoverCancelar] = useState(false);
   const [focusField, setFocusField] = useState(null);
@@ -163,14 +160,56 @@ export default function CreateSolicitacao() {
   }
 
   function enviarFormulario() {
-    alert("Solicitação enviada com sucesso!");
-    setForm({
-      tipoServico: "",
-      hora: "",
-      tempo: "",
-      observacao: "",
-    });
-    setEtapa(1);
+    const usuarioLogadoString = localStorage.getItem("usuarioLogado");
+
+    if (!usuarioLogadoString) {
+      alert("Erro: nenhum usuário logado encontrado.");
+      return;
+    }
+
+    let usuarioLogado;
+    try {
+      usuarioLogado = JSON.parse(usuarioLogadoString);
+    } catch {
+      alert("Erro: dados de usuário inválidos.");
+      return;
+    }
+
+    if (!usuarioLogado._id) {
+      alert("Erro: ID do usuário não encontrado.");
+      return;
+    }
+
+    const novaSolicitacao = {
+      usuario_id: usuarioLogado._id,
+      data: dataSelecionada,
+      tipoServico: form.tipoServico,
+      hora: form.hora,
+      tempo: form.tempo,
+      observacao: form.observacao,
+    };
+
+    fetch(`${API_URL}/solicitacoes`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(novaSolicitacao),
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(text || "Erro ao criar solicitação");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        alert("Solicitação enviada com sucesso!");
+        setForm({ tipoServico: "", hora: "", tempo: "", observacao: "" });
+        setEtapa(1);
+      })
+      .catch((err) => {
+        console.error(err);
+        alert("Erro ao enviar solicitação. Veja o console para detalhes.");
+      });
   }
 
   const dias = diasDoCalendario(mesAtual);
@@ -180,22 +219,12 @@ export default function CreateSolicitacao() {
       {etapa === 1 && (
         <>
           <div style={calendarHeader}>
-            <button style={getBtnCancelarStyle(false)} onClick={() => setMesAtual(subMonths(mesAtual, 1))}>
-              ←
-            </button>
-            <h3 style={{ margin: 0, color: "#1B4D3E" }}>
-              {format(mesAtual, "MMMM yyyy", { locale: ptBR })}
-            </h3>
-            <button style={getBtnCancelarStyle(false)} onClick={() => setMesAtual(addMonths(mesAtual, 1))}>
-              →
-            </button>
+            <button style={getBtnCancelarStyle(false)} onClick={() => setMesAtual(subMonths(mesAtual, 1))}>←</button>
+            <h3 style={{ margin: 0, color: "#1B4D3E" }}>{format(mesAtual, "MMMM yyyy", { locale: ptBR })}</h3>
+            <button style={getBtnCancelarStyle(false)} onClick={() => setMesAtual(addMonths(mesAtual, 1))}>→</button>
           </div>
           <div style={grid}>
-            {nomesDias.map((dia) => (
-              <div key={dia} style={dayNameStyle}>
-                {dia}
-              </div>
-            ))}
+            {nomesDias.map((dia) => (<div key={dia} style={dayNameStyle}>{dia}</div>))}
             {dias.map((dia, index) => (
               <div
                 key={index}
@@ -210,23 +239,9 @@ export default function CreateSolicitacao() {
       )}
 
       {etapa === 2 && (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            enviarFormulario();
-          }}
-        >
+        <form onSubmit={(e) => { e.preventDefault(); enviarFormulario(); }}>
           <h5 style={sectionTitle}>DADOS DO AGENDAMENTO</h5>
-
-          <p
-            style={{
-              marginBottom: "20px",
-              color: "#143018",
-              fontWeight: "600", 
-              textAlign: "center",
-              fontSize: "0.9rem",
-            }}
-          >
+          <p style={{ marginBottom: "20px", color: "#143018", fontWeight: "600", textAlign: "center", fontSize: "0.9rem" }}>
             {format(dataSelecionada, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
           </p>
 
@@ -242,9 +257,7 @@ export default function CreateSolicitacao() {
           >
             <option value="">Selecione...</option>
             {servicosDisponiveis.map((s) => (
-              <option key={s._id} value={s.nome}>
-                {s.nome}
-              </option>
+              <option key={s._id} value={s.nome}>{s.nome}</option>
             ))}
           </select>
 
@@ -279,30 +292,12 @@ export default function CreateSolicitacao() {
             onChange={handleInput}
             onFocus={() => setFocusField("observacao")}
             onBlur={() => setFocusField(null)}
-            style={
-              focusField === "observacao"
-                ? { ...inputStyle, ...inputFocus, height: "80px" }
-                : { ...inputStyle, height: "80px" }
-            }
+            style={focusField === "observacao" ? { ...inputStyle, ...inputFocus, height: "80px" } : { ...inputStyle, height: "80px" }}
           />
 
           <div style={{ marginTop: "30px", display: "flex", justifyContent: "center" }}>
-          <button
-            type="submit"
-            style={getBtnCadastrarStyle(hoverCadastrar)}
-            onMouseEnter={() => setHoverCadastrar(true)}
-            onMouseLeave={() => setHoverCadastrar(false)}
-          >
-            Enviar
-          </button>
-          <button
-            type="button"
-            style={getBtnCancelarStyle(hoverCancelar)}
-            onMouseEnter={() => setHoverCancelar(true)}
-            onMouseLeave={() => setHoverCancelar(false)}
-            >
-              Cancelar
-            </button>
+            <button type="submit" style={getBtnCadastrarStyle(hoverCadastrar)} onMouseEnter={() => setHoverCadastrar(true)} onMouseLeave={() => setHoverCadastrar(false)}>Enviar</button>
+            <button type="button" style={getBtnCancelarStyle(hoverCancelar)} onMouseEnter={() => setHoverCancelar(true)} onMouseLeave={() => setHoverCancelar(false)} onClick={() => setEtapa(1)}>Cancelar</button>
           </div>
         </form>
       )}

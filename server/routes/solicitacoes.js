@@ -5,7 +5,7 @@ const dbo = require("../db/conn");
 const router = express.Router();
 
 // POST - Criar nova solicitação
-router.post("/solicitacoes", async (req, res) => {
+router.post("/", async (req, res) => {
   const dbConnect = dbo.getDb();
   try {
     const { data, tipoServico, hora, tempo, observacao, usuario_id } = req.body;
@@ -26,7 +26,9 @@ router.post("/solicitacoes", async (req, res) => {
       criadoEm: new Date(),
     };
 
-    const result = await dbConnect.collection("solicitacoes").insertOne(novaSolicitacao);
+    const result = await dbConnect
+      .collection("solicitacoes")
+      .insertOne(novaSolicitacao);
 
     res.status(201).json({
       message: "Solicitação criada com sucesso!",
@@ -38,8 +40,8 @@ router.post("/solicitacoes", async (req, res) => {
   }
 });
 
-// GET - Buscar todas solicitações (admin)
-router.get("/solicitacoes", async (req, res) => {
+// GET - Todas as solicitações
+router.get("/", async (req, res) => {
   try {
     const dbConnect = dbo.getDb();
     const solicitacoes = await dbConnect
@@ -55,8 +57,8 @@ router.get("/solicitacoes", async (req, res) => {
   }
 });
 
-// GET - Buscar solicitações por ID do usuário (associado)
-router.get("/solicitacoes/usuario/:usuarioId", async (req, res) => {
+// GET - Solicitações de um usuário
+router.get("/usuario/:usuarioId", async (req, res) => {
   const { usuarioId } = req.params;
 
   try {
@@ -75,7 +77,7 @@ router.get("/solicitacoes/usuario/:usuarioId", async (req, res) => {
 });
 
 // PUT - Atualizar status da solicitação
-router.put("/solicitacoes/:id", async (req, res) => {
+router.put("/:id", async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
 

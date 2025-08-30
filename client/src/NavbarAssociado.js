@@ -103,12 +103,12 @@ export default function NavbarAssociado() {
                             </button>
                             <ul className={`dropdown-menu${dropdownOpen ? " show" : ""}`} style={dropdownMenuStyle}>
                                 <li>
-                                    <NavLink to="/solicitações/list" className="dropdown-item" style={dropdownItemStyle}>
+                                    <NavLink to="/solicitacoes/list" className="dropdown-item" style={dropdownItemStyle}>
                                         Listar Solicitações
                                     </NavLink>
                                 </li>
                                 <li>
-                                    <NavLink to="/solicitações/create" className="dropdown-item" style={dropdownItemStyle}>
+                                    <NavLink to="/solicitacoes/create" className="dropdown-item" style={dropdownItemStyle}>
                                         Criar Solicitação
                                     </NavLink>
                                 </li>

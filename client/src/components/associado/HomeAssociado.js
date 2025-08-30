@@ -2,7 +2,7 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 
 export default function HomeAssociado() {
-    const nomeUsuario = localStorage.getItem("nomeUsuario") || "Associado"; // pega o nome salvo
+    const nomeUsuario = localStorage.getItem("nomeUsuario") || "Associado"; 
 
     const containerStyle = {
         maxWidth: "900px",
@@ -55,23 +55,23 @@ export default function HomeAssociado() {
 
             <div style={cardContainer}>
                 <NavLink
-                    to="/solicitações/list"
+                    to="/solicitacoes/list"
                     style={({ isActive }) => ({
                         ...cardStyle,
                         ...(isActive ? cardHover : {})
                     })}
                 >
-                    📋 Minhas Solicitações
+                    Minhas Solicitações
                 </NavLink>
 
                 <NavLink
-                    to="/solicitações/create"
+                    to="/solicitacoes/create"
                     style={({ isActive }) => ({
                         ...cardStyle,
                         ...(isActive ? cardHover : {})
                     })}
                 >
-                    ➕ Criar Nova Solicitação
+                    + Criar Nova Solicitação
                 </NavLink>
             </div>
         </div>

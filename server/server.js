@@ -23,6 +23,7 @@ app.use(require("./routes/implementos"));
 app.use(require("./routes/login"));
 app.use(require("./routes/administrador"));
 app.use(require("./routes/servicos"));
+app.use("/solicitacoes", require("./routes/solicitacoes"));
 
 app.get("/", (req, res) => {
   res.send("Servidor rodando!");

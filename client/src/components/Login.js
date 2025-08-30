@@ -14,27 +14,30 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post(`${API_URL}/login`, {
-        cpf,
-        senha,
-      });
+      const response = await axios.post(`${API_URL}/login`, { cpf, senha });
 
-      const { usuario, tipo, token } = response.data;
+      console.log("Resposta completa do backend:", response); // <--- Aqui
+      console.log("Dados do usuário logado:", response.data); // <--- Aqui
+
+      const usuario = response.data;
+      const tipo = usuario.tipo;
+
+      if (!tipo) {
+        setErro("Tipo de usuário não reconhecido.");
+        return;
+      }
 
       // Salva os dados no localStorage
       localStorage.setItem("usuarioLogado", JSON.stringify(usuario));
       localStorage.setItem("tipoUsuario", tipo);
-      if (token) {
-        localStorage.setItem("token", token);
-      }
 
       // Redireciona conforme o tipo de usuário
       switch (tipo) {
         case "associado":
           navigate("/associado");
           break;
-        case "administrador":
-          navigate("/");
+        case "admin":
+          navigate("/admin");
           break;
         case "operador":
           navigate("/operador");
@@ -43,6 +46,7 @@ const Login = () => {
           setErro("Tipo de usuário não reconhecido.");
       }
     } catch (error) {
+      console.error("Erro no login:", error.response || error);
       setErro(error.response?.data?.mensagem || "Erro ao fazer login");
     }
   };
@@ -72,7 +76,9 @@ const Login = () => {
           />
         </div>
         {erro && <p style={{ color: "red" }}>{erro}</p>}
-        <button type="submit" style={buttonStyle}>Entrar</button>
+        <button type="submit" style={buttonStyle}>
+          Entrar
+        </button>
       </form>
     </div>
   );
