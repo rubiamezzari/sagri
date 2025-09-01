@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from "react";
 
+// Estilos base para a nova abordagem
 const linha = {
   padding: "6px 0",
   display: "flex",
   gap: "8px",
   fontSize: "0.95rem",
-  borderBottom: "1px solid #d5ecd0",
+  borderBottom: "1px solid #e0f2e0", // Cor mais suave para a borda
 };
 
 const campo = {
   minWidth: "140px",
   fontWeight: "bold",
-  color: "#1a3c1a",
+  color: "#386641", // Tonalidade mais suave de verde escuro
 };
 
 const tituloNome = {
@@ -19,63 +20,33 @@ const tituloNome = {
   fontWeight: "bold",
   textTransform: "uppercase",
   paddingBottom: "10px",
-  marginBottom: "20px",
-  borderBottom: "2px solid #a5d6a7",
-  color: "#1a3c1a",
-};
-
-const btnBase = {
-  padding: "4px 22px",
-  borderRadius: "5px",
-  fontWeight: "600",
-  fontSize: "1rem",
-  border: "none",
-  cursor: "pointer",
-  transition: "all 0.3s ease",
-  marginRight: "15px",
-  color: "#fff",
-};
-
-const btnEditar = {
-  ...btnBase,
-  backgroundColor: "#1B4D3E",
-  color: "#D2EFE6",
-};
-
-const btnSalvar = {
-  ...btnBase,
-  backgroundColor: "#1B4D3E",
-  color: "#D2EFE6",
-};
-
-const btnExcluir = {
-  ...btnBase,
-  backgroundColor: "#F9DCDE",
-  color: "#721C24",
+  marginBottom: "16px",
+  borderBottom: "2px solid #a8e0a8", // Borda mais suave
+  color: "#386641",
 };
 
 const closeBtnStyle = {
   position: "absolute",
-  top: "15px",
-  right: "15px",
+  top: "12px",
+  right: "12px",
   background: "none",
   border: "none",
-  fontSize: "1.5rem",
+  fontSize: "1.4rem",
   cursor: "pointer",
-  color: "#555",
+  color: "#666", // Cor mais suave para o X
 };
 
 const boxStyle = {
   backgroundColor: "#fff",
-  padding: "30px",
-  borderRadius: "8px",
-  width: "500px",
-  maxWidth: "90%",
-  boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
-  fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-  maxHeight: "80vh",
+  padding: "28px", // Um pouco mais de padding
+  borderRadius: "16px", // Cantos mais arredondados
+  width: "580px", // Um pouco mais largo
+  maxWidth: "95%",
+  boxShadow: "0 10px 30px rgba(0,0,0,0.1)", // Sombra mais sutil
+  fontFamily: "'Segoe UI', sans-serif",
+  maxHeight: "85vh",
   overflowY: "auto",
-  position: "relative", 
+  position: "relative",
 };
 
 const modalStyle = {
@@ -84,27 +55,63 @@ const modalStyle = {
   left: 0,
   width: "100vw",
   height: "100vh",
-  backgroundColor: "rgba(0, 0, 0, 0.4)",
+  backgroundColor: "rgba(0, 0, 0, 0.3)", // Fundo do modal mais transparente
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
   zIndex: 1000,
 };
 
+const btnBase = {
+  padding: "8px 18px",
+  borderRadius: "20px",
+  fontWeight: 500, // Menos bold
+  fontSize: "0.9rem",
+  border: "1px solid #99c9a0", // Borda sutil
+  cursor: "pointer",
+  transition: "all 0.2s ease",
+  marginLeft: "10px",
+};
+
+const btnEditar = {
+  ...btnBase,
+  backgroundColor: "#e6f4ea", // Fundo claro
+  color: "#386641", // Texto verde escuro
+};
+
+const btnSalvar = {
+  ...btnBase,
+  backgroundColor: "#5cb85c", // Verde vibrante para salvar
+  color: "#fff", // Texto branco
+  border: "none",
+};
+
+const btnExcluir = {
+  ...btnBase,
+  backgroundColor: "transparent", // Fundo transparente para Excluir
+  color: "#88a88c", // Texto cinza esverdeado
+  border: "1px solid #d0e7d3", // Borda mais clara
+};
+
 const inputStyle = {
   width: "100%",
-  padding: "8px 10px",
-  marginBottom: "12px",
-  borderRadius: "3px",
-  border: "1px solid #ccc",
-  fontSize: "1rem",
+  padding: "10px 12px", // Mais padding
+  marginBottom: "15px", // Mais espaço abaixo
+  borderRadius: "8px", // Cantos mais arredondados
+  border: "1px solid #d4e3d6", // Borda mais clara
+  fontSize: "0.95rem",
+  outline: "none", // Remove o contorno padrão
+  transition: "border-color 0.2s",
+  "&:focus": {
+    borderColor: "#5cb85c", // Borda verde no foco
+  },
 };
 
 const labelStyle = {
   fontWeight: "600",
   fontSize: "0.9rem",
   marginBottom: "6px",
-  color: "#1a3c1a",
+  color: "#386641", // Tonalidade mais suave
   display: "block",
 };
 
@@ -123,44 +130,52 @@ export default function DetalhesImplemento({ implemento, onClose, onDeleted }) {
   }
 
   async function handleSalvar() {
-  if (!implemento || !implemento._id) {
-    alert("Erro: ID do implemento não encontrado.");
-    return;
-  }
-
-  const dadosParaEnviar = { ...form };
-  delete dadosParaEnviar._id;
-
-  const formData = new FormData();
-  formData.append("dados", JSON.stringify(dadosParaEnviar));
-
-  try {
-    const response = await fetch(`http://localhost:5050/implementos/update/${implemento._id}`, {
-      method: "PATCH",
-      body: formData,
-    });
-
-    if (response.ok) {
-      alert("Implemento atualizado com sucesso!");
-      setModoEdicao(false);
-      onClose();
-    } else {
-      const errorText = await response.text();
-      alert(`Erro ao atualizar implemento. Status: ${response.status} - Mensagem: ${errorText}`);
+    if (!implemento || !implemento._id) {
+      alert("Erro: ID do implemento não encontrado.");
+      return;
     }
-  } catch (error) {
-    alert("Erro de rede ao atualizar implemento: " + error.message);
-  }
-}
 
+    const dadosParaEnviar = { ...form };
+    delete dadosParaEnviar._id;
 
-  async function handleExcluir() {
-    if (!window.confirm("Tem certeza que deseja excluir este implemento?")) return;
+    const formData = new FormData();
+    formData.append("dados", JSON.stringify(dadosParaEnviar));
 
     try {
-      const response = await fetch(`http://localhost:5050/implementos/${implemento._id}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `http://localhost:5050/implementos/update/${implemento._id}`,
+        {
+          method: "PATCH",
+          body: formData,
+        }
+      );
+
+      if (response.ok) {
+        alert("Implemento atualizado com sucesso!");
+        setModoEdicao(false);
+        onClose();
+      } else {
+        const errorText = await response.text();
+        alert(
+          `Erro ao atualizar implemento. Status: ${response.status} - Mensagem: ${errorText}`
+        );
+      }
+    } catch (error) {
+      alert("Erro de rede ao atualizar implemento: " + error.message);
+    }
+  }
+
+  async function handleExcluir() {
+    if (!window.confirm("Tem certeza que deseja excluir este implemento?"))
+      return;
+
+    try {
+      const response = await fetch(
+        `http://localhost:5050/implementos/${implemento._id}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (response.ok) {
         alert("Implemento excluído com sucesso!");
@@ -268,7 +283,7 @@ export default function DetalhesImplemento({ implemento, onClose, onDeleted }) {
           </div>
           {implemento.observacao && (
             <div style={{ marginTop: "25px" }}>
-              <h4 style={{ fontSize: "1.05rem", color: "#1a3c1a" }}>Observações:</h4>
+              <h4 style={{ fontSize: "1.05rem", color: "#386641" }}>Observações:</h4>
               <p>{implemento.observacao}</p>
             </div>
           )}
@@ -296,18 +311,28 @@ export default function DetalhesImplemento({ implemento, onClose, onDeleted }) {
 
         <div style={{ marginTop: "30px", textAlign: "right" }}>
           {modoEdicao ? (
-            <button style={btnSalvar} onClick={handleSalvar} type="button">
-              Salvar
-            </button>
+            <>
+              <button
+                style={{ ...btnExcluir, marginRight: "10px" }}
+                onClick={() => setModoEdicao(false)}
+                type="button"
+              >
+                Cancelar
+              </button>
+              <button style={btnSalvar} onClick={handleSalvar} type="button">
+                Salvar
+              </button>
+            </>
           ) : (
-            <button style={btnEditar} onClick={() => setModoEdicao(true)} type="button">
-              Editar
-            </button>
+            <>
+              <button style={btnEditar} onClick={() => setModoEdicao(true)} type="button">
+                Editar
+              </button>
+              <button style={btnExcluir} onClick={handleExcluir} type="button">
+                Excluir
+              </button>
+            </>
           )}
-
-          <button style={btnExcluir} onClick={handleExcluir} type="button">
-            Excluir
-          </button>
         </div>
       </div>
     </div>

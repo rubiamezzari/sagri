@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const REACT_APP_YOUR_HOSTNAME = "http://localhost:5050";
@@ -84,10 +84,26 @@ export default function CreateImplemento() {
     observacao: "",
   });
 
+  const [tipos, setTipos] = useState([]);
+  const [marcas, setMarcas] = useState([]);
+
   const [hoverCadastrar, setHoverCadastrar] = useState(false);
   const [hoverCancelar, setHoverCancelar] = useState(false);
   const [focusField, setFocusField] = useState(null);
   const navigate = useNavigate();
+
+  // Buscar tipos e marcas do backend
+  useEffect(() => {
+    fetch(`${REACT_APP_YOUR_HOSTNAME}/tipos`)
+      .then((res) => res.json())
+      .then((data) => setTipos(data))
+      .catch((err) => console.error("Erro ao carregar tipos:", err));
+
+    fetch(`${REACT_APP_YOUR_HOSTNAME}/marcas`)
+      .then((res) => res.json())
+      .then((data) => setMarcas(data))
+      .catch((err) => console.error("Erro ao carregar marcas:", err));
+  }, []);
 
   function updateForm(value) {
     setForm((prev) => ({ ...prev, ...value }));
@@ -96,13 +112,17 @@ export default function CreateImplemento() {
   async function onSubmit(e) {
     e.preventDefault();
 
-    const formData = new FormData()
-
     try {
-      const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/implementos/create`, {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        `${REACT_APP_YOUR_HOSTNAME}/implementos/create`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(form),
+        }
+      );
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -123,7 +143,6 @@ export default function CreateImplemento() {
       });
 
       navigate("/implementos", { replace: true });
-
     } catch (error) {
       alert("Erro na comunicação com o servidor.");
     }
@@ -138,27 +157,41 @@ export default function CreateImplemento() {
       <form onSubmit={onSubmit}>
         <h5 style={sectionTitle}>DADOS DO IMPLEMENTO</h5>
 
+        {/* Select Tipo */}
         <label style={labelStyle}>Tipo</label>
-        <input
-          type="text"
+        <select
           style={getInputStyle("tipo")}
           value={form.tipo}
           onChange={(e) => updateForm({ tipo: e.target.value })}
           onFocus={() => setFocusField("tipo")}
           onBlur={() => setFocusField(null)}
           required
-        />
+        >
+          <option value="">Selecione o tipo</option>
+          {tipos.map((t) => (
+            <option key={t._id} value={t.nome}>
+              {t.nome}
+            </option>
+          ))}
+        </select>
 
+        {/* Select Marca */}
         <label style={labelStyle}>Marca</label>
-        <input
-          type="text"
+        <select
           style={getInputStyle("marca")}
           value={form.marca}
           onChange={(e) => updateForm({ marca: e.target.value })}
           onFocus={() => setFocusField("marca")}
           onBlur={() => setFocusField(null)}
           required
-        />
+        >
+          <option value="">Selecione a marca</option>
+          {marcas.map((m) => (
+            <option key={m._id} value={m.nome}>
+              {m.nome}
+            </option>
+          ))}
+        </select>
 
         <label style={labelStyle}>Modelo</label>
         <input
@@ -180,7 +213,6 @@ export default function CreateImplemento() {
           onBlur={() => setFocusField(null)}
         />
 
-
         <label style={labelStyle}>Número de Série</label>
         <input
           type="text"
@@ -201,9 +233,12 @@ export default function CreateImplemento() {
         />
 
         <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <button type="submit" style={getBtnCadastrarStyle(hoverCadastrar)}
+          <button
+            type="submit"
+            style={getBtnCadastrarStyle(hoverCadastrar)}
             onMouseEnter={() => setHoverCadastrar(true)}
-            onMouseLeave={() => setHoverCadastrar(false)}>
+            onMouseLeave={() => setHoverCadastrar(false)}
+          >
             Cadastrar
           </button>
           <button
@@ -211,7 +246,7 @@ export default function CreateImplemento() {
             style={getBtnCancelarStyle(hoverCancelar)}
             onMouseEnter={() => setHoverCancelar(true)}
             onMouseLeave={() => setHoverCancelar(false)}
-            onClick={() => navigate("/associados")}
+            onClick={() => navigate("/implementos")}
           >
             Cancelar
           </button>
@@ -220,4 +255,3 @@ export default function CreateImplemento() {
     </div>
   );
 }
-

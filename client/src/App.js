@@ -15,10 +15,15 @@ import ListSolicitacao from "./components/associado/ListSolicitacao";
 import HomeAssociado from "./components/associado/HomeAssociado";
 
 // Admin
+
+//agendamentos
 import ListAgendamentos from "./components/administrador/agendamentos/ListAgendamentos";
 import DetalhesSolicitacao from "./components/administrador/agendamentos/ListAgendamentos";
 import Agendamentos from "./components/administrador/agendamentos/Agendamentos";
 import HomeAdmin from "./components/Home";
+ 
+//marcas e tipos
+import MarcasNomes from "./components/administrador/CadastroMarcasNomes";
 
 // Serviços
 import Servicos from "./components/administrador/servicos/Servicos";
@@ -126,6 +131,8 @@ const App = () => {
           <Route path="/agendamentos/list" element={isLoggedIn() ? <ListAgendamentos /> : <Navigate to="/login" replace />} />
           <Route path="/agendamentos/:id" element={isLoggedIn() ? <DetalhesSolicitacao /> : <Navigate to="/login" replace />} />
           <Route path="/agendamentos" element={isLoggedIn() ? <Agendamentos /> : <Navigate to="/login" replace />} />
+          
+          <Route path="/marcas" element={isLoggedIn() ? <MarcasNomes /> : <Navigate to="/login" replace />} />
 
           {/* Serviços */}
           <Route path="/servicos" element={isLoggedIn() ? <Servicos /> : <Navigate to="/login" replace />} />

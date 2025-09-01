@@ -16,7 +16,7 @@ export default function Maquinas() {
     backgroundColor: "#D2EFE6",
     color: "#000",
     padding: "5px 15px",
-    borderRadius: "7px",
+    borderRadius: "12px",
     border: "1px solid #1A381F",
     cursor: "pointer",
     fontWeight: "500",
@@ -35,7 +35,7 @@ export default function Maquinas() {
         }}
       >
         <Link style={btnCadastrar} to="/maquinas/create">
-          + nova máquina
+          + Máquina
         </Link>
       </div>
 

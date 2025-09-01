@@ -1,23 +1,26 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import DetalhesAssociado from "./DetalhesAssociado"; // Importe o componente DetalhesAssociado
 
 export default function UserListAssociado({ associados }) {
   const [busca, setBusca] = useState("");
   const [paginaAtual, setPaginaAtual] = useState(1);
+  const [associadoSelecionado, setAssociadoSelecionado] = useState(null); // Estado para o associado do modal
+
   const tipoUsuario = localStorage.getItem("tipoUsuario");
   const usuarioId = localStorage.getItem("usuarioId");
   let associadosVisiveis = associados;
 
   if (tipoUsuario === "associado") {
-    associadosVisiveis = associados.filter(a => a._id === usuarioId);
+    associadosVisiveis = associados.filter((a) => a._id === usuarioId);
   }
 
-  const associadosFiltrados = associados
-    .filter((associado) =>
-      associado.nome?.toLowerCase().includes(busca.toLowerCase()) ||
-      associado.telefone?.toLowerCase().includes(busca.toLowerCase()) ||
-      associado.cpf?.toLowerCase().includes(busca.toLowerCase()) ||
-      associado.endereco?.bairro?.toLowerCase().includes(busca.toLowerCase())
+  const associadosFiltrados = associadosVisiveis
+    .filter(
+      (associado) =>
+        associado.nome?.toLowerCase().includes(busca.toLowerCase()) ||
+        associado.telefone?.toLowerCase().includes(busca.toLowerCase()) ||
+        associado.cpf?.toLowerCase().includes(busca.toLowerCase()) ||
+        associado.endereco?.bairro?.toLowerCase().includes(busca.toLowerCase())
     )
     .reverse();
 
@@ -33,6 +36,14 @@ export default function UserListAssociado({ associados }) {
     if (novaPagina >= 1 && novaPagina <= totalPaginas) {
       setPaginaAtual(novaPagina);
     }
+  };
+
+  const abrirModal = (associado) => {
+    setAssociadoSelecionado(associado);
+  };
+
+  const fecharModal = () => {
+    setAssociadoSelecionado(null);
   };
 
   return (
@@ -55,15 +66,13 @@ export default function UserListAssociado({ associados }) {
         style={{
           width: "100%",
           padding: "10px",
-          borderRadius: "7px",
+          borderRadius: "5px",
           border: "1px solid #ccc",
           outlineColor: "#1B4D3E",
           fontSize: "0.85rem",
           marginBottom: "15px",
         }}
       />
-
-      {/* Tabela */}
       <table
         style={{
           width: "100%",
@@ -79,12 +88,12 @@ export default function UserListAssociado({ associados }) {
           }}
         >
           <tr style={{ borderBottom: "1px solid #ccc" }}>
-            <th style={{ padding: "12px 0" }}>#</th>
-            <th style={{ padding: "12px 0" }}>Nome completo</th>
-            <th style={{ padding: "12px 0" }}>Telefone</th>
-            <th style={{ padding: "12px 0" }}>CPF</th>
-            <th style={{ padding: "12px 0" }}>Bairro</th>
-            <th style={{ padding: "12px 0" }}>Mais detalhes</th> {/* título adicionado */}
+            <th style={{ padding: "8px 0" }}>#</th>
+            <th style={{ padding: "8px 0" }}>Nome completo</th>
+            <th style={{ padding: "8px 0" }}>Telefone</th>
+            <th style={{ padding: "8px 0" }}>CPF</th>
+            <th style={{ padding: "8px 0" }}>Bairro</th>
+            <th style={{ padding: "8px 0" }}>Mais detalhes</th>
           </tr>
         </thead>
         <tbody>
@@ -96,10 +105,7 @@ export default function UserListAssociado({ associados }) {
             </tr>
           ) : (
             associadosPaginados.map((associado, index) => (
-              <tr
-                key={associado._id}
-                style={{ borderBottom: "1px solid #ccc" }}
-              >
+              <tr key={associado._id} style={{ borderBottom: "1px solid #ccc" }}>
                 <td style={{ padding: "12px 8px" }}>
                   {(paginaAtual - 1) * itensPorPagina + index + 1}
                 </td>
@@ -112,8 +118,8 @@ export default function UserListAssociado({ associados }) {
                   {associado.endereco?.bairro?.toUpperCase()}
                 </td>
                 <td style={{ textAlign: "center", padding: "12px 8px" }}>
-                  <Link
-                    to={`/associados/${associado._id}`}
+                  <button
+                    onClick={() => abrirModal(associado)}
                     style={{
                       fontSize: "1.4rem",
                       backgroundColor: "transparent",
@@ -125,15 +131,13 @@ export default function UserListAssociado({ associados }) {
                     aria-label={`Mais detalhes do associado ${associado.nome}`}
                   >
                     →
-                  </Link>
+                  </button>
                 </td>
               </tr>
             ))
           )}
         </tbody>
       </table>
-
-      {/* Paginação com setas */}
       {totalPaginas > 1 && (
         <div
           style={{
@@ -159,11 +163,9 @@ export default function UserListAssociado({ associados }) {
           >
             ←
           </button>
-
           <span style={{ color: "#1B4D3E" }}>
             Página {paginaAtual} de {totalPaginas}
           </span>
-
           <button
             onClick={() => mudarPagina(paginaAtual + 1)}
             disabled={paginaAtual === totalPaginas}
@@ -179,6 +181,13 @@ export default function UserListAssociado({ associados }) {
             →
           </button>
         </div>
+      )}
+      {associadoSelecionado && (
+        <DetalhesAssociado
+          associado={associadoSelecionado}
+          onClose={fecharModal}
+          onDeleted={fecharModal} // Adicione esta linha para fechar o modal após a exclusão
+        />
       )}
     </div>
   );

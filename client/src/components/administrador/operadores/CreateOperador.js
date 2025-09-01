@@ -8,7 +8,7 @@ const containerStyle = {
   margin: "40px auto",
   padding: "30px 40px",
   backgroundColor: "#ffffff",
-  borderRadius: "5px",
+  borderRadius: "10px",
   textAlign: "center",
 };
 

@@ -243,7 +243,7 @@ export default function CreateAssociado() {
         </label>
         <input
           id="nome"
-          type="text"
+          type="text"  
           style={getInputStyle("nome")}
           value={form.nome}
           onChange={(e) => updateForm({ nome: e.target.value })}

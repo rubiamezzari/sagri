@@ -3,28 +3,30 @@ import { Link } from "react-router-dom";
 
 const API_URL = "http://localhost:5050";
 
-const btnEditar = {
-  backgroundColor: "#1A381F",
-  color: "#fff",
-  padding: "5px 12px",
-  borderRadius: "4px",
-  fontSize: "0.75rem",
-  border: "none",
+// Estilos de botões arredondados e delicados
+const btnBase = {
+  padding: "8px 18px",
+  borderRadius: "20px",
+  fontWeight: 500,
+  fontSize: "0.9rem",
+  border: "1px solid #99c9a0",
   cursor: "pointer",
-  fontWeight: "500",
-  textDecoration: "none",
-  marginRight: "5px",
+  transition: "all 0.2s ease",
+  marginLeft: "10px",
+  textDecoration: "none", // Mantido para o Link
+};
+
+const btnEditar = {
+  ...btnBase,
+  backgroundColor: "#e6f4ea",
+  color: "#386641",
 };
 
 const btnExcluir = {
-  backgroundColor: "#daf4d0",
-  color: "#143018",
-  padding: "5px 12px",
-  borderRadius: "4px",
-  fontSize: "0.75rem",
-  border: "none",
-  cursor: "pointer",
-  fontWeight: "500",
+  ...btnBase,
+  backgroundColor: "transparent",
+  color: "#88a88c",
+  border: "1px solid #d0e7d3",
 };
 
 export default function UserListOperador() {
@@ -86,65 +88,84 @@ export default function UserListOperador() {
   };
 
   return (
-    <div style={{ width: "100%", backgroundColor: "#fff", padding: "20px", borderRadius: "5px" }}>
+    <div style={{
+      width: "100%",
+      backgroundColor: "#fff",
+      padding: "20px",
+      borderRadius: "16px", // Cantos arredondados
+      boxShadow: "0 4px 12px rgba(0,0,0,0.05)" // Sombra sutil
+    }}>
       <input
         type="text"
         placeholder="Pesquisar operador..."
         value={busca}
         onChange={(e) => {
           setBusca(e.target.value);
-          setPaginaAtual(1); 
+          setPaginaAtual(1);
         }}
         style={{
           width: "100%",
           padding: "10px",
-          borderRadius: "5px",
-          border: "1px solid #ccc",
-          outlineColor: "#1A381F",
+          borderRadius: "8px", // Cantos mais arredondados
+          border: "1px solid #d4e3d6", // Borda mais suave
+          outlineColor: "#5cb85c", // Cor no foco
           fontSize: "0.85rem",
-          marginBottom: "15px",
+          marginBottom: "20px", // Aumentei o espaçamento
         }}
       />
 
       <table style={{
         width: "100%",
-        borderCollapse: "collapse",
+        borderCollapse: "separate", // Necessário para border-radius
+        borderSpacing: "0 10px", // Espaço entre as linhas
         fontSize: "0.85rem",
-        textAlign: "center"
+        textAlign: "left", // Alinhei o texto à esquerda para um visual mais limpo
       }}>
         <thead style={{
-          backgroundColor: "#f8f8f8",
-          fontWeight: "600"
+          fontWeight: "600",
+          backgroundColor: "#f7fcf8", // Fundo mais claro para o cabeçalho
         }}>
-          <tr style={{ borderBottom: "1px solid #ccc" }}>
-            <th style={{ padding: "12px 0" }}>#</th>
-            <th style={{ padding: "12px 0" }}>Nome</th>
-            <th style={{ padding: "12px 0" }}>Telefone</th>
-            <th style={{ padding: "12px 0" }}>CPF</th>
-            <th style={{ padding: "12px 0" }}>Email</th>
-            <th style={{ padding: "12px 0" }}></th>
+          <tr>
+            <th style={{ padding: "12px 10px", borderBottom: "1px solid #e0f2e0" }}>#</th>
+            <th style={{ padding: "12px 10px", borderBottom: "1px solid #e0f2e0" }}>Nome</th>
+            <th style={{ padding: "12px 10px", borderBottom: "1px solid #e0f2e0" }}>Telefone</th>
+            <th style={{ padding: "12px 10px", borderBottom: "1px solid #e0f2e0" }}>CPF</th>
+            <th style={{ padding: "12px 10px", borderBottom: "1px solid #e0f2e0" }}>Email</th>
+            <th style={{ padding: "12px 10px", borderBottom: "1px solid #e0f2e0" }}></th>
           </tr>
         </thead>
         <tbody>
           {operadoresPaginados.length === 0 ? (
             <tr>
-              <td colSpan={6} style={{ padding: "12px 0" }}>
+              <td colSpan={6} style={{ padding: "20px 0", textAlign: "center", color: "#666" }}>
                 Nenhum operador encontrado.
               </td>
             </tr>
           ) : (
             operadoresPaginados.map((op, index) => (
-              <tr key={op._id} style={{ borderBottom: "1px solid #ccc" }}>
-                <td style={{ padding: "12px 8px" }}>
+              <tr key={op._id} style={{
+                backgroundColor: "#fff",
+                boxShadow: "0 2px 5px rgba(0,0,0,0.03)",
+                borderRadius: "8px",
+                transition: "transform 0.2s ease",
+              }}
+              onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.01)'}
+              onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+              >
+                <td style={{ padding: "12px 10px" }}>
                   {(paginaAtual - 1) * itensPorPagina + index + 1}
                 </td>
-                <td style={{ padding: "12px 8px" }}>{op.nome?.toUpperCase()}</td>
-                <td style={{ padding: "12px 8px" }}>{op.telefone}</td>
-                <td style={{ padding: "12px 8px" }}>{op.cpf}</td>
-                <td style={{ padding: "12px 8px" }}>{op.email || "—"}</td>
-                <td style={{ padding: "12px 8px" }}>
-                  <Link to={`/operadores/edit/${op._id}`} style={btnEditar}>Editar</Link>
-                  <button onClick={() => excluirOperador(op._id)} style={btnExcluir}>Excluir</button>
+                <td style={{ padding: "12px 10px" }}>{op.nome?.toUpperCase()}</td>
+                <td style={{ padding: "12px 10px" }}>{op.telefone}</td>
+                <td style={{ padding: "12px 10px" }}>{op.cpf}</td>
+                <td style={{ padding: "12px 10px" }}>{op.email || "—"}</td>
+                <td style={{ padding: "12px 10px", whiteSpace: "nowrap" }}>
+                  <Link to={`/operadores/edit/${op._id}`} style={btnEditar}>
+                    Editar
+                  </Link>
+                  <button onClick={() => excluirOperador(op._id)} style={btnExcluir}>
+                    Excluir
+                  </button>
                 </td>
               </tr>
             ))
@@ -152,7 +173,6 @@ export default function UserListOperador() {
         </tbody>
       </table>
 
-      {/* Paginação com setas */}
       {totalPaginas > 1 && (
         <div style={{
           marginTop: "20px",
@@ -171,13 +191,13 @@ export default function UserListOperador() {
               border: "none",
               cursor: paginaAtual === 1 ? "not-allowed" : "pointer",
               opacity: paginaAtual === 1 ? 0.4 : 1,
-              color: "#1A381F",
+              color: "#386641",
             }}
           >
             ←
           </button>
 
-          <span style={{ color: "#1A381F" }}>
+          <span style={{ color: "#386641" }}>
             Página {paginaAtual} de {totalPaginas}
           </span>
 
@@ -190,7 +210,7 @@ export default function UserListOperador() {
               border: "none",
               cursor: paginaAtual === totalPaginas ? "not-allowed" : "pointer",
               opacity: paginaAtual === totalPaginas ? 0.4 : 1,
-              color: "#1A381F",
+              color: "#386641",
             }}
           >
             →

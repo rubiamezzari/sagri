@@ -20,7 +20,7 @@ const buttonStyle = {
   backgroundColor: "#D2EFE6",
   color: "#1a381f",
   border: "1.5px solid #1a381f",
-  borderRadius: "5px",
+  borderRadius: "12px",
   cursor: "pointer",
   fontWeight: "600",
   fontSize: "1rem",
@@ -48,7 +48,7 @@ export default function Servicos() {
           onMouseEnter={() => setHover(true)}
           onMouseLeave={() => setHover(false)}
         >
-          + serviço
+          + Serviço
         </button>
       </header>
 

@@ -24,6 +24,8 @@ app.use(require("./routes/login"));
 app.use(require("./routes/administrador"));
 app.use(require("./routes/servicos"));
 app.use("/solicitacoes", require("./routes/solicitacoes"));
+app.use("/marcas", require("./routes/marcas"));
+app.use("/tipos", require("./routes/tipos"));
 
 app.get("/", (req, res) => {
   res.send("Servidor rodando!");

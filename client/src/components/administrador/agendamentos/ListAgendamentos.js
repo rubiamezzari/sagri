@@ -54,9 +54,9 @@ const styles = {
     textAlign: "center",
   }),
   expanded: {
-    backgroundColor: "#f9f9f9",
+    backgroundColor: "#fff",
     padding: "0 18px",
-    maxHeight: 0,
+    maxHeight: 20,
     overflow: "hidden",
     transition: "max-height 0.3s ease, padding 0.3s ease",
   },

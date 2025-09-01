@@ -7,7 +7,7 @@ export default function operadores() {
     backgroundColor: "#D2EFE6",
     color: "#000",
     padding: "5px 15px",
-    borderRadius: "7px",
+    borderRadius: "12px",
     border: "1px solid #1c3d21",
     cursor: "pointer",
     fontWeight: "500",
@@ -27,7 +27,7 @@ export default function operadores() {
         }}
       >
         <Link style={btnCadastrar} to="/operadores/create">
-          + novo operador
+          + Operador
         </Link>
       </div>
       <UserListOperador />

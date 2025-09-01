@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const REACT_APP_YOUR_HOSTNAME = "http://localhost:5050";
@@ -39,7 +39,6 @@ const inputStyle = {
   fontSize: "1rem",
   boxSizing: "border-box",
   transition: "border-color 0.3s",
-  maxWidth: "100%",
 };
 
 const inputFocus = {
@@ -84,19 +83,36 @@ export default function CreateMaquina() {
     observacao: "",
   });
 
+  const [tipos, setTipos] = useState([]);
+  const [marcas, setMarcas] = useState([]);
   const [hoverCadastrar, setHoverCadastrar] = useState(false);
   const [hoverCancelar, setHoverCancelar] = useState(false);
   const [focusField, setFocusField] = useState(null);
-
   const navigate = useNavigate();
+
+  // Carrega tipos e marcas do backend
+  useEffect(() => {
+    fetch(`${REACT_APP_YOUR_HOSTNAME}/tipos?categoria=maquina`)
+      .then((res) => res.json())
+      .then((data) => setTipos(data))
+      .catch(console.error);
+
+    fetch(`${REACT_APP_YOUR_HOSTNAME}/marcas`)
+      .then((res) => res.json())
+      .then((data) => setMarcas(data))
+      .catch(console.error);
+  }, []);
 
   function updateForm(value) {
     setForm((prev) => ({ ...prev, ...value }));
   }
 
+  function getInputStyle(name) {
+    return focusField === name ? { ...inputStyle, ...inputFocus } : inputStyle;
+  }
+
   async function onSubmit(e) {
     e.preventDefault();
-
     try {
       const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/maquinas/create`, {
         method: "POST",
@@ -112,16 +128,7 @@ export default function CreateMaquina() {
 
       const data = await response.json();
       alert(data.message || "Máquina cadastrada com sucesso!");
-
-      setForm({
-        tipo: "",
-        marca: "",
-        modelo: "",
-        potencia: "",
-        n_serie: "",
-        observacao: "",
-      });
-
+      setForm({ tipo: "", marca: "", modelo: "", potencia: "", n_serie: "", observacao: "" });
       navigate("/maquinas", { replace: true });
     } catch (error) {
       alert("Erro na comunicação com o servidor.");
@@ -129,37 +136,44 @@ export default function CreateMaquina() {
     }
   }
 
-  function getInputStyle(name) {
-    return focusField === name ? { ...inputStyle, ...inputFocus } : inputStyle;
-  }
-
   return (
     <div style={containerStyle}>
       <form onSubmit={onSubmit}>
         <h5 style={sectionTitle}>DADOS DA MÁQUINA</h5>
 
+        {/* Tipo */}
         <label style={labelStyle}>Tipo</label>
-        <input
-          type="text"
+        <select
           style={getInputStyle("tipo")}
           value={form.tipo}
           onChange={(e) => updateForm({ tipo: e.target.value })}
           onFocus={() => setFocusField("tipo")}
           onBlur={() => setFocusField(null)}
           required
-        />
+        >
+          <option value="">Selecione um tipo</option>
+          {tipos.map((t) => (
+            <option key={t._id} value={t.tipo}>{t.tipo}</option>
+          ))}
+        </select>
 
+        {/* Marca */}
         <label style={labelStyle}>Marca</label>
-        <input
-          type="text"
+        <select
           style={getInputStyle("marca")}
           value={form.marca}
           onChange={(e) => updateForm({ marca: e.target.value })}
           onFocus={() => setFocusField("marca")}
           onBlur={() => setFocusField(null)}
           required
-        />
+        >
+          <option value="">Selecione uma marca</option>
+          {marcas.map((m) => (
+            <option key={m._id} value={m.nome}>{m.nome}</option>
+          ))}
+        </select>
 
+        {/* Outros campos */}
         <label style={labelStyle}>Modelo</label>
         <input
           type="text"
@@ -199,7 +213,7 @@ export default function CreateMaquina() {
           onBlur={() => setFocusField(null)}
         />
 
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "15px" }}>
           <button
             type="submit"
             style={getBtnCadastrarStyle(hoverCadastrar)}

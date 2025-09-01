@@ -47,7 +47,7 @@ const cardHoverStyle = {
 const titleStyle = {
   marginBottom: "10px",
   fontWeight: "bold",
-  fontSize: "1.3rem",
+  fontSize: "1.1rem",
   color: "#1A381F",
   textTransform: "uppercase",
 };
@@ -60,8 +60,8 @@ const textStyle = {
 
 function getStatusStyle(status) {
   const baseStyle = {
-    padding: "5px 12px",
-    borderRadius: "10px",
+    padding: "4px 10px",
+    borderRadius: "30px",
     fontWeight: "600",
     fontSize: "0.85rem",
     display: "inline-block",
