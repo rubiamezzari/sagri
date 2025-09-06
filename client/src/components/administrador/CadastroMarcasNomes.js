@@ -2,12 +2,55 @@ import React, { useState, useEffect } from "react";
 
 const API_URL = "http://localhost:5050";
 
+// --- Botões baseados no estilo que você mandou ---
+const btnBase = {
+  padding: "6px 14px",
+  borderRadius: "20px",
+  fontWeight: 500,
+  fontSize: "0.85rem",
+  border: "1px solid #99c9a0",
+  cursor: "pointer",
+  transition: "all 0.2s ease",
+  marginLeft: "8px",
+};
+
+const btnEditar = {
+  ...btnBase,
+  backgroundColor: "#e6f4ea",
+  color: "#386641",
+};
+
+const btnSalvar = {
+  ...btnBase,
+  backgroundColor: "#e6f4ea",
+  color: "#386641",
+};
+
+const btnExcluir = {
+  ...btnBase,
+  backgroundColor: "transparent",
+  color: "#88a88c",
+  border: "1px solid #d0e7d3",
+};
+
+const closeBtnStyle = {
+  position: "absolute",
+  top: "12px",
+  right: "12px",
+  background: "none",
+  border: "none",
+  fontSize: "1.4rem",
+  cursor: "pointer",
+  color: "#666",
+};
+
+// --- Estilos gerais ---
 const styles = {
   container: {
     display: "flex",
-    gap: 20,
-    padding: 20,
-    maxWidth: 900,
+    gap: 24,
+    padding: 24,
+    maxWidth: 1100,
     margin: "0 auto",
     fontFamily: "Inter, sans-serif",
   },
@@ -15,37 +58,46 @@ const styles = {
     flex: 1,
     display: "flex",
     flexDirection: "column",
-    gap: 10,
+    gap: 16,
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: "16px",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+    border: "1px solid #E2E8F0",
   },
   title: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: "600",
     color: "#2F855A",
-    marginBottom: 10,
+    borderBottom: "2px solid #E6FFFA",
+    paddingBottom: 6,
   },
   form: {
     display: "flex",
     gap: 10,
-    marginBottom: 10,
   },
   input: {
     flex: 1,
-    padding: 8,
-    borderRadius: 6,
+    padding: "8px 10px",
+    borderRadius: 10,
     border: "1px solid #CBD5E0",
+    outline: "none",
+    fontSize: 14,
+    transition: "all 0.2s ease",
+  },
+  inputHover: {
+    border: "1px solid #2F855A",
   },
   button: {
-    padding: "8px 12px",
-    backgroundColor: "#2F855A",
-    color: "#fff",
-    border: "none",
-    borderRadius: 6,
-    cursor: "pointer",
+    ...btnSalvar,
+  },
+  buttonHover: {
+    backgroundColor: "#4cae4c",
   },
   cardList: {
     display: "flex",
     flexDirection: "column",
-    gap: 8,
+    gap: 10,
     maxHeight: 250,
     overflowY: "auto",
   },
@@ -53,50 +105,57 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 10,
-    borderRadius: 8,
-    backgroundColor: "#E6FFFA",
-    border: "1px solid #2F855A",
+    padding: "10px 12px",
+    borderRadius: 12,
+    backgroundColor: "#F9FAFB",
+    border: "1px solid #E2E8F0",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+  },
+  cardHover: {
+    backgroundColor: "#edfdfd",
   },
   cardName: {
     fontWeight: "500",
-  },
-  cardButtons: {
-    display: "flex",
-    gap: 5,
-  },
-  deleteBtn: {
-    backgroundColor: "#E53E3E",
-    border: "none",
-    color: "#fff",
-    padding: "4px 8px",
-    borderRadius: 6,
-    cursor: "pointer",
-    fontSize: 12,
-  },
-  editBtn: {
-    backgroundColor: "#3182CE",
-    border: "none",
-    color: "#fff",
-    padding: "4px 8px",
-    borderRadius: 6,
-    cursor: "pointer",
-    fontSize: 12,
+    fontSize: 15,
+    color: "#2D3748",
   },
   tabs: {
     display: "flex",
     gap: 10,
-    marginBottom: 10,
   },
   tabButton: (active) => ({
     flex: 1,
-    padding: 6,
-    backgroundColor: active ? "#2F855A" : "#E6FFFA",
+    padding: "8px 12px",
+    backgroundColor: active ? "#2F855A" : "#EDFDFD",
     color: active ? "#fff" : "#2F855A",
     border: "1px solid #2F855A",
-    borderRadius: 6,
+    borderRadius: 8,
     cursor: "pointer",
+    fontWeight: "500",
+    transition: "all 0.2s ease",
   }),
+  modalOverlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100vw",
+    height: "100vh",
+    background: "rgba(0,0,0,0.4)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 1000,
+  },
+  modalContent: {
+    position: "relative",
+    background: "#fff",
+    padding: 24,
+    borderRadius: 16,
+    width: "300px",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+    textAlign: "center",
+  },
 };
 
 const CadastroMarcasNomes = () => {
@@ -108,6 +167,9 @@ const CadastroMarcasNomes = () => {
 
   const [editMarcaId, setEditMarcaId] = useState(null);
   const [editTipoId, setEditTipoId] = useState(null);
+
+  const [modalItem, setModalItem] = useState(null); // item selecionado no modal
+  const [modalTipo, setModalTipo] = useState(""); // "marca" ou "tipo"
 
   useEffect(() => {
     fetchMarcas();
@@ -122,9 +184,15 @@ const CadastroMarcasNomes = () => {
   };
 
   const fetchTipos = async (categoria) => {
-    const res = await fetch(`${API_URL}/tipos?categoria=${categoria}`);
-    const data = await res.json();
-    setTipos(data);
+    try {
+      const res = await fetch(`${API_URL}/tipos?categoria=${categoria}`);
+      const data = await res.json();
+      // caso a API não filtre, garante no front
+      const filtrados = data.filter((t) => t.categoria === categoria);
+      setTipos(filtrados);
+    } catch (err) {
+      console.error("Erro ao carregar tipos:", err);
+    }
   };
 
   // --- SALVAR / EDITAR ---
@@ -134,7 +202,6 @@ const CadastroMarcasNomes = () => {
 
     try {
       if (editMarcaId) {
-        // editar
         await fetch(`${API_URL}/marcas/${editMarcaId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -142,7 +209,6 @@ const CadastroMarcasNomes = () => {
         });
         setEditMarcaId(null);
       } else {
-        // criar
         await fetch(`${API_URL}/marcas`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -165,14 +231,20 @@ const CadastroMarcasNomes = () => {
         await fetch(`${API_URL}/tipos/${editTipoId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tipo: tipo.trim() }),
+          body: JSON.stringify({ 
+            tipo: tipo.trim(), 
+            categoria: abaTipo 
+          }),
         });
         setEditTipoId(null);
       } else {
         await fetch(`${API_URL}/tipos`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tipo: tipo.trim(), categoria: abaTipo }),
+          body: JSON.stringify({ 
+            tipo: tipo.trim(), 
+            categoria: abaTipo 
+          }),
         });
       }
       setTipo("");
@@ -186,22 +258,13 @@ const CadastroMarcasNomes = () => {
   const excluirMarca = async (id) => {
     await fetch(`${API_URL}/marcas/${id}`, { method: "DELETE" });
     fetchMarcas();
+    setModalItem(null);
   };
 
   const excluirTipo = async (id) => {
     await fetch(`${API_URL}/tipos/${id}`, { method: "DELETE" });
     fetchTipos(abaTipo);
-  };
-
-  // --- EDITAR ---
-  const editarMarca = (m) => {
-    setMarca(m.nome);
-    setEditMarcaId(m._id || m.id);
-  };
-
-  const editarTipo = (t) => {
-    setTipo(t.tipo);
-    setEditTipoId(t._id || t.id);
+    setModalItem(null);
   };
 
   return (
@@ -223,16 +286,15 @@ const CadastroMarcasNomes = () => {
         </form>
         <div style={styles.cardList}>
           {marcas.map((m) => (
-            <div style={styles.card} key={m._id || m.id}>
+            <div
+              style={styles.card}
+              key={m._id || m.id}
+              onClick={() => {
+                setModalItem(m);
+                setModalTipo("marca");
+              }}
+            >
               <span style={styles.cardName}>{m.nome}</span>
-              <div style={styles.cardButtons}>
-                <button style={styles.editBtn} onClick={() => editarMarca(m)}>
-                  Editar
-                </button>
-                <button style={styles.deleteBtn} onClick={() => excluirMarca(m._id || m.id)}>
-                  Excluir
-                </button>
-              </div>
             </div>
           ))}
         </div>
@@ -269,20 +331,58 @@ const CadastroMarcasNomes = () => {
         </form>
         <div style={styles.cardList}>
           {tipos.map((t) => (
-            <div style={styles.card} key={t._id || t.id}>
+            <div
+              style={styles.card}
+              key={t._id || t.id}
+              onClick={() => {
+                setModalItem(t);
+                setModalTipo("tipo");
+              }}
+            >
               <span style={styles.cardName}>{t.tipo}</span>
-              <div style={styles.cardButtons}>
-                <button style={styles.editBtn} onClick={() => editarTipo(t)}>
-                  Editar
-                </button>
-                <button style={styles.deleteBtn} onClick={() => excluirTipo(t._id || t.id)}>
-                  Excluir
-                </button>
-              </div>
             </div>
           ))}
         </div>
       </div>
+
+      {/* MODAL */}
+      {modalItem && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.modalContent}>
+            <button style={closeBtnStyle} onClick={() => setModalItem(null)}>
+              ✕
+            </button>
+            <h3>{modalTipo === "marca" ? modalItem.nome : modalItem.tipo}</h3>
+            <div style={{ marginTop: 20 }}>
+              <button
+                style={btnEditar}
+                onClick={() => {
+                  if (modalTipo === "marca") {
+                    setMarca(modalItem.nome);
+                    setEditMarcaId(modalItem._id || modalItem.id);
+                  } else {
+                    setTipo(modalItem.tipo);
+                    setEditTipoId(modalItem._id || modalItem.id);
+                  }
+                  setModalItem(null);
+                }}
+              >
+                Editar
+              </button>
+              <button
+                style={btnExcluir}
+                onClick={() => {
+                  modalTipo === "marca"
+                    ? excluirMarca(modalItem._id || modalItem.id)
+                    : excluirTipo(modalItem._id || modalItem.id);
+                }}
+              >
+                Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

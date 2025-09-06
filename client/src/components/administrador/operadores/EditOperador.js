@@ -45,34 +45,34 @@ const inputFocus = {
   borderColor: "#e8e8e8",
   outline: "none",
 };
-
 const getBtnSalvarStyle = (hover) => ({
-  backgroundColor: hover ? "#143018" : "#1A381F",
-  color: "#daf4d0",
-  padding: "8px 10px",
-  borderRadius: "5px",
-  border: "none",
+  padding: "8px 18px",
+  borderRadius: "20px",
+  fontWeight: 500,
+  fontSize: "0.9rem",
+  border: "1px solid #99c9a0",
   cursor: "pointer",
-  fontWeight: "500",
-  fontSize: "1.1rem",
-  width: "30%",
-  marginTop: "10px",
-  transition: "background-color 0.3s",
+  transition: "all 0.2s ease",
+  marginLeft: "10px",
+  textDecoration: "none", 
+  backgroundColor: "#e6f4ea",
+  color: "#386641",
 });
 
+
+
 const getBtnCancelarStyle = (hover) => ({
-  backgroundColor: hover ? "#c2dbac" : "#daf4d0",
-  color: "#86a479",
-  padding: "8px 10px",
-  borderRadius: "5px",
-  border: "none",
+  padding: "8px 18px",
+  borderRadius: "20px",
+  fontWeight: 500,
+  fontSize: "0.9rem",
+  border: "1px solid #99c9a0",
   cursor: "pointer",
-  fontWeight: "500",
-  fontSize: "1.1rem",
-  width: "30%",
-  marginTop: "10px",
+  transition: "all 0.2s ease",
   marginLeft: "10px",
-  transition: "background-color 0.3s",
+  textDecoration: "none", 
+   backgroundColor: "#e6f4ea",
+  color: "#386641",
 });
 
 export default function EditOperador() {

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const API_URL = "http://localhost:5050";
 
-// Estilos de botões arredondados e delicados
+
 const btnBase = {
   padding: "8px 18px",
   borderRadius: "20px",
@@ -13,7 +13,7 @@ const btnBase = {
   cursor: "pointer",
   transition: "all 0.2s ease",
   marginLeft: "10px",
-  textDecoration: "none", // Mantido para o Link
+  textDecoration: "none", 
 };
 
 const btnEditar = {
@@ -92,8 +92,8 @@ export default function UserListOperador() {
       width: "100%",
       backgroundColor: "#fff",
       padding: "20px",
-      borderRadius: "16px", // Cantos arredondados
-      boxShadow: "0 4px 12px rgba(0,0,0,0.05)" // Sombra sutil
+      borderRadius: "16px", 
+      boxShadow: "0 4px 12px rgba(0,0,0,0.05)" 
     }}>
       <input
         type="text"
@@ -106,24 +106,24 @@ export default function UserListOperador() {
         style={{
           width: "100%",
           padding: "10px",
-          borderRadius: "8px", // Cantos mais arredondados
-          border: "1px solid #d4e3d6", // Borda mais suave
-          outlineColor: "#5cb85c", // Cor no foco
+          borderRadius: "8px", 
+          border: "1px solid #d4e3d6",
+          outlineColor: "#5cb85c", 
           fontSize: "0.85rem",
-          marginBottom: "20px", // Aumentei o espaçamento
+          marginBottom: "20px", 
         }}
       />
 
       <table style={{
         width: "100%",
-        borderCollapse: "separate", // Necessário para border-radius
-        borderSpacing: "0 10px", // Espaço entre as linhas
+        borderCollapse: "separate", 
+        borderSpacing: "0 10px", 
         fontSize: "0.85rem",
-        textAlign: "left", // Alinhei o texto à esquerda para um visual mais limpo
+        textAlign: "left", 
       }}>
         <thead style={{
           fontWeight: "600",
-          backgroundColor: "#f7fcf8", // Fundo mais claro para o cabeçalho
+          backgroundColor: "#f7fcf8", 
         }}>
           <tr>
             <th style={{ padding: "12px 10px", borderBottom: "1px solid #e0f2e0" }}>#</th>

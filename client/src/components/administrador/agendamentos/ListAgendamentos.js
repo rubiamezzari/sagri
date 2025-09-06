@@ -71,23 +71,35 @@ const Detalhes = ({ solicitacao, handleUpdateStatus, handleDelete }) => {
       fontSize: "0.95rem",
       borderBottom: "1px solid #e0e0e0",
       alignItems: "center",
+      lineHeight: "1.4",
     },
     campoLabel: {
       minWidth: "160px",
       fontWeight: "bold",
       color: "#1B4D3E",
     },
-    btn: {
+    btnBase: {
       padding: "8px 16px",
-      borderRadius: 5,
+      borderRadius: "20px",
       border: "none",
       cursor: "pointer",
       marginRight: 10,
       fontWeight: 600,
-      backgroundColor: "#96c7b8ff",
-      color: "#174137ff",
-      fontSize: 14,
+      fontSize: "0.85rem",
       transition: "all 0.3s ease",
+      boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+    },
+    btnaprovar: {
+      backgroundColor: "#e6f4ea",
+      color: "#2e6d4c",
+    },
+    btnRecusar: {
+      backgroundColor: "#fdecea",
+      color: "#b23b3b",
+    },
+    btnExcluir: {
+      backgroundColor: "#e5e5e5ff",
+      color: "#6d6d6dff",
     },
   };
 
@@ -111,31 +123,38 @@ const Detalhes = ({ solicitacao, handleUpdateStatus, handleDelete }) => {
           <div>{solicitacao.observacao}</div>
         </div>
       )}
-      <div style={{ marginTop: 15 }}>
+
+      <div style={{ marginTop: 15, display: "flex", gap: "8px" }}>
         <button
-          style={detalhesStyles.btn}
+          style={{ ...detalhesStyles.btnBase, ...detalhesStyles.btnaprovar }}
           onClick={(e) => {
             e.stopPropagation();
-            handleUpdateStatus(solicitacao._id, "Aceito");
+            handleUpdateStatus(solicitacao._id, "aprovado");
           }}
+          onMouseOver={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
+          onMouseOut={(e) => (e.currentTarget.style.transform = "scale(1)")}
         >
-          Aceitar
+          aprovar
         </button>
         <button
-          style={detalhesStyles.btn}
+          style={{ ...detalhesStyles.btnBase, ...detalhesStyles.btnRecusar }}
           onClick={(e) => {
             e.stopPropagation();
             handleUpdateStatus(solicitacao._id, "Recusado");
           }}
+          onMouseOver={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
+          onMouseOut={(e) => (e.currentTarget.style.transform = "scale(1)")}
         >
           Recusar
         </button>
         <button
-          style={detalhesStyles.btn}
+          style={{ ...detalhesStyles.btnBase, ...detalhesStyles.btnExcluir }}
           onClick={(e) => {
             e.stopPropagation();
             handleDelete(solicitacao._id);
           }}
+          onMouseOver={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
+          onMouseOut={(e) => (e.currentTarget.style.transform = "scale(1)")}
         >
           Excluir
         </button>
@@ -159,7 +178,9 @@ export default function ListAgendamentos() {
         const solicitacoesComNomes = await Promise.all(
           data.map(async (sol) => {
             if (sol.usuario_id) {
-              const userRes = await fetch(`${API_URL}/associados/${sol.usuario_id}`);
+              const userRes = await fetch(
+                `${API_URL}/associados/${sol.usuario_id}`
+              );
               const userData = await userRes.json();
               return { ...sol, nomeUsuario: userData.nome || "Associado" };
             }
@@ -217,8 +238,8 @@ export default function ListAgendamentos() {
   const getStatusColors = (status) => {
     switch (status?.toLowerCase()) {
       case "pendente":
-        return { bg: "#FFF3CD", text: "#856404" };
-      case "aceito":
+        return { bg: "#e3e3e3ff", text: "#5a5a5aff" };
+      case "aprovado":
         return { bg: "#C7E5CD", text: "#1B4D3E" };
       case "recusado":
         return { bg: "#F8D7DA", text: "#721C24" };
@@ -237,7 +258,7 @@ export default function ListAgendamentos() {
           fontWeight: 600,
         }}
       >
-       
+        Lista de Agendamentos
       </h2>
 
       <input
@@ -273,7 +294,9 @@ export default function ListAgendamentos() {
                   {new Date(s.data_servico).toLocaleDateString()}
                 </span>
               </span>
-              <span style={styles.statusLabel(bg, text)}>{s.status || "Pendente"}</span>
+              <span style={styles.statusLabel(bg, text)}>
+                {s.status || "Pendente"}
+              </span>
             </div>
 
             <div

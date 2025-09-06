@@ -1,24 +1,21 @@
 import React, { useState, useEffect } from "react";
-// Removendo o createPortal daqui se não for mais usado,
-// ou garantindo que o target 'document.body' exista e esteja funcionando corretamente.
-// Para manter a consistência com os outros modais que não usaram createPortal no exemplo anterior,
-// vou remover por enquanto. Se precisar dele, me avise!
+
 
 const API_URL = "http://localhost:5050";
 
-// Estilos base para a nova abordagem (delicada)
+
 const linha = {
   padding: "6px 0",
   display: "flex",
   gap: "8px",
   fontSize: "0.95rem",
-  borderBottom: "1px solid #e0f2e0", // Cor mais suave
+  borderBottom: "1px solid #e0f2e0", 
 };
 
 const campoLabel = {
   minWidth: "140px",
   fontWeight: "bold",
-  color: "#386641", // Tonalidade mais suave de verde escuro
+  color: "#386641", 
 };
 
 const tituloNome = {
@@ -26,8 +23,8 @@ const tituloNome = {
   fontWeight: "bold",
   textTransform: "uppercase",
   paddingBottom: "10px",
-  marginBottom: "16px", // Espaçamento mais coeso
-  borderBottom: "2px solid #a8e0a8", // Borda mais suave
+  marginBottom: "16px", 
+  borderBottom: "2px solid #a8e0a8", 
   color: "#386641",
 };
 
@@ -39,16 +36,16 @@ const closeBtnStyle = {
   border: "none",
   fontSize: "1.4rem",
   cursor: "pointer",
-  color: "#666", // Cor mais suave
+  color: "#666", 
 };
 
 const boxStyle = {
   backgroundColor: "#fff",
-  padding: "28px", // Um pouco mais de padding
-  borderRadius: "16px", // Cantos mais arredondados
-  width: "580px", // Um pouco mais largo
+  padding: "28px", 
+  borderRadius: "16px", 
+  width: "580px", 
   maxWidth: "95%",
-  boxShadow: "0 10px 30px rgba(0,0,0,0.1)", // Sombra mais sutil
+  boxShadow: "0 10px 30px rgba(0,0,0,0.1)", 
   fontFamily: "'Segoe UI', sans-serif",
   maxHeight: "85vh",
   overflowY: "auto",
@@ -61,66 +58,57 @@ const modalStyle = {
   left: 0,
   width: "100vw",
   height: "100vh",
-  backgroundColor: "rgba(0, 0, 0, 0.3)", // Fundo do modal mais transparente
+  backgroundColor: "rgba(0, 0, 0, 0.3)", 
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
   zIndex: 1000,
 };
 
-// Estilos de botões arredondados e delicados
+
 const btnBase = {
   padding: "8px 18px",
-  borderRadius: "20px", // Cantos bem arredondados para um visual suave
-  fontWeight: 500, // Menos bold
+  borderRadius: "20px",
+  fontWeight: 500,
   fontSize: "0.9rem",
-  border: "1px solid #99c9a0", // Borda sutil
+  border: "1px solid #99c9a0",
   cursor: "pointer",
   transition: "all 0.2s ease",
-  marginLeft: "10px", // Espaçamento entre botões
+  marginLeft: "10px",
+  textDecoration: "none", 
 };
 
 const btnEditar = {
   ...btnBase,
-  backgroundColor: "#e6f4ea", // Fundo mais claro
-  color: "#386641", // Texto verde escuro
-  "&:hover": {
-    backgroundColor: "#d9eadd", // Um pouco mais escuro no hover
-  },
-};
-
-const btnSalvar = {
-  ...btnBase,
-  backgroundColor: "#5cb85c", // Verde vibrante para salvar
-  color: "#fff", // Texto branco
-  border: "none",
-  "&:hover": {
-    backgroundColor: "#4CAF50", // Um pouco mais escuro no hover
-  },
+  backgroundColor: "#e6f4ea",
+  color: "#386641",
 };
 
 const btnExcluir = {
   ...btnBase,
-  backgroundColor: "transparent", // Fundo transparente para Excluir
-  color: "#88a88c", // Texto cinza esverdeado
-  border: "1px solid #d0e7d3", // Borda mais clara
-  "&:hover": {
-    backgroundColor: "#f2fcf3", // Um leve fundo no hover
-    color: "#c24747", // Uma cor de alerta suave no hover
-  },
+  backgroundColor: "transparent",
+  color: "#88a88c",
+  border: "1px solid #d0e7d3",
 };
+const btnSalvar = {
+  ...btnBase,
+  backgroundColor: "#e6f4ea",
+  color: "#386641",
+};
+
+
 
 const inputStyle = {
   width: "100%",
-  padding: "10px 12px", // Mais padding
-  marginBottom: "15px", // Mais espaço abaixo
-  borderRadius: "8px", // Cantos mais arredondados
-  border: "1px solid #d4e3d6", // Borda mais clara
+  padding: "10px 12px", 
+  marginBottom: "15px", 
+  borderRadius: "8px", 
+  border: "1px solid #d4e3d6", 
   fontSize: "0.95rem",
-  outline: "none", // Remove o contorno padrão
+  outline: "none", 
   transition: "border-color 0.2s",
   "&:focus": {
-    borderColor: "#5cb85c", // Borda verde no foco
+    borderColor: "#5cb85c", 
   },
 };
 
@@ -274,7 +262,7 @@ export default function DetalhesServicoModal({ servico, onClose, onDeleted }) {
           {modoEdicao ? (
             <>
               <button
-                style={{ ...btnExcluir, marginRight: "10px" }} // Adicionando "Cancelar"
+                style={{ ...btnExcluir, marginRight: "10px" }} 
                 onClick={() => setModoEdicao(false)}
                 type="button"
               >

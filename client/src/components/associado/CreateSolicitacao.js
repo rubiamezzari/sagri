@@ -9,6 +9,8 @@ import {
   endOfWeek,
   eachDayOfInterval,
   isToday,
+  isSameDay,
+  isWeekend,
 } from "date-fns";
 import ptBR from "date-fns/locale/pt-BR";
 
@@ -60,30 +62,31 @@ const inputFocus = {
 };
 
 const getBtnCadastrarStyle = (hover) => ({
-  backgroundColor: hover ? "#143018" : "#1B4D3E",
-  color: "#D2EFE6",
-  padding: "8px 10px",
-  borderRadius: "5px",
-  border: "none",
+  padding: "8px 18px",
+  borderRadius: "20px",
+  fontWeight: 500,
+  fontSize: "0.9rem",
+  border: "1px solid #99c9a0",
   cursor: "pointer",
-  fontWeight: "500",
-  fontSize: "1.1rem",
-  width: "30%",
-  transition: "background-color 0.3s",
+  transition: "all 0.2s ease",
+  marginLeft: "10px",
+  textDecoration: "none",
+  backgroundColor: "#e6f4ea",
+  color: "#386641",
 });
 
 const getBtnCancelarStyle = (hover) => ({
-  backgroundColor: hover ? "#c7e5cc" : "#D2EFE6",
-  color: "#143018",
-  padding: "8px 10px",
-  borderRadius: "5px",
-  border: "none",
+  padding: "8px 18px",
+  borderRadius: "20px",
+  fontWeight: 500,
+  fontSize: "0.9rem",
+  border: "1px solid #99c9a0",
   cursor: "pointer",
-  fontWeight: "500",
-  fontSize: "1.1rem",
-  width: "30%",
-  marginLeft: "20px",
-  transition: "background-color 0.3s",
+  transition: "all 0.2s ease",
+  marginLeft: "10px",
+  textDecoration: "none",
+  backgroundColor: "#e6f4ea",
+  color: "#386641",
 });
 
 const calendarHeader = {
@@ -95,7 +98,7 @@ const calendarHeader = {
 
 const grid = {
   display: "grid",
-  gridTemplateColumns: "repeat(7, 1fr)",
+  gridTemplateColumns: "repeat(5, 1fr)",
   gap: "8px",
 };
 
@@ -106,9 +109,9 @@ const dayNameStyle = {
   textAlign: "center",
 };
 
-const dayStyle = (disponivel, isHoje) => ({
-  backgroundColor: disponivel ? "#D2EFE6" : "#f1f1f1",
-  color: disponivel ? "#143018" : "#888",
+const dayStyle = (disponivel, isHoje, isAprovado) => ({
+  backgroundColor: isAprovado ? "#1B4D3E" : disponivel ? "#D2EFE6" : "#f1f1f1",
+  color: isAprovado ? "#fff" : disponivel ? "#143018" : "#888",
   padding: "16px 0",
   textAlign: "center",
   borderRadius: "6px",
@@ -123,6 +126,7 @@ export default function CreateSolicitacao() {
   const [dataSelecionada, setDataSelecionada] = useState(null);
   const [mesAtual, setMesAtual] = useState(new Date());
   const [servicosDisponiveis, setServicosDisponiveis] = useState([]);
+  const [agendamentosAprovados, setAgendamentosAprovados] = useState([]);
   const [form, setForm] = useState({
     tipoServico: "",
     hora: "",
@@ -134,19 +138,34 @@ export default function CreateSolicitacao() {
   const [hoverCancelar, setHoverCancelar] = useState(false);
   const [focusField, setFocusField] = useState(null);
 
+  const fetchAgendamentosAprovados = () => {
+    // Buscando por status "aprovado"
+    fetch(`${API_URL}/solicitacoes?status=aprovado`)
+      .then((res) => res.json())
+      .then((data) => {
+        setAgendamentosAprovados(data.map(item => new Date(item.data_servico)));
+      })
+      .catch((err) =>
+        console.error("Erro ao buscar agendamentos aprovados:", err)
+      );
+  };
+
   useEffect(() => {
     fetch(`${API_URL}/servicos`)
       .then((res) => res.json())
       .then((data) => setServicosDisponiveis(data))
       .catch((err) => console.error("Erro ao buscar serviços:", err));
+    fetchAgendamentosAprovados();
   }, []);
 
-  const nomesDias = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+  const nomesDias = ["Seg", "Ter", "Qua", "Qui", "Sex"];
 
   function diasDoCalendario(mes) {
-    const inicio = startOfWeek(startOfMonth(mes), { weekStartsOn: 0 });
-    const fim = endOfWeek(endOfMonth(mes), { weekStartsOn: 0 });
-    return eachDayOfInterval({ start: inicio, end: fim });
+    const inicio = startOfWeek(startOfMonth(mes), { weekStartsOn: 1 });
+    const fim = endOfWeek(endOfMonth(mes), { weekStartsOn: 1 });
+    const dias = eachDayOfInterval({ start: inicio, end: fim });
+    
+    return dias.filter(day => !isWeekend(day));
   }
 
   function selecionarData(dia) {
@@ -205,6 +224,7 @@ export default function CreateSolicitacao() {
         alert("Solicitação enviada com sucesso!");
         setForm({ tipoServico: "", hora: "", tempo: "", observacao: "" });
         setEtapa(1);
+        fetchAgendamentosAprovados();
       })
       .catch((err) => {
         console.error(err);
@@ -214,35 +234,80 @@ export default function CreateSolicitacao() {
 
   const dias = diasDoCalendario(mesAtual);
 
+  const isDayAprovado = (day) => {
+    return agendamentosAprovados.some(aprovadoDate => isSameDay(day, aprovadoDate));
+  };
+  
+  const isDayInCurrentMonth = (day) => {
+    return day.getMonth() === mesAtual.getMonth();
+  };
+
   return (
     <div style={containerStyle}>
       {etapa === 1 && (
         <>
           <div style={calendarHeader}>
-            <button style={getBtnCancelarStyle(false)} onClick={() => setMesAtual(subMonths(mesAtual, 1))}>←</button>
-            <h3 style={{ margin: 0, color: "#1B4D3E" }}>{format(mesAtual, "MMMM yyyy", { locale: ptBR })}</h3>
-            <button style={getBtnCancelarStyle(false)} onClick={() => setMesAtual(addMonths(mesAtual, 1))}>→</button>
+            <button
+              style={getBtnCancelarStyle(false)}
+              onClick={() => setMesAtual(subMonths(mesAtual, 1))}
+            >
+              ←
+            </button>
+            <h3 style={{ margin: 0, color: "#1B4D3E" }}>
+              {format(mesAtual, "MMMM yyyy", { locale: ptBR })}
+            </h3>
+            <button
+              style={getBtnCancelarStyle(false)}
+              onClick={() => setMesAtual(addMonths(mesAtual, 1))}
+            >
+              →
+            </button>
           </div>
           <div style={grid}>
-            {nomesDias.map((dia) => (<div key={dia} style={dayNameStyle}>{dia}</div>))}
-            {dias.map((dia, index) => (
-              <div
-                key={index}
-                style={dayStyle(true, isToday(dia))}
-                onClick={() => selecionarData(dia)}
-              >
-                {dia.getMonth() === mesAtual.getMonth() ? dia.getDate() : ""}
+            {nomesDias.map((dia) => (
+              <div key={dia} style={dayNameStyle}>
+                {dia}
               </div>
             ))}
+            {dias.map((dia, index) => {
+              const inMonth = isDayInCurrentMonth(dia);
+              const isAprovado = inMonth && isDayAprovado(dia);
+              const isClickable = inMonth && !isAprovado;
+
+              return (
+                <div
+                  key={index}
+                  style={dayStyle(isClickable, isToday(dia), isAprovado)}
+                  onClick={() => isClickable && selecionarData(dia)}
+                >
+                  {inMonth ? dia.getDate() : ""}
+                </div>
+              );
+            })}
           </div>
         </>
       )}
 
       {etapa === 2 && (
-        <form onSubmit={(e) => { e.preventDefault(); enviarFormulario(); }}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            enviarFormulario();
+          }}
+        >
           <h5 style={sectionTitle}>DADOS DO AGENDAMENTO</h5>
-          <p style={{ marginBottom: "20px", color: "#143018", fontWeight: "600", textAlign: "center", fontSize: "0.9rem" }}>
-            {format(dataSelecionada, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+          <p
+            style={{
+              marginBottom: "20px",
+              color: "#143018",
+              fontWeight: "600",
+              textAlign: "center",
+              fontSize: "0.9rem",
+            }}
+          >
+            {format(dataSelecionada, "dd 'de' MMMM 'de' yyyy", {
+              locale: ptBR,
+            })}
           </p>
 
           <label style={labelStyle}>Tipo de serviço</label>
@@ -252,12 +317,18 @@ export default function CreateSolicitacao() {
             onChange={handleInput}
             onFocus={() => setFocusField("tipoServico")}
             onBlur={() => setFocusField(null)}
-            style={focusField === "tipoServico" ? { ...inputStyle, ...inputFocus } : inputStyle}
+            style={
+              focusField === "tipoServico"
+                ? { ...inputStyle, ...inputFocus }
+                : inputStyle
+            }
             required
           >
             <option value="">Selecione...</option>
             {servicosDisponiveis.map((s) => (
-              <option key={s._id} value={s.nome}>{s.nome}</option>
+              <option key={s._id} value={s.nome}>
+                {s.nome}
+              </option>
             ))}
           </select>
 
@@ -269,7 +340,11 @@ export default function CreateSolicitacao() {
             onChange={handleInput}
             onFocus={() => setFocusField("hora")}
             onBlur={() => setFocusField(null)}
-            style={focusField === "hora" ? { ...inputStyle, ...inputFocus } : inputStyle}
+            style={
+              focusField === "hora"
+                ? { ...inputStyle, ...inputFocus }
+                : inputStyle
+            }
             required
           />
 
@@ -281,7 +356,11 @@ export default function CreateSolicitacao() {
             onChange={handleInput}
             onFocus={() => setFocusField("tempo")}
             onBlur={() => setFocusField(null)}
-            style={focusField === "tempo" ? { ...inputStyle, ...inputFocus } : inputStyle}
+            style={
+              focusField === "tempo"
+                ? { ...inputStyle, ...inputFocus }
+                : inputStyle
+            }
             required
           />
 
@@ -292,12 +371,37 @@ export default function CreateSolicitacao() {
             onChange={handleInput}
             onFocus={() => setFocusField("observacao")}
             onBlur={() => setFocusField(null)}
-            style={focusField === "observacao" ? { ...inputStyle, ...inputFocus, height: "80px" } : { ...inputStyle, height: "80px" }}
+            style={
+              focusField === "observacao"
+                ? { ...inputStyle, ...inputFocus, height: "80px" }
+                : { ...inputStyle, height: "80px" }
+            }
           />
 
-          <div style={{ marginTop: "30px", display: "flex", justifyContent: "center" }}>
-            <button type="submit" style={getBtnCadastrarStyle(hoverCadastrar)} onMouseEnter={() => setHoverCadastrar(true)} onMouseLeave={() => setHoverCadastrar(false)}>Enviar</button>
-            <button type="button" style={getBtnCancelarStyle(hoverCancelar)} onMouseEnter={() => setHoverCancelar(true)} onMouseLeave={() => setHoverCancelar(false)} onClick={() => setEtapa(1)}>Cancelar</button>
+          <div
+            style={{
+              marginTop: "30px",
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <button
+              type="submit"
+              style={getBtnCadastrarStyle(hoverCadastrar)}
+              onMouseEnter={() => setHoverCadastrar(true)}
+              onMouseLeave={() => setHoverCadastrar(false)}
+            >
+              Enviar
+            </button>
+            <button
+              type="button"
+              style={getBtnCancelarStyle(hoverCancelar)}
+              onMouseEnter={() => setHoverCancelar(true)}
+              onMouseLeave={() => setHoverCancelar(false)}
+              onClick={() => setEtapa(1)}
+            >
+              Cancelar
+            </button>
           </div>
         </form>
       )}

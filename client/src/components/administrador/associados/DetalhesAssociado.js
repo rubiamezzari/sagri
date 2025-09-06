@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-// Remova o import `useParams` pois ele não é mais necessário
-// import { useParams } from "react-router-dom"; 
 
 const API_URL = "http://localhost:5050";
 
@@ -9,13 +7,13 @@ const linha = {
   display: "flex",
   gap: "8px",
   fontSize: "0.95rem",
-  borderBottom: "1px solid #e0f2e0", // Cor mais suave para a borda
+  borderBottom: "1px solid #e0f2e0",
 };
 
 const campo = {
   minWidth: "140px",
   fontWeight: "bold",
-  color: "#386641", // Tonalidade mais suave de verde escuro
+  color: "#386641",
 };
 
 const tituloNome = {
@@ -24,7 +22,7 @@ const tituloNome = {
   textTransform: "uppercase",
   paddingBottom: "10px",
   marginBottom: "16px",
-  borderBottom: "2px solid #a8e0a8", // Borda mais suave
+  borderBottom: "2px solid #a8e0a8",
   color: "#386641",
 };
 
@@ -36,18 +34,18 @@ const closeBtnStyle = {
   border: "none",
   fontSize: "1.4rem",
   cursor: "pointer",
-  color: "#666", // Cor mais suave para o X
+  color: "#666",
 };
 
 const boxStyle = {
   backgroundColor: "#fff",
-  padding: "28px", // Um pouco mais de padding para um respiro visual
-  borderRadius: "16px", // Cantos mais arredondados
-  width: "580px", // Um pouco mais largo
+  padding: "28px",
+  borderRadius: "16px",
+  width: "580px",
   maxWidth: "95%",
-  boxShadow: "0 10px 30px rgba(0,0,0,0.1)", // Sombra mais sutil
+  boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
   fontFamily: "'Segoe UI', sans-serif",
-  maxHeight: "85vh", // Um pouco mais de altura
+  maxHeight: "85vh",
   overflowY: "auto",
   position: "relative",
 };
@@ -58,7 +56,7 @@ const modalStyle = {
   left: 0,
   width: "100vw",
   height: "100vh",
-  backgroundColor: "rgba(0, 0, 0, 0.3)", // Fundo do modal mais transparente
+  backgroundColor: "rgba(0, 0, 0, 0.3)",
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
@@ -66,11 +64,11 @@ const modalStyle = {
 };
 
 const btnBase = {
-  padding: "8px 18px", // Mais padding
-  borderRadius: "20px", // Cantos bem arredondados para um visual suave
-  fontWeight: 500, // Menos bold
+  padding: "8px 18px",
+  borderRadius: "20px",
+  fontWeight: 500,
   fontSize: "0.9rem",
-  border: "1px solid #99c9a0", // Borda sutil
+  border: "1px solid #99c9a0",
   cursor: "pointer",
   transition: "all 0.2s ease",
   marginLeft: "10px",
@@ -78,42 +76,41 @@ const btnBase = {
 
 const btnEditar = {
   ...btnBase,
-  backgroundColor: "#e6f4ea", // Fundo mais claro
-  color: "#386641", // Texto verde escuro
+  backgroundColor: "#e6f4ea",
+  color: "#386641",
   "&:hover": {
-    backgroundColor: "#d9eadd", // Um pouco mais escuro no hover
+    backgroundColor: "#d9eadd",
   },
 };
 
 const btnExcluir = {
   ...btnBase,
-  backgroundColor: "transparent", // Fundo transparente para Excluir
-  color: "#88a88c", // Texto cinza esverdeado
-  border: "1px solid #d0e7d3", // Borda mais clara
+  backgroundColor: "transparent",
+  color: "#88a88c",
+  border: "1px solid #d0e7d3",
   "&:hover": {
-    backgroundColor: "#f2fcf3", // Um leve fundo no hover
-    color: "#c24747", // Uma cor de alerta suave no hover
+    backgroundColor: "#f2fcf3",
+    color: "#c24747",
   },
 };
 
 const navContainer = {
-  marginTop: "20px", // Mais espaço acima
+  marginTop: "20px",
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
-  gap: "8px", // Espaçamento entre os dots
+  gap: "8px",
 };
 
-// Estilo para os "dots" de navegação, mais delicados
 const navDot = (active) => ({
   width: "10px",
   height: "10px",
   borderRadius: "50%",
-  backgroundColor: active ? "#5cb85c" : "#e0e0e0", // Verde vibrante para ativo, cinza suave para inativo
+  backgroundColor: active ? "#386641" : "#e0e0e0",
   cursor: "pointer",
-  transition: "background-color 0.2s, transform 0.2s", // Animação suave
-  border: `1px solid ${active ? "#4CAF50" : "transparent"}`, // Borda sutil para o ativo
-  transform: active ? "scale(1.1)" : "scale(1)", // Leve aumento no ativo
+  transition: "background-color 0.2s, transform 0.2s",
+  border: `1px solid ${active ? "#386641" : "transparent"}`,
+  transform: active ? "scale(1.1)" : "scale(1)",
 });
 
 export default function DetalhesAssociado({
@@ -148,7 +145,6 @@ export default function DetalhesAssociado({
   const docs = associado?.documentos || {};
 
   const paginas = [
-    // Página 1: Dados Pessoais
     <>
       <div style={linha}>
         <div style={campo}>Número:</div>
@@ -182,15 +178,15 @@ export default function DetalhesAssociado({
             target="_blank"
             rel="noopener noreferrer"
             style={{
-              backgroundColor: "#d4edda", // Fundo mais claro para links
+              backgroundColor: "#d4edda",
               color: "#386641",
-              padding: "4px 9px", // Mais padding
-              borderRadius: "15px", // Mais arredondado
+              padding: "4px 9px",
+              borderRadius: "15px",
               textDecoration: "none",
               display: "inline-block",
               marginTop: "4px",
               fontWeight: 500,
-              fontSize: "0.85rem", // Fonte um pouco menor
+              fontSize: "0.85rem",
             }}
           >
             Anuidade
@@ -223,7 +219,6 @@ export default function DetalhesAssociado({
         )}
       </div>
     </>,
-    // Página 2: Endereço
     <>
       <h4 style={{ marginBottom: "10px", color: "#386641" }}>Endereço:</h4>
       <div style={linha}>
@@ -268,10 +263,8 @@ export default function DetalhesAssociado({
 
         <h3 style={tituloNome}>{associado?.nome || "Associado"}</h3>
 
-        {/* Conteúdo da página atual */}
         {paginas[pagina - 1]}
 
-        {/* Navegação por "dots" */}
         <div style={navContainer}>
           {paginas.map((_, i) => (
             <div
@@ -282,7 +275,7 @@ export default function DetalhesAssociado({
           ))}
         </div>
 
-        <div style={{ marginTop: 25, textAlign: "right" }}> {/* Mais espaço acima */}
+        <div style={{ marginTop: 25, textAlign: "right" }}>
           <button style={btnEditar} onClick={() => alert("Abrir edição")}>
             Editar
           </button>

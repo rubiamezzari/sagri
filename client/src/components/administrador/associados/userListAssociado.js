@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import DetalhesAssociado from "./DetalhesAssociado"; // Importe o componente DetalhesAssociado
+import DetalhesAssociado from "./DetalhesAssociado"; 
 
 export default function UserListAssociado({ associados }) {
   const [busca, setBusca] = useState("");
   const [paginaAtual, setPaginaAtual] = useState(1);
-  const [associadoSelecionado, setAssociadoSelecionado] = useState(null); // Estado para o associado do modal
+  const [associadoSelecionado, setAssociadoSelecionado] = useState(null); 
 
   const tipoUsuario = localStorage.getItem("tipoUsuario");
   const usuarioId = localStorage.getItem("usuarioId");
@@ -158,7 +158,7 @@ export default function UserListAssociado({ associados }) {
               border: "none",
               cursor: paginaAtual === 1 ? "not-allowed" : "pointer",
               opacity: paginaAtual === 1 ? 0.4 : 1,
-              color: "#1B4D3E",
+              color: "#103329ff",
             }}
           >
             ←

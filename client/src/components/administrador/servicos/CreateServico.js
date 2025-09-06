@@ -3,6 +3,32 @@ import { useNavigate } from "react-router-dom";
 
 const API_URL = "http://localhost:5050";
 
+// Estilos base para os botões (mantidos dos componentes anteriores)
+const btnBase = {
+  padding: "8px 18px",
+  borderRadius: "20px",
+  fontWeight: 500,
+  fontSize: "0.9rem",
+  border: "1px solid #99c9a0",
+  cursor: "pointer",
+  transition: "all 0.2s ease",
+  marginLeft: "10px",
+  textDecoration: "none", 
+};
+
+const btnSalvar = {
+  ...btnBase,
+  backgroundColor: "#e6f4ea",
+  color: "#386641",
+};
+
+const btnExcluir = {
+  ...btnBase,
+  backgroundColor: "transparent",
+  color: "#88a88c",
+  border: "1px solid #d0e7d3",
+};
+
 const containerStyle = {
   maxWidth: "800px",
   margin: "40px auto",
@@ -46,33 +72,6 @@ const inputFocus = {
   outline: "none",
 };
 
-const getBtnCadastrarStyle = (hover) => ({
-  backgroundColor: hover ? "#143018" : "#1c3d21",
-  color: "#D2EFE6",
-  padding: "5px 15px",
-  borderRadius: "5px",
-  border: "none",
-  cursor: "pointer",
-  fontWeight: "500",
-  fontSize: "1.1rem",
-  width: "30%",
-  transition: "background-color 0.3s",
-});
-
-const getBtnCancelarStyle = (hover) => ({
-  backgroundColor: hover ? "#ccedbf" : "#D2EFE6",
-  color: "#143018",
-  padding: "5px 15px",
-  borderRadius: "5px",
-  border: "none",
-  cursor: "pointer",
-  fontWeight: "500",
-  fontSize: "1.1rem",
-  width: "30%",
-  marginLeft: "20px",
-  transition: "background-color 0.3s",
-});
-
 export default function CreateServico() {
   const [form, setForm] = useState({
     nome: "",
@@ -84,8 +83,6 @@ export default function CreateServico() {
   const [tiposMaquina, setTiposMaquina] = useState([]);
   const [tiposImplemento, setTiposImplemento] = useState([]);
   const [focusField, setFocusField] = useState(null);
-  const [hoverCadastrar, setHoverCadastrar] = useState(false);
-  const [hoverCancelar, setHoverCancelar] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -188,24 +185,19 @@ export default function CreateServico() {
           onBlur={() => setFocusField(null)}
         />
 
-        <div style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
-          <button
-            type="submit"
-            style={getBtnCadastrarStyle(hoverCadastrar)}
-            onMouseEnter={() => setHoverCadastrar(true)}
-            onMouseLeave={() => setHoverCadastrar(false)}
-          >
-            Enviar
-          </button>
-
+        <div style={{ marginTop: "30px", textAlign: "right", display: "flex", justifyContent: "flex-end", gap: "10px" }}>
           <button
             type="button"
+            style={btnExcluir}
             onClick={() => navigate("/servicos")}
-            style={getBtnCancelarStyle(hoverCancelar)}
-            onMouseEnter={() => setHoverCancelar(true)}
-            onMouseLeave={() => setHoverCancelar(false)}
           >
             Cancelar
+          </button>
+          <button
+            type="submit"
+            style={btnSalvar}
+          >
+            Enviar
           </button>
         </div>
       </form>

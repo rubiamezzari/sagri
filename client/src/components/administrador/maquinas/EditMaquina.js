@@ -41,50 +41,42 @@ const inputStyle = {
   transition: "border-color 0.3s",
 };
 
-const inputFocus = {
-  borderColor: "#e8e8e8",
-  outline: "none",
-};
+const inputFocus = { borderColor: "#e8e8e8", outline: "none" };
 
 const getBtnSalvarStyle = (hover) => ({
-  backgroundColor: hover ? "#143018" : "#1A381F",
-  color: "#D2EFE6",
-  padding: "8px 10px",
-  borderRadius: "5px",
-  border: "none",
+  padding: "8px 18px",
+  borderRadius: "20px",
+  fontWeight: 500,
+  fontSize: "0.9rem",
+  border: "1px solid #99c9a0",
   cursor: "pointer",
-  fontWeight: "500",
-  fontSize: "1.1rem",
-  width: "30%",
-  marginTop: "10px",
-  transition: "background-color 0.3s",
+  transition: "all 0.2s ease",
+  marginLeft: "10px",
+  textDecoration: "none", 
+  backgroundColor: "#e6f4ea",
+  color: "#386641",
 });
 
+
+
 const getBtnCancelarStyle = (hover) => ({
-  backgroundColor: hover ? "#c2dbac" : "#D2EFE6",
-  color: "#86a479",
-  padding: "8px 10px",
-  borderRadius: "5px",
-  border: "none",
+  padding: "8px 18px",
+  borderRadius: "20px",
+  fontWeight: 500,
+  fontSize: "0.9rem",
+  border: "1px solid #99c9a0",
   cursor: "pointer",
-  fontWeight: "500",
-  fontSize: "1.1rem",
-  width: "30%",
-  marginTop: "10px",
+  transition: "all 0.2s ease",
   marginLeft: "10px",
-  transition: "background-color 0.3s",
+  textDecoration: "none", 
+   backgroundColor: "#e6f4ea",
+  color: "#386641",
 });
 
 export default function EditMaquina() {
-  const [form, setForm] = useState({
-    tipo: "",
-    marca: "",
-    modelo: "",
-    potencia: "",
-    n_serie: "",
-    observacao: "",
-  });
-
+  const [form, setForm] = useState(null);
+  const [tipos, setTipos] = useState([]);
+  const [marcas, setMarcas] = useState([]);
   const [focusField, setFocusField] = useState(null);
   const [hoverSalvar, setHoverSalvar] = useState(false);
   const [hoverCancelar, setHoverCancelar] = useState(false);
@@ -93,23 +85,51 @@ export default function EditMaquina() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    async function fetchData() {
-      const response = await fetch(`${API_URL}/maquinas/${params.id}`);
-      if (!response.ok) {
-        alert("Erro ao buscar máquina.");
+    async function fetchDados() {
+      try {
+        // 1️⃣ Busca tipos e marcas primeiro
+        const [tiposRes, marcasRes] = await Promise.all([
+          fetch(`${API_URL}/tipos?categoria=maquina`),
+          fetch(`${API_URL}/marcas`),
+        ]);
+        const tiposData = await tiposRes.json();
+        const marcasData = await marcasRes.json();
+        setTipos(tiposData);
+        setMarcas(marcasData);
+
+        // 2️⃣ Busca a máquina
+        const maquinaRes = await fetch(`${API_URL}/maquinas/${params.id}`);
+        if (!maquinaRes.ok) throw new Error("Erro ao buscar máquina.");
+        const maquinaData = await maquinaRes.json();
+
+        // 3️⃣ Ajusta o form
+        setForm({
+          tipo: maquinaData.tipo || "",
+          marca: maquinaData.marca || "",
+          modelo: maquinaData.modelo || "",
+          potencia: maquinaData.potencia || "",
+          n_serie: maquinaData.n_serie || "",
+          observacao: maquinaData.observacao || "",
+        });
+
+        // Debug: veja os valores
+        console.log("Tipos:", tiposData);
+        console.log("Marcas:", marcasData);
+        console.log("Máquina:", maquinaData);
+
+      } catch (err) {
+        alert(err.message);
         navigate("/maquinas");
-        return;
       }
-
-      const maquina = await response.json();
-
-      const { status, foto, ...semStatusEFoto } = maquina;
-
-      setForm(semStatusEFoto);
     }
 
-    fetchData();
+    fetchDados();
   }, [params.id, navigate]);
+
+  // ⚠️ Aguarda carregamento de tudo
+  if (!form || tipos.length === 0 || marcas.length === 0) {
+    return <p>Carregando...</p>;
+  }
 
   function updateForm(value) {
     setForm((prev) => ({ ...prev, ...value }));
@@ -121,7 +141,6 @@ export default function EditMaquina() {
 
   async function onSubmit(e) {
     e.preventDefault();
-
     try {
       const response = await fetch(`${API_URL}/maquinas/update/${params.id}`, {
         method: "PATCH",
@@ -129,15 +148,12 @@ export default function EditMaquina() {
         body: JSON.stringify(form),
       });
 
-      if (!response.ok) {
-        alert("Erro ao atualizar máquina.");
-        return;
-      }
+      if (!response.ok) throw new Error("Erro ao atualizar máquina.");
 
       alert("Máquina atualizada com sucesso!");
       navigate("/maquinas");
     } catch (err) {
-      alert("Erro ao se comunicar com o servidor.");
+      alert(err.message);
     }
   }
 
@@ -146,27 +162,77 @@ export default function EditMaquina() {
       <form onSubmit={onSubmit}>
         <h5 style={sectionTitle}>DADOS DA MÁQUINA</h5>
 
-        {[
-          ["tipo", "Tipo"],
-          ["marca", "Marca"],
-          ["modelo", "Modelo"],
-          ["potencia", "Potência"],
-          ["n_serie", "Número de Série"],
-        ].map(([name, label]) => (
-          <div key={name}>
-            <label style={labelStyle}>{label}</label>
-            <input
-              type="text"
-              style={getInputStyle(name)}
-              value={form[name]}
-              onChange={(e) => updateForm({ [name]: e.target.value })}
-              onFocus={() => setFocusField(name)}
-              onBlur={() => setFocusField(null)}
-            />
-          </div>
-        ))}
+        {/* Tipo */}
+        <label style={labelStyle}>Tipo</label>
+        <select
+          style={getInputStyle("tipo")}
+          value={form.tipo}
+          onChange={(e) => updateForm({ tipo: e.target.value })}
+          onFocus={() => setFocusField("tipo")}
+          onBlur={() => setFocusField(null)}
+          required
+        >
+          <option value="">Selecione um tipo</option>
+          {tipos.map((t) => (
+            <option key={t._id} value={t.tipo}>
+              {t.tipo}
+            </option>
+          ))}
+        </select>
 
-        <label style={labelStyle}>Observações</label>
+        {/* Marca */}
+        <label style={labelStyle}>Marca</label>
+        <select
+          style={getInputStyle("marca")}
+          value={form.marca}
+          onChange={(e) => updateForm({ marca: e.target.value })}
+          onFocus={() => setFocusField("marca")}
+          onBlur={() => setFocusField(null)}
+          required
+        >
+          <option value="">Selecione uma marca</option>
+          {marcas.map((m) => (
+            <option key={m._id} value={m.nome}>
+              {m.nome}
+            </option>
+          ))}
+        </select>
+
+        {/* Modelo */}
+        <label style={labelStyle}>Modelo</label>
+        <input
+          type="text"
+          style={getInputStyle("modelo")}
+          value={form.modelo}
+          onChange={(e) => updateForm({ modelo: e.target.value })}
+          onFocus={() => setFocusField("modelo")}
+          onBlur={() => setFocusField(null)}
+        />
+
+        {/* Potência */}
+        <label style={labelStyle}>Potência</label>
+        <input
+          type="text"
+          style={getInputStyle("potencia")}
+          value={form.potencia}
+          onChange={(e) => updateForm({ potencia: e.target.value })}
+          onFocus={() => setFocusField("potencia")}
+          onBlur={() => setFocusField(null)}
+        />
+
+        {/* Número de Série */}
+        <label style={labelStyle}>Número de Série</label>
+        <input
+          type="text"
+          style={getInputStyle("n_serie")}
+          value={form.n_serie}
+          onChange={(e) => updateForm({ n_serie: e.target.value })}
+          onFocus={() => setFocusField("n_serie")}
+          onBlur={() => setFocusField(null)}
+        />
+
+        {/* Observação */}
+        <label style={labelStyle}>Observação</label>
         <textarea
           style={{ ...getInputStyle("observacao"), height: "80px", resize: "vertical" }}
           value={form.observacao}
@@ -175,6 +241,7 @@ export default function EditMaquina() {
           onBlur={() => setFocusField(null)}
         />
 
+        {/* Botões */}
         <div style={{ display: "flex", justifyContent: "center", gap: "12px" }}>
           <button
             type="submit"
@@ -186,10 +253,10 @@ export default function EditMaquina() {
           </button>
           <button
             type="button"
-            onClick={() => navigate("/maquinas")}
             style={getBtnCancelarStyle(hoverCancelar)}
             onMouseEnter={() => setHoverCancelar(true)}
             onMouseLeave={() => setHoverCancelar(false)}
+            onClick={() => navigate("/maquinas")}
           >
             Cancelar
           </button>

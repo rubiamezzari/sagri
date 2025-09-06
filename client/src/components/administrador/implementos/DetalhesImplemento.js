@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from "react";
 
-// Estilos base para a nova abordagem
+
 const linha = {
   padding: "6px 0",
   display: "flex",
   gap: "8px",
   fontSize: "0.95rem",
-  borderBottom: "1px solid #e0f2e0", // Cor mais suave para a borda
+  borderBottom: "1px solid #e0f2e0", 
 };
 
 const campo = {
   minWidth: "140px",
   fontWeight: "bold",
-  color: "#386641", // Tonalidade mais suave de verde escuro
+  color: "#386641", 
 };
 
 const tituloNome = {
@@ -21,7 +21,7 @@ const tituloNome = {
   textTransform: "uppercase",
   paddingBottom: "10px",
   marginBottom: "16px",
-  borderBottom: "2px solid #a8e0a8", // Borda mais suave
+  borderBottom: "2px solid #a8e0a8", 
   color: "#386641",
 };
 
@@ -65,33 +65,35 @@ const modalStyle = {
 const btnBase = {
   padding: "8px 18px",
   borderRadius: "20px",
-  fontWeight: 500, // Menos bold
+  fontWeight: 500,
   fontSize: "0.9rem",
-  border: "1px solid #99c9a0", // Borda sutil
+  border: "1px solid #99c9a0",
   cursor: "pointer",
   transition: "all 0.2s ease",
   marginLeft: "10px",
+  textDecoration: "none", 
 };
 
 const btnEditar = {
   ...btnBase,
-  backgroundColor: "#e6f4ea", // Fundo claro
-  color: "#386641", // Texto verde escuro
-};
-
-const btnSalvar = {
-  ...btnBase,
-  backgroundColor: "#5cb85c", // Verde vibrante para salvar
-  color: "#fff", // Texto branco
-  border: "none",
+  backgroundColor: "#e6f4ea",
+  color: "#386641",
 };
 
 const btnExcluir = {
   ...btnBase,
-  backgroundColor: "transparent", // Fundo transparente para Excluir
-  color: "#88a88c", // Texto cinza esverdeado
-  border: "1px solid #d0e7d3", // Borda mais clara
+  backgroundColor: "transparent",
+  color: "#88a88c",
+  border: "1px solid #d0e7d3",
 };
+
+const btnSalvar = {
+  ...btnBase,
+ backgroundColor: "#e6f4ea",
+  color: "#386641",
+};
+
+
 
 const inputStyle = {
   width: "100%",

@@ -3,6 +3,34 @@ import { useNavigate } from "react-router-dom";
 
 const REACT_APP_YOUR_HOSTNAME = "http://localhost:5050";
 
+// Estilos mantidos do componente DetalhesMaquina
+const btnBase = {
+  padding: "8px 18px",
+  borderRadius: "20px",
+  fontWeight: 500,
+  fontSize: "0.9rem",
+  border: "1px solid #99c9a0",
+  cursor: "pointer",
+  transition: "all 0.2s ease",
+  marginLeft: "10px",
+  textDecoration: "none", 
+};
+
+const btnSalvar = {
+  ...btnBase,
+  backgroundColor: "#e6f4ea",
+  color: "#386641",
+};
+
+const btnExcluir = {
+  ...btnBase,
+  backgroundColor: "transparent",
+  color: "#88a88c",
+  border: "1px solid #d0e7d3",
+};
+
+
+// Estilos originais do componente CreateMaquina
 const containerStyle = {
   maxWidth: "800px",
   margin: "40px auto",
@@ -46,33 +74,6 @@ const inputFocus = {
   outline: "none",
 };
 
-const getBtnCadastrarStyle = (hover) => ({
-  backgroundColor: hover ? "#143018" : "#1A381F",
-  color: "#D2EFE6",
-  padding: "5px 15px",
-  borderRadius: "5px",
-  border: "none",
-  cursor: "pointer",
-  fontWeight: "500",
-  fontSize: "1.1rem",
-  width: "30%",
-  transition: "background-color 0.3s",
-});
-
-const getBtnCancelarStyle = (hover) => ({
-  backgroundColor: hover ? "#ccedbf" : "#D2EFE6",
-  color: "#143018",
-  padding: "5px 15px",
-  borderRadius: "5px",
-  border: "none",
-  cursor: "pointer",
-  fontWeight: "500",
-  fontSize: "1.1rem",
-  width: "30%",
-  marginLeft: "20px",
-  transition: "background-color 0.3s",
-});
-
 export default function CreateMaquina() {
   const [form, setForm] = useState({
     tipo: "",
@@ -85,8 +86,6 @@ export default function CreateMaquina() {
 
   const [tipos, setTipos] = useState([]);
   const [marcas, setMarcas] = useState([]);
-  const [hoverCadastrar, setHoverCadastrar] = useState(false);
-  const [hoverCancelar, setHoverCancelar] = useState(false);
   const [focusField, setFocusField] = useState(null);
   const navigate = useNavigate();
 
@@ -129,7 +128,7 @@ export default function CreateMaquina() {
       const data = await response.json();
       alert(data.message || "Máquina cadastrada com sucesso!");
       setForm({ tipo: "", marca: "", modelo: "", potencia: "", n_serie: "", observacao: "" });
-      navigate("/maquinas", { replace: true });
+      navigate("/maquinas"); // Alterado para navegação padrão
     } catch (error) {
       alert("Erro na comunicação com o servidor.");
       console.error(error);
@@ -213,24 +212,19 @@ export default function CreateMaquina() {
           onBlur={() => setFocusField(null)}
         />
 
-        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "15px" }}>
-          <button
-            type="submit"
-            style={getBtnCadastrarStyle(hoverCadastrar)}
-            onMouseEnter={() => setHoverCadastrar(true)}
-            onMouseLeave={() => setHoverCadastrar(false)}
-          >
-            Cadastrar
-          </button>
-
+        <div style={{ marginTop: "30px", textAlign: "right" }}>
           <button
             type="button"
-            style={getBtnCancelarStyle(hoverCancelar)}
-            onMouseEnter={() => setHoverCancelar(true)}
-            onMouseLeave={() => setHoverCancelar(false)}
+            style={{ ...btnExcluir, marginRight: "10px" }} // Reutilizando o estilo btnExcluir para o botão Cancelar
             onClick={() => navigate("/maquinas")}
           >
             Cancelar
+          </button>
+          <button
+            type="submit"
+            style={btnSalvar} // Reutilizando o estilo btnSalvar para o botão Cadastrar
+          >
+            Cadastrar
           </button>
         </div>
       </form>

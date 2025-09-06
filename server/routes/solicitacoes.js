@@ -22,7 +22,7 @@ router.post("/", async (req, res) => {
       hora,
       tempo_estimado: tempo || "",
       observacao: observacao || "",
-      status: "pendente",
+      status: "pendente", // Status inicial sempre será 'pendente'
       criadoEm: new Date(),
     };
 
@@ -40,13 +40,24 @@ router.post("/", async (req, res) => {
   }
 });
 
-// GET - Todas as solicitações
+// GET - Todas as solicitações com filtro opcional por status
 router.get("/", async (req, res) => {
   try {
     const dbConnect = dbo.getDb();
+    const { status } = req.query; // Pega o parâmetro 'status' da URL
+
+    // Cria um objeto de filtro vazio.
+    let query = {};
+
+    // Se o parâmetro de status existir, adiciona ele ao objeto de filtro.
+    if (status) {
+      // Garante que a busca seja sempre com letras minúsculas
+      query.status = status.toLowerCase();
+    }
+
     const solicitacoes = await dbConnect
       .collection("solicitacoes")
-      .find({})
+      .find(query) // Usa o objeto de filtro na busca
       .sort({ criadoEm: -1 })
       .toArray();
 
@@ -85,7 +96,11 @@ router.put("/:id", async (req, res) => {
     const dbConnect = dbo.getDb();
     await dbConnect
       .collection("solicitacoes")
-      .updateOne({ _id: new ObjectId(id) }, { $set: { status } });
+      .updateOne(
+        { _id: new ObjectId(id) },
+        // Garante que o status seja salvo sempre em minúsculas
+        { $set: { status: status.toLowerCase() } }
+      );
 
     res.json({ message: "Status atualizado com sucesso" });
   } catch (err) {

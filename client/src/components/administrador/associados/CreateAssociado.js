@@ -70,32 +70,35 @@ const uploadLabelStyle = {
   whiteSpace: "nowrap",
 };
 
-  const getBtnCadastrarStyle = (hover) => ({
-    backgroundColor: hover ? "#143018" : "#1B4D3E",
-    color: "#D2EFE6",
-    padding: "4px 22px",
-    borderRadius: "5px",
-    border: "none",
-    cursor: "pointer",
-    fontWeight: "500",
-    fontSize: "1.1rem",
-    width: "30%",
-    transition: "background-color 0.3s",
-  });
+ const getBtnCadastrarStyle = (hover) => ({
+  padding: "8px 18px",
+  borderRadius: "20px",
+  fontWeight: 500,
+  fontSize: "0.9rem",
+  border: "1px solid #99c9a0",
+  cursor: "pointer",
+  transition: "all 0.2s ease",
+  marginLeft: "10px",
+  textDecoration: "none", 
+  backgroundColor: "#e6f4ea",
+  color: "#386641",
+});
 
-  const getBtnCancelarStyle = (hover) => ({
-    backgroundColor: hover ? "#c7e5cc" : "#D2EFE6",
-    color: "#143018",
-    padding: "8px 10px",
-    borderRadius: "5px",
-    border: "none",
-    cursor: "pointer",
-    fontWeight: "500",
-    fontSize: "1.1rem",
-    width: "30%",
-    marginLeft: "20px",
-    transition: "background-color 0.3s",
-  });
+
+
+const getBtnCancelarStyle = (hover) => ({
+  padding: "8px 18px",
+  borderRadius: "20px",
+  fontWeight: 500,
+  fontSize: "0.9rem",
+  border: "1px solid #99c9a0",
+  cursor: "pointer",
+  transition: "all 0.2s ease",
+  marginLeft: "10px",
+  textDecoration: "none", 
+   backgroundColor: "#e6f4ea",
+  color: "#386641",
+});
 
 export default function CreateAssociado() {
   const [form, setForm] = useState({
