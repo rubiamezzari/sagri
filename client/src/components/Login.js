@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Logo from "./Logo.png"; // 
 
 const API_URL = "http://localhost:5050";
 
@@ -45,19 +46,19 @@ const Login = () => {
   };
 
   return (
-    <div style={pageStyle}>
+    <div style={containerStyle}>
       <div style={loginBoxStyle}>
-        {/* Lado esquerdo com logo */}
+        {/* Lado esquerdo - logo */}
         <div style={leftPanelStyle}>
-          <h2 style={{ color: "#fff" }}>SAGRI</h2>
-          {/* Aqui pode trocar pelo <img src="logo.png" /> */}
+          <img src={Logo} alt="Logo SAGRI" style={logoStyle} />
         </div>
 
-        {/* Lado direito com formulário */}
+        {/* Lado direito - formulário */}
         <div style={rightPanelStyle}>
           <h2 style={titleStyle}>Bem vindo!</h2>
-          <form onSubmit={handleLogin}>
-            <div style={formGroupStyle}>
+
+          <form onSubmit={handleLogin} style={formStyle}>
+            <div style={inputGroupStyle}>
               <label style={labelStyle}>CPF</label>
               <input
                 type="text"
@@ -67,8 +68,9 @@ const Login = () => {
                 style={inputStyle}
               />
             </div>
-            <div style={formGroupStyle}>
-              <label style={labelStyle}>Senha</label>
+
+            <div style={inputGroupStyle}>
+              <label style={labelStyle}>SENHA</label>
               <input
                 type="password"
                 value={senha}
@@ -77,7 +79,9 @@ const Login = () => {
                 style={inputStyle}
               />
             </div>
-            {erro && <p style={{ color: "red" }}>{erro}</p>}
+
+            {erro && <p style={errorStyle}>{erro}</p>}
+
             <button type="submit" style={buttonStyle}>
               Entrar
             </button>
@@ -89,74 +93,99 @@ const Login = () => {
 };
 
 /* --- ESTILOS --- */
-const pageStyle = {
-  backgroundColor: "#F0FCEB", // fundo verdinho
+const containerStyle = {
   height: "100vh",
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
+  backgroundColor: "#E9F8E3",
+  fontFamily: "Inter, sans-serif",
 };
 
 const loginBoxStyle = {
   display: "flex",
-  width: "800px",
-  borderRadius: "6px",
+  width: "720px",
+  height: "380px",
+  borderRadius: "8px",
   overflow: "hidden",
-  boxShadow: "0 0 15px rgba(0,0,0,0.1)",
+  boxShadow: "0 0 10px rgba(0,0,0,0.1)",
 };
 
 const leftPanelStyle = {
-  backgroundColor: "#1D3B29", // verde escuro
   flex: 1,
+  backgroundColor: "#1D3B29",
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
   flexDirection: "column",
 };
 
+const logoStyle = {
+  width: "90px",
+  height: "auto",
+  filter: "brightness(0) invert(1)", // deixa o logo branco, igual ao da navbar
+};
+
 const rightPanelStyle = {
-  backgroundColor: "#DDF3D4", // verde clarinho
-  flex: 2,
-  padding: "40px",
+  flex: 1.8,
+  backgroundColor: "#DDF3D4",
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center",
+  padding: "0 40px",
 };
 
 const titleStyle = {
-  fontSize: "28px",
-  fontWeight: "bold",
   color: "#1D3B29",
-  marginBottom: "30px",
+  fontWeight: "700",
+  fontSize: "24px",
+  marginBottom: "25px",
+  textAlign: "center",
 };
 
-const formGroupStyle = {
-  marginBottom: "20px",
+const formStyle = {
   display: "flex",
   flexDirection: "column",
+  gap: "15px",
+};
+
+const inputGroupStyle = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "4px",
 };
 
 const labelStyle = {
-  marginBottom: "6px",
-  fontSize: "14px",
+  fontSize: "12px",
   color: "#1D3B29",
+  fontWeight: "600",
 };
 
 const inputStyle = {
-  padding: "12px",
-  borderRadius: "4px",
-  border: "none",
   backgroundColor: "#CDE7C4",
+  border: "none",
+  borderRadius: "4px",
+  padding: "10px",
   outline: "none",
+  fontSize: "14px",
 };
 
 const buttonStyle = {
-  width: "100%",
-  padding: "12px",
-  border: "none",
-  borderRadius: "4px",
+  marginTop: "10px",
   backgroundColor: "#1D3B29",
   color: "#fff",
-  fontSize: "16px",
+  border: "none",
+  borderRadius: "4px",
+  padding: "10px",
+  fontWeight: "bold",
   cursor: "pointer",
-  marginTop: "10px",
+  transition: "background 0.3s",
+};
+
+const errorStyle = {
+  color: "red",
+  fontSize: "13px",
+  textAlign: "center",
 };
 
 export default Login;

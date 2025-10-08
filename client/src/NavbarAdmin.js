@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap/dist/js/bootstrap.bundle";
 import { NavLink } from "react-router-dom";
-import Logo from "./Logo.png";
+import Logo from "./components/Logo.png";
 
 export default function Navbar() {
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -156,6 +156,11 @@ export default function Navbar() {
                         <li className="nav-item">
                             <NavLink className="nav-link" to="/agendamentos" style={linkStyle}>
                                 Agendamentos
+                            </NavLink>
+                        </li>
+                        <li className="nav-item">
+                            <NavLink className="nav-link" to="/marcas" style={linkStyle}>
+                                Marcas
                             </NavLink>
                         </li>
                     </ul>

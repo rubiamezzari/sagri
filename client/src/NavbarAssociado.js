@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap/dist/js/bootstrap.bundle";
 import { NavLink } from "react-router-dom";
-import Logo from "./Logo.png";
+import Logo from "./components/Logo.png";
 
 export default function NavbarAssociado() {
     const [dropdownOpen, setDropdownOpen] = useState(false);

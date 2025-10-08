@@ -258,7 +258,6 @@ export default function ListAgendamentos() {
           fontWeight: 600,
         }}
       >
-        Lista de Agendamentos
       </h2>
 
       <input
