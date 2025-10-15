@@ -139,7 +139,7 @@ export default function CreateImplemento() {
         observacao: "",
       });
 
-      navigate("/implementos", { replace: true });
+      navigate("/maquinas", { replace: true });
     } catch (error) {
       alert("Erro na comunicação com o servidor.");
     }

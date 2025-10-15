@@ -1,134 +1,76 @@
 import React, { useState } from "react";
-import "bootstrap/dist/css/bootstrap.css";
-import "bootstrap/dist/js/bootstrap.bundle";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import Logo from "./components/Logo.png";
 
-export default function NavbarAdmin() {
-    const [dropdownOpen, setDropdownOpen] = useState(false);
+export default function NavbarAdminSimple({ children }) {
+  const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-    const baseStyle = {
-        fontFamily: '"Inter", sans-serif',
-        fontWeight: 500,
-        textTransform: "uppercase",
-        letterSpacing: "0.5px",
-        fontSize: "12px",
-        color: "#fff",
-        textDecoration: "none",
-        transition: "color 0.3s ease",
-    };
+  const SIDEBAR_WIDTH = "240px";
+  const SIDEBAR_BG = "#1B4D3E";
+  const ACTIVE_BG = "rgba(255,255,255,0.1)";
+  const HOVER_BG = "rgba(255,255,255,0.1)";
+  const MAIN_BG = "#F5F1E8";
 
-    const linkStyle = ({ isActive }) => ({
-        ...baseStyle,
-        color: isActive ? "#fff" : baseStyle.color,
-    });
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/login");
+  };
 
-    const dropdownToggleStyle = {
-        ...baseStyle,
-        background: "none",
-        border: "none",
-        borderRadius: "5px",
-        cursor: "pointer",
-        display: "flex",
-        alignItems: "center",
-        gap: "4px",
-        padding: "4px 0",
-    };
+  return (
+    <>
+      <style>{`
+        * {margin:0; padding:0; box-sizing:border-box;}
+        .top-navbar {height:56px; background-color:${SIDEBAR_BG}; color:white; display:flex; align-items:center; justify-content:space-between; padding:0 16px; position:fixed; top:0; left:0; right:0; z-index:1000;}
+        .hamburger {font-size:24px; cursor:pointer;}
+        .top-logo {position:absolute; left:50%; transform:translateX(-50%);}
+        .top-logo img {height:32px; object-fit:contain;}
+        .logout-btn {cursor:pointer; background:none; border:none; color:white; font-weight:500;}
+        .sidebar {width:${SIDEBAR_WIDTH}; background-color:${SIDEBAR_BG}; color:white; display:flex; flex-direction:column; position:fixed; left:${sidebarOpen ? "0" : `-${SIDEBAR_WIDTH}`}; top:56px; bottom:0; overflow-y:auto; transition:left 0.3s ease;}
+        .sidebar-logo {padding:24px;}
+        .logo-container {width:48px; height:48px; display:flex; align-items:center; justify-content:center; background-color:rgba(255,255,255,0.1); border-radius:12px;}
+        .logo-container img {height:32px; object-fit:contain;}
+        .sidebar-nav {flex:1; padding:0 12px; overflow-y:auto;}
+        .nav-list {list-style:none; padding:0; margin:0;}
+        .nav-item {margin-bottom:4px;}
+        .nav-link {display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:8px; color:rgba(255,255,255,0.8); text-decoration:none; cursor:pointer; transition: all 0.2s ease; background-color: transparent; width:100%; text-align:left; font-family:inherit;}
+        .nav-link:hover {background-color:${HOVER_BG}; color:white;}
+        .nav-link.active {background-color:${ACTIVE_BG}; color:white;}
+        .nav-link-text {text-transform:uppercase; letter-spacing:0.5px; font-size:12px; font-weight:500;}
+        .main-content {margin-left:${sidebarOpen ? SIDEBAR_WIDTH : "0"}; flex:1; min-height:calc(100vh - 56px); background-color:${MAIN_BG}; transition:margin-left 0.3s ease; padding:16px; padding-top:72px;}
+      `}</style>
 
-    const dropdownMenuStyle = {
-        backgroundColor: "#fff",
-        borderRadius: "8px",
-        boxShadow: "0 4px 6px rgba(0,0,0,0.08)",
-        marginTop: "3px",
-        minWidth: "160px",
-        padding: "6px 0",
-    };
+      <div className="top-navbar">
+        <span className="hamburger" onClick={toggleSidebar}>&#9776;</span>
+        <span className="top-logo"><img src={Logo} alt="Logo" /></span>
+        <button className="logout-btn" onClick={handleLogout}>Sair</button>
+      </div>
 
-    const dropdownItemStyle = ({ isActive }) => ({
-        ...baseStyle,
-        padding: "6px 16px",
-        color: isActive ? "#2f755e" : "#444",
-        backgroundColor: isActive ? "#f1f1f1" : "transparent",
-        fontSize: "13px",
-        display: "block",
-        textTransform: "none"
-    });
+      <div className="sidebar">
+        <div className="sidebar-logo">
+          <div className="logo-container">
+            <img src={Logo} alt="Logo" />
+          </div>
+        </div>
 
-    return (
-        <>
-            <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap');
-                .dropdown-toggle::after { display: none !important; }
-                .dropdown-item:hover { background-color: #f5f5f5 !important; color: #2f755e !important; }
-                .navbar-nav .nav-link { padding: 4px 8px !important; }
-            `}</style>
+        <nav className="sidebar-nav">
+          <ul className="nav-list">
+            <li className="nav-item">
+              <NavLink to="/operador" className={({isActive})=>`nav-link ${isActive ? "active" : ""}`}>
+                <span className="nav-link-text">Início</span>
+              </NavLink>
+            </li>
+            <li className="nav-item">
+              <NavLink to="/operador/agendamentos" className={({isActive})=>`nav-link ${isActive ? "active" : ""}`}>
+                <span className="nav-link-text">Agendamentos</span>
+              </NavLink>
+            </li>
+          </ul>
+        </nav>
+      </div>
 
-            <nav
-                className="navbar navbar-expand-lg"
-                style={{
-                    backgroundColor: "#1B4D3E",
-                    padding: "2px 20px",
-                    boxShadow: "0 1px 1px rgba(136, 136, 136, 0.2)",
-                }}
-            >
-                <NavLink className="navbar-brand" to="/">
-                    <img style={{ width: "45px" }} src={Logo} alt="Logo" />
-                </NavLink>
-
-                <button
-                    className="navbar-toggler"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#navbarAdmin"
-                >
-                    <span className="navbar-toggler-icon"></span>
-                </button>
-
-                <div className="collapse navbar-collapse" id="navbarAdmin">
-                    <ul
-                        className="navbar-nav me-auto mb-2 mb-lg-0"
-                        style={{ gap: "14px", display: "flex", alignItems: "center" }}
-                    >
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/" style={linkStyle}>Início</NavLink>
-                        </li>
-
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/associados" style={linkStyle}>Associados</NavLink>
-                        </li>
-
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/operadores" style={linkStyle}>Operadores</NavLink>
-                        </li>
-
-                        <li
-                            className={`nav-item dropdown${dropdownOpen ? " show" : ""}`}
-                            onMouseEnter={() => setDropdownOpen(true)}
-                            onMouseLeave={() => setDropdownOpen(false)}
-                        >
-                            <button className="nav-link dropdown-toggle" style={dropdownToggleStyle}>
-                                Solicitações <span style={{ fontSize: "10px" }}>▼</span>
-                            </button>
-                            <ul className={`dropdown-menu${dropdownOpen ? " show" : ""}`} style={dropdownMenuStyle}>
-                                <li>
-                                    <NavLink to="/solicitacoes/list" className="dropdown-item" style={dropdownItemStyle}>
-                                        Listar Solicitações
-                                    </NavLink>
-                                </li>
-                                <li>
-                                    <NavLink to="/solicitacoes/create" className="dropdown-item" style={dropdownItemStyle}>
-                                        Criar Solicitação
-                                    </NavLink>
-                                </li>
-                            </ul>
-                        </li>
-
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/equipamentos" style={linkStyle}>Equipamentos</NavLink>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
-        </>
-    );
+      <main className="main-content">{children}</main>
+    </>
+  );
 }

@@ -25,19 +25,7 @@ export default function Maquinas() {
 
   return (
     <div style={{ padding: "20px" }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          alignItems: "center",
-          flexWrap: "wrap",
-          marginBottom: "20px",
-        }}
-      >
-        <Link style={btnCadastrar} to="/maquinas/create">
-          + Máquina
-        </Link>
-      </div>
+      
 
       <ListMaquinas maquinas={maquinas} />
     </div>

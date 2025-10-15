@@ -1,27 +1,32 @@
 const express = require("express");
 const { ObjectId } = require("mongodb");
+const bcrypt = require("bcryptjs");
 const dbo = require("../db/conn");
 
 const router = express.Router();
+const SALT_ROUNDS = 10;
 
-// Criar operador (sem hash na senha)
+// Criar operador com hash na senha
 router.post("/operadores/create", async (req, res) => {
   const dbConnect = dbo.getDb();
 
   try {
     const cpfLimpo = req.body.cpf.replace(/[^\d]/g, "");
 
-    // 🔒 Verifica se já existe operador com esse CPF
+    // Verifica se já existe operador com esse CPF
     const existente = await dbConnect.collection("operadores").findOne({ cpf: cpfLimpo });
     if (existente) {
       return res.status(409).send({ mensagem: "CPF já cadastrado" });
     }
 
+    // Hash da senha
+    const senhaHash = await bcrypt.hash(req.body.senha, SALT_ROUNDS);
+
     const novoOperador = {
       nome: req.body.nome,
-      senha: req.body.senha, // senha salva em texto simples
+      senha: senhaHash,
       email: req.body.email,
-      telefone: req.body.telefone,
+      telefone: req.body.telefone.replace(/[^\d]/g, ""),
       cpf: cpfLimpo,
     };
 
@@ -57,9 +62,7 @@ router.get("/operadores/:id", async (req, res) => {
       projection: { nome: 1, email: 1, telefone: 1, cpf: 1 }
     });
 
-    if (!operador) {
-      return res.status(404).send("Operador não encontrado");
-    }
+    if (!operador) return res.status(404).send("Operador não encontrado");
 
     res.status(200).send(operador);
   } catch (err) {
@@ -67,23 +70,23 @@ router.get("/operadores/:id", async (req, res) => {
   }
 });
 
-// Atualizar operador (sem hash)
+// Atualizar operador
 router.patch("/operadores/update/:id", async (req, res) => {
   const dbConnect = dbo.getDb();
   const query = { _id: new ObjectId(req.params.id) };
 
   delete req.body._id;
 
-  const updates = {
-    $set: req.body,
-  };
+  // Se atualizar a senha, hash novamente
+  if (req.body.senha) {
+    req.body.senha = await bcrypt.hash(req.body.senha, SALT_ROUNDS);
+  }
+
+  const updates = { $set: req.body };
 
   try {
     const result = await dbConnect.collection("operadores").updateOne(query, updates);
-
-    if (result.matchedCount === 0) {
-      return res.status(404).send({ error: "Operador não encontrado" });
-    }
+    if (result.matchedCount === 0) return res.status(404).send({ error: "Operador não encontrado" });
 
     const operadorAtualizado = await dbConnect.collection("operadores").findOne(query, {
       projection: { nome: 1, email: 1, telefone: 1, cpf: 1 }

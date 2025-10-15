@@ -2,360 +2,765 @@ import React, { useState, useEffect } from "react";
 
 const API_URL = "http://localhost:5050";
 
-// --- Botões baseados no estilo que você mandou ---
-const btnBase = {
-  padding: "6px 14px",
-  borderRadius: "20px",
-  fontWeight: 500,
-  fontSize: "0.85rem",
-  border: "1px solid #99c9a0",
-  cursor: "pointer",
-  transition: "all 0.2s ease",
-  marginLeft: "8px",
-};
-
-const btnEditar = {
-  ...btnBase,
-  backgroundColor: "#e6f4ea",
-  color: "#386641",
-};
-
-const btnSalvar = {
-  ...btnBase,
-  backgroundColor: "#e6f4ea",
-  color: "#386641",
-};
-
-const btnExcluir = {
-  ...btnBase,
-  backgroundColor: "transparent",
-  color: "#88a88c",
-  border: "1px solid #d0e7d3",
-};
-
-const closeBtnStyle = {
-  position: "absolute",
-  top: "12px",
-  right: "12px",
-  background: "none",
-  border: "none",
-  fontSize: "1.4rem",
-  cursor: "pointer",
-  color: "#666",
-};
-
-// --- Estilos gerais ---
-const styles = {
-  container: {
-    display: "flex",
-    gap: 24,
-    padding: 24,
-    maxWidth: 1100,
-    margin: "0 auto",
-    fontFamily: "Inter, sans-serif",
-  },
-  section: {
-    flex: 1,
-    display: "flex",
-    flexDirection: "column",
-    gap: 16,
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: "16px",
-    boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
-    border: "1px solid #E2E8F0",
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "#2F855A",
-    borderBottom: "2px solid #E6FFFA",
-    paddingBottom: 6,
-  },
-  form: {
-    display: "flex",
-    gap: 10,
-  },
-  input: {
-    flex: 1,
-    padding: "8px 10px",
-    borderRadius: 10,
-    border: "1px solid #CBD5E0",
-    outline: "none",
-    fontSize: 14,
-    transition: "all 0.2s ease",
-  },
-  inputHover: {
-    border: "1px solid #2F855A",
-  },
-  button: {
-    ...btnSalvar,
-  },
-  buttonHover: {
-    backgroundColor: "#4cae4c",
-  },
-  cardList: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 10,
-    maxHeight: 250,
-    overflowY: "auto",
-  },
-  card: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "10px 12px",
-    borderRadius: 12,
-    backgroundColor: "#F9FAFB",
-    border: "1px solid #E2E8F0",
-    cursor: "pointer",
-    transition: "all 0.2s ease",
-  },
-  cardHover: {
-    backgroundColor: "#edfdfd",
-  },
-  cardName: {
-    fontWeight: "500",
-    fontSize: 15,
-    color: "#2D3748",
-  },
-  tabs: {
-    display: "flex",
-    gap: 10,
-  },
-  tabButton: (active) => ({
-    flex: 1,
-    padding: "8px 12px",
-    backgroundColor: active ? "#2F855A" : "#EDFDFD",
-    color: active ? "#fff" : "#2F855A",
-    border: "1px solid #2F855A",
-    borderRadius: 8,
-    cursor: "pointer",
-    fontWeight: "500",
-    transition: "all 0.2s ease",
-  }),
-  modalOverlay: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    width: "100vw",
-    height: "100vh",
-    background: "rgba(0,0,0,0.4)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 1000,
-  },
-  modalContent: {
-    position: "relative",
-    background: "#fff",
-    padding: 24,
-    borderRadius: 16,
-    width: "300px",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-    textAlign: "center",
-  },
-};
-
 const CadastroMarcasNomes = () => {
+  const [abaPrincipal, setAbaPrincipal] = useState("marcas");
+  const [abaTipo, setAbaTipo] = useState("maquina");
   const [marca, setMarca] = useState("");
   const [marcas, setMarcas] = useState([]);
   const [tipo, setTipo] = useState("");
   const [tipos, setTipos] = useState([]);
-  const [abaTipo, setAbaTipo] = useState("maquina");
-
   const [editMarcaId, setEditMarcaId] = useState(null);
   const [editTipoId, setEditTipoId] = useState(null);
+  const [modalItem, setModalItem] = useState(null);
+  const [modalTipo, setModalTipo] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [notification, setNotification] = useState({ message: "", type: "" });
 
-  const [modalItem, setModalItem] = useState(null); // item selecionado no modal
-  const [modalTipo, setModalTipo] = useState(""); // "marca" ou "tipo"
+  const dismissNotification = () =>
+    setNotification({ message: "", type: "" });
 
-  useEffect(() => {
-    fetchMarcas();
-    fetchTipos(abaTipo);
-  }, [abaTipo]);
-
-  // --- FETCH ---
   const fetchMarcas = async () => {
-    const res = await fetch(`${API_URL}/marcas`);
-    const data = await res.json();
-    setMarcas(data);
+    try {
+      setLoading(true);
+      const res = await fetch(`${API_URL}/marcas`);
+      const data = await res.json();
+      setMarcas(data);
+    } catch (e) {
+      setNotification({ message: "Erro ao buscar marcas", type: "error" });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchTipos = async (categoria) => {
     try {
+      setLoading(true);
       const res = await fetch(`${API_URL}/tipos?categoria=${categoria}`);
       const data = await res.json();
-      // caso a API não filtre, garante no front
-      const filtrados = data.filter((t) => t.categoria === categoria);
-      setTipos(filtrados);
-    } catch (err) {
-      console.error("Erro ao carregar tipos:", err);
+      setTipos(data.filter((t) => t.categoria === categoria));
+    } catch (e) {
+      setNotification({ message: "Erro ao buscar tipos", type: "error" });
+    } finally {
+      setLoading(false);
     }
   };
 
-  // --- SALVAR / EDITAR ---
+  useEffect(() => {
+    fetchMarcas();
+  }, []);
+  useEffect(() => {
+    if (abaPrincipal === "tipos") fetchTipos(abaTipo);
+  }, [abaTipo, abaPrincipal]);
+
   const salvarMarca = async (e) => {
     e.preventDefault();
     if (!marca.trim()) return;
-
+    setLoading(true);
     try {
-      if (editMarcaId) {
-        await fetch(`${API_URL}/marcas/${editMarcaId}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ nome: marca.trim() }),
-        });
-        setEditMarcaId(null);
-      } else {
-        await fetch(`${API_URL}/marcas`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ nome: marca.trim() }),
-        });
-      }
-      setMarca("");
+      await fetch(`${API_URL}/marcas${editMarcaId ? `/${editMarcaId}` : ""}`, {
+        method: editMarcaId ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nome: marca }),
+      });
       fetchMarcas();
-    } catch (err) {
-      console.error(err);
+      setMarca("");
+      setEditMarcaId(null);
+      setNotification({ message: "Marca salva com sucesso!", type: "success" });
+      setTimeout(dismissNotification, 3000);
+    } catch {
+      setNotification({ message: "Erro ao salvar marca", type: "error" });
+    } finally {
+      setLoading(false);
     }
   };
 
   const salvarTipo = async (e) => {
     e.preventDefault();
     if (!tipo.trim()) return;
-
+    setLoading(true);
     try {
-      if (editTipoId) {
-        await fetch(`${API_URL}/tipos/${editTipoId}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            tipo: tipo.trim(), 
-            categoria: abaTipo 
-          }),
-        });
-        setEditTipoId(null);
-      } else {
-        await fetch(`${API_URL}/tipos`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            tipo: tipo.trim(), 
-            categoria: abaTipo 
-          }),
-        });
-      }
-      setTipo("");
+      await fetch(`${API_URL}/tipos${editTipoId ? `/${editTipoId}` : ""}`, {
+        method: editTipoId ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tipo, categoria: abaTipo }),
+      });
       fetchTipos(abaTipo);
-    } catch (err) {
-      console.error(err);
+      setTipo("");
+      setEditTipoId(null);
+      setNotification({ message: "Tipo salvo com sucesso!", type: "success" });
+      setTimeout(dismissNotification, 3000);
+    } catch {
+      setNotification({ message: "Erro ao salvar tipo", type: "error" });
+    } finally {
+      setLoading(false);
     }
   };
 
-  // --- EXCLUIR ---
-  const excluirMarca = async (id) => {
-    await fetch(`${API_URL}/marcas/${id}`, { method: "DELETE" });
-    fetchMarcas();
-    setModalItem(null);
+  const handleExcluir = async () => {
+    if (!modalItem) return;
+    const id = modalItem._id || modalItem.id;
+    setLoading(true);
+    try {
+      await fetch(
+        `${API_URL}/${modalTipo === "marca" ? "marcas" : "tipos"}/${id}`,
+        { method: "DELETE" }
+      );
+      if (modalTipo === "marca") fetchMarcas();
+      else fetchTipos(abaTipo);
+      setNotification({ message: "Item excluído com sucesso!", type: "success" });
+      setTimeout(dismissNotification, 3000);
+    } finally {
+      setLoading(false);
+      setModalItem(null);
+    }
   };
 
-  const excluirTipo = async (id) => {
-    await fetch(`${API_URL}/tipos/${id}`, { method: "DELETE" });
-    fetchTipos(abaTipo);
-    setModalItem(null);
+  const renderList = (items, tipo) => {
+    if (loading && items.length === 0) {
+      return (
+        <div
+          style={{
+            padding: "64px 20px",
+            textAlign: "center",
+            backgroundColor: "#fff",
+            borderRadius: "12px",
+            border: "1px solid #E5E7EB",
+          }}
+        >
+          <div
+            style={{
+              width: "40px",
+              height: "40px",
+              border: "3px solid #E5E7EB",
+              borderTop: "3px solid #1B4D3E",
+              borderRadius: "50%",
+              animation: "spin 1s linear infinite",
+              margin: "0 auto 16px",
+            }}
+          />
+          <p style={{ color: "#6B7280", fontSize: "14px" }}>Carregando...</p>
+        </div>
+      );
+    }
+
+    if (!items.length) {
+      return (
+        <div
+          style={{
+            padding: "64px 20px",
+            textAlign: "center",
+            backgroundColor: "#fff",
+            borderRadius: "12px",
+            border: "1px solid #E5E7EB",
+          }}
+        >
+          <svg
+            style={{
+              width: "48px",
+              height: "48px",
+              color: "#D1D5DB",
+              margin: "0 auto 16px",
+            }}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+            />
+          </svg>
+          <p style={{ color: "#6B7280", fontSize: "14px" }}>
+            Nenhum {tipo} cadastrado ainda
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
+          gap: "16px",
+        }}
+      >
+        {items.map((item) => (
+          <div
+            key={item._id || item.id}
+            onClick={() => {
+              setModalItem(item);
+              setModalTipo(tipo);
+            }}
+            style={{
+              backgroundColor: "#fff",
+              padding: "20px",
+              borderRadius: "12px",
+              border: "1px solid #E5E7EB",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#FAFAF9";
+              e.currentTarget.style.borderColor = "#1B4D3E";
+              e.currentTarget.style.transform = "translateY(-2px)";
+              e.currentTarget.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.1)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "#fff";
+              e.currentTarget.style.borderColor = "#E5E7EB";
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = "0 1px 2px rgba(0, 0, 0, 0.05)";
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <div
+                style={{
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "8px",
+                  backgroundColor: "#1B4D3E",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <svg
+                  style={{ width: "20px", height: "20px", color: "#fff" }}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  {tipo === "marca" ? (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+                    />
+                  ) : (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  )}
+                </svg>
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p
+                  style={{
+                    fontSize: "15px",
+                    fontWeight: "600",
+                    color: "#1F2937",
+                    margin: 0,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {tipo === "marca" ? item.nome : item.tipo}
+                </p>
+                <p
+                  style={{
+                    fontSize: "12px",
+                    color: "#6B7280",
+                    margin: "4px 0 0 0",
+                  }}
+                >
+                  Clique para editar
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
   };
 
   return (
-    <div style={styles.container}>
-      {/* MARCAS */}
-      <div style={styles.section}>
-        <h3 style={styles.title}>Marcas</h3>
-        <form style={styles.form} onSubmit={salvarMarca}>
-          <input
-            style={styles.input}
-            type="text"
-            placeholder="Digite a marca"
-            value={marca}
-            onChange={(e) => setMarca(e.target.value)}
-          />
-          <button style={styles.button} type="submit">
-            {editMarcaId ? "Atualizar" : "Salvar"}
+    <div
+      style={{
+        width: "100%",
+        maxWidth: "1400px",
+        margin: "0 auto",
+        padding: "32px 20px",
+      }}
+    >
+      {/* Notification */}
+      {notification.message && (
+        <div
+          style={{
+            position: "fixed",
+            top: "20px",
+            right: "20px",
+            zIndex: 1000,
+            padding: "16px 20px",
+            borderRadius: "12px",
+            backgroundColor:
+              notification.type === "success" ? "#D1FAE5" : "#FEE2E2",
+            color: notification.type === "success" ? "#065F46" : "#991B1B",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            maxWidth: "400px",
+            animation: "slideIn 0.3s ease-out",
+          }}
+        >
+          <svg
+            style={{ width: "20px", height: "20px", flexShrink: 0 }}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            {notification.type === "success" ? (
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            ) : (
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            )}
+          </svg>
+          <span style={{ fontSize: "14px", fontWeight: "500", flex: 1 }}>
+            {notification.message}
+          </span>
+          <button
+            onClick={dismissNotification}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: "4px",
+              color: "inherit",
+              fontSize: "20px",
+              lineHeight: "1",
+            }}
+          >
+            ×
           </button>
-        </form>
-        <div style={styles.cardList}>
-          {marcas.map((m) => (
-            <div
-              style={styles.card}
-              key={m._id || m.id}
-              onClick={() => {
-                setModalItem(m);
-                setModalTipo("marca");
-              }}
-            >
-              <span style={styles.cardName}>{m.nome}</span>
-            </div>
-          ))}
         </div>
+      )}
+
+     
+      {/* Main Tabs */}
+      <div
+        style={{
+          display: "flex",
+          gap: "8px",
+          marginBottom: "32px",
+          borderBottom: "2px solid #E5E7EB",
+          paddingBottom: "0",
+        }}
+      >
+        <button
+          onClick={() => setAbaPrincipal("marcas")}
+          style={{
+            padding: "12px 24px",
+            border: "none",
+            borderBottom:
+              abaPrincipal === "marcas" ? "3px solid #1B4D3E" : "none",
+            backgroundColor: "transparent",
+            color: abaPrincipal === "marcas" ? "#1B4D3E" : "#6B7280",
+            cursor: "pointer",
+            fontWeight: abaPrincipal === "marcas" ? "600" : "500",
+            fontSize: "15px",
+            transition: "all 0.2s ease",
+            marginBottom: "-2px",
+          }}
+        >
+          Marcas
+        </button>
+        <button
+          onClick={() => setAbaPrincipal("tipos")}
+          style={{
+            padding: "12px 24px",
+            border: "none",
+            borderBottom:
+              abaPrincipal === "tipos" ? "3px solid #1B4D3E" : "none",
+            backgroundColor: "transparent",
+            color: abaPrincipal === "tipos" ? "#1B4D3E" : "#6B7280",
+            cursor: "pointer",
+            fontWeight: abaPrincipal === "tipos" ? "600" : "500",
+            fontSize: "15px",
+            transition: "all 0.2s ease",
+            marginBottom: "-2px",
+          }}
+        >
+          Tipos
+        </button>
       </div>
 
-      {/* TIPOS */}
-      <div style={styles.section}>
-        <h3 style={styles.title}>Tipos</h3>
-        <div style={styles.tabs}>
-          <button
-            style={styles.tabButton(abaTipo === "maquina")}
-            onClick={() => setAbaTipo("maquina")}
+      {/* Marcas Content */}
+      {abaPrincipal === "marcas" && (
+        <div>
+          {/* Form */}
+          <form
+            onSubmit={salvarMarca}
+            style={{
+              backgroundColor: "#fff",
+              padding: "24px",
+              borderRadius: "12px",
+              border: "1px solid #E5E7EB",
+              marginBottom: "32px",
+              boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)",
+            }}
           >
-            Máquinas
-          </button>
-          <button
-            style={styles.tabButton(abaTipo === "implemento")}
-            onClick={() => setAbaTipo("implemento")}
-          >
-            Implementos
-          </button>
-        </div>
-        <form style={styles.form} onSubmit={salvarTipo}>
-          <input
-            style={styles.input}
-            type="text"
-            placeholder={`Digite o tipo de ${abaTipo}`}
-            value={tipo}
-            onChange={(e) => setTipo(e.target.value)}
-          />
-          <button style={styles.button} type="submit">
-            {editTipoId ? "Atualizar" : "Salvar"}
-          </button>
-        </form>
-        <div style={styles.cardList}>
-          {tipos.map((t) => (
-            <div
-              style={styles.card}
-              key={t._id || t.id}
-              onClick={() => {
-                setModalItem(t);
-                setModalTipo("tipo");
+            <label
+              style={{
+                display: "block",
+                fontSize: "14px",
+                fontWeight: "600",
+                color: "#374151",
+                marginBottom: "8px",
               }}
             >
-              <span style={styles.cardName}>{t.tipo}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* MODAL */}
-      {modalItem && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modalContent}>
-            <button style={closeBtnStyle} onClick={() => setModalItem(null)}>
-              ✕
-            </button>
-            <h3>{modalTipo === "marca" ? modalItem.nome : modalItem.tipo}</h3>
-            <div style={{ marginTop: 20 }}>
+              {editMarcaId ? "Editar Marca" : "Nova Marca"}
+            </label>
+            <div style={{ display: "flex", gap: "12px" }}>
+              <input
+                type="text"
+                placeholder="Digite o nome da marca"
+                value={marca}
+                onChange={(e) => setMarca(e.target.value)}
+                style={{
+                  flex: 1,
+                  padding: "12px 16px",
+                  borderRadius: "8px",
+                  border: "1px solid #E5E7EB",
+                  fontSize: "14px",
+                  outline: "none",
+                  transition: "all 0.2s ease",
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = "#1B4D3E";
+                  e.target.style.boxShadow = "0 0 0 3px rgba(27, 77, 62, 0.1)";
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = "#E5E7EB";
+                  e.target.style.boxShadow = "none";
+                }}
+              />
+              {editMarcaId && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMarca("");
+                    setEditMarcaId(null);
+                  }}
+                  style={{
+                    padding: "12px 20px",
+                    borderRadius: "8px",
+                    border: "1px solid #E5E7EB",
+                    backgroundColor: "#fff",
+                    color: "#6B7280",
+                    fontSize: "14px",
+                    fontWeight: "500",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = "#F9FAFB";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = "#fff";
+                  }}
+                >
+                  Cancelar
+                </button>
+              )}
               <button
-                style={btnEditar}
+                type="submit"
+                disabled={loading || !marca.trim()}
+                style={{
+                  padding: "12px 24px",
+                  borderRadius: "8px",
+                  border: "none",
+                  backgroundColor: loading || !marca.trim() ? "#D1D5DB" : "#1B4D3E",
+                  color: "#fff",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  cursor: loading || !marca.trim() ? "not-allowed" : "pointer",
+                  transition: "all 0.2s ease",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+                onMouseEnter={(e) => {
+                  if (!loading && marca.trim()) {
+                    e.target.style.backgroundColor = "#163E32";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!loading && marca.trim()) {
+                    e.target.style.backgroundColor = "#1B4D3E";
+                  }
+                }}
+              >
+                {loading && (
+                  <div
+                    style={{
+                      width: "16px",
+                      height: "16px",
+                      border: "2px solid #fff",
+                      borderTop: "2px solid transparent",
+                      borderRadius: "50%",
+                      animation: "spin 1s linear infinite",
+                    }}
+                  />
+                )}
+                {editMarcaId ? "Atualizar" : "Adicionar"}
+              </button>
+            </div>
+          </form>
+
+          {/* List */}
+          {renderList(marcas, "marca")}
+        </div>
+      )}
+
+      {/* Tipos Content */}
+      {abaPrincipal === "tipos" && (
+        <div>
+          {/* Sub Tabs */}
+          <div
+            style={{
+              display: "inline-flex",
+              gap: "0",
+              marginBottom: "24px",
+              backgroundColor: "#F3F4F6",
+              padding: "4px",
+              borderRadius: "10px",
+            }}
+          >
+            <button
+              onClick={() => setAbaTipo("maquina")}
+              style={{
+                padding: "8px 20px",
+                border: "none",
+                borderRadius: "8px",
+                backgroundColor:
+                  abaTipo === "maquina" ? "#1B4D3E" : "transparent",
+                color: abaTipo === "maquina" ? "#fff" : "#6B7280",
+                cursor: "pointer",
+                fontWeight: "500",
+                fontSize: "14px",
+                transition: "all 0.2s ease",
+              }}
+            >
+              Máquinas
+            </button>
+            <button
+              onClick={() => setAbaTipo("implemento")}
+              style={{
+                padding: "8px 20px",
+                border: "none",
+                borderRadius: "8px",
+                backgroundColor:
+                  abaTipo === "implemento" ? "#1B4D3E" : "transparent",
+                color: abaTipo === "implemento" ? "#fff" : "#6B7280",
+                cursor: "pointer",
+                fontWeight: "500",
+                fontSize: "14px",
+                transition: "all 0.2s ease",
+              }}
+            >
+              Implementos
+            </button>
+          </div>
+
+          {/* Form */}
+          <form
+            onSubmit={salvarTipo}
+            style={{
+              backgroundColor: "#fff",
+              padding: "24px",
+              borderRadius: "12px",
+              border: "1px solid #E5E7EB",
+              marginBottom: "32px",
+              boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)",
+            }}
+          >
+            <label
+              style={{
+                display: "block",
+                fontSize: "14px",
+                fontWeight: "600",
+                color: "#374151",
+                marginBottom: "8px",
+              }}
+            >
+              {editTipoId ? "Editar Tipo" : "Novo Tipo"} de{" "}
+              {abaTipo === "maquina" ? "Máquina" : "Implemento"}
+            </label>
+            <div style={{ display: "flex", gap: "12px" }}>
+              <input
+                type="text"
+                placeholder={`Digite o tipo de ${
+                  abaTipo === "maquina" ? "máquina" : "implemento"
+                }`}
+                value={tipo}
+                onChange={(e) => setTipo(e.target.value)}
+                style={{
+                  flex: 1,
+                  padding: "12px 16px",
+                  borderRadius: "8px",
+                  border: "1px solid #E5E7EB",
+                  fontSize: "14px",
+                  outline: "none",
+                  transition: "all 0.2s ease",
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = "#1B4D3E";
+                  e.target.style.boxShadow = "0 0 0 3px rgba(27, 77, 62, 0.1)";
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = "#E5E7EB";
+                  e.target.style.boxShadow = "none";
+                }}
+              />
+              {editTipoId && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTipo("");
+                    setEditTipoId(null);
+                  }}
+                  style={{
+                    padding: "12px 20px",
+                    borderRadius: "8px",
+                    border: "1px solid #E5E7EB",
+                    backgroundColor: "#fff",
+                    color: "#6B7280",
+                    fontSize: "14px",
+                    fontWeight: "500",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = "#F9FAFB";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = "#fff";
+                  }}
+                >
+                  Cancelar
+                </button>
+              )}
+              <button
+                type="submit"
+                disabled={loading || !tipo.trim()}
+                style={{
+                  padding: "12px 24px",
+                  borderRadius: "8px",
+                  border: "none",
+                  backgroundColor: loading || !tipo.trim() ? "#D1D5DB" : "#1B4D3E",
+                  color: "#fff",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  cursor: loading || !tipo.trim() ? "not-allowed" : "pointer",
+                  transition: "all 0.2s ease",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+                onMouseEnter={(e) => {
+                  if (!loading && tipo.trim()) {
+                    e.target.style.backgroundColor = "#163E32";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!loading && tipo.trim()) {
+                    e.target.style.backgroundColor = "#1B4D3E";
+                  }
+                }}
+              >
+                {loading && (
+                  <div
+                    style={{
+                      width: "16px",
+                      height: "16px",
+                      border: "2px solid #fff",
+                      borderTop: "2px solid transparent",
+                      borderRadius: "50%",
+                      animation: "spin 1s linear infinite",
+                    }}
+                  />
+                )}
+                {editTipoId ? "Atualizar" : "Adicionar"}
+              </button>
+            </div>
+          </form>
+
+          {/* List */}
+          {renderList(tipos, "tipo")}
+        </div>
+      )}
+
+      {/* Modal */}
+      {modalItem && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1001,
+            padding: "20px",
+          }}
+          onClick={() => setModalItem(null)}
+        >
+          <div
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: "16px",
+              padding: "32px",
+              maxWidth: "500px",
+              width: "100%",
+              boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3
+              style={{
+                fontSize: "20px",
+                fontWeight: "600",
+                color: "#1F2937",
+                marginBottom: "8px",
+              }}
+            >
+              Gerenciar {modalTipo === "marca" ? "Marca" : "Tipo"}
+            </h3>
+            <p
+              style={{
+                fontSize: "14px",
+                color: "#6B7280",
+                marginBottom: "24px",
+              }}
+            >
+              "{modalItem.nome || modalItem.tipo}"
+            </p>
+
+            <div style={{ display: "flex", gap: "12px" }}>
+              <button
                 onClick={() => {
                   if (modalTipo === "marca") {
                     setMarca(modalItem.nome);
@@ -366,23 +771,112 @@ const CadastroMarcasNomes = () => {
                   }
                   setModalItem(null);
                 }}
+                style={{
+                  flex: 1,
+                  padding: "12px 24px",
+                  borderRadius: "8px",
+                  border: "1px solid #1B4D3E",
+                  backgroundColor: "#1B4D3E",
+                  color: "#fff",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = "#163E32";
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = "#1B4D3E";
+                }}
               >
                 Editar
               </button>
               <button
-                style={btnExcluir}
-                onClick={() => {
-                  modalTipo === "marca"
-                    ? excluirMarca(modalItem._id || modalItem.id)
-                    : excluirTipo(modalItem._id || modalItem.id);
+                onClick={handleExcluir}
+                disabled={loading}
+                style={{
+                  flex: 1,
+                  padding: "12px 24px",
+                  borderRadius: "8px",
+                  border: "1px solid #DC2626",
+                  backgroundColor: loading ? "#F3F4F6" : "transparent",
+                  color: loading ? "#9CA3AF" : "#DC2626",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  cursor: loading ? "not-allowed" : "pointer",
+                  transition: "all 0.2s ease",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
+                }}
+                onMouseEnter={(e) => {
+                  if (!loading) {
+                    e.target.style.backgroundColor = "#FEE2E2";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!loading) {
+                    e.target.style.backgroundColor = "transparent";
+                  }
                 }}
               >
+                {loading && (
+                  <div
+                    style={{
+                      width: "16px",
+                      height: "16px",
+                      border: "2px solid #DC2626",
+                      borderTop: "2px solid transparent",
+                      borderRadius: "50%",
+                      animation: "spin 1s linear infinite",
+                    }}
+                  />
+                )}
                 Excluir
               </button>
             </div>
+
+            <button
+              onClick={() => setModalItem(null)}
+              style={{
+                marginTop: "16px",
+                width: "100%",
+                padding: "12px",
+                borderRadius: "8px",
+                border: "1px solid #E5E7EB",
+                backgroundColor: "#fff",
+                color: "#6B7280",
+                fontSize: "14px",
+                fontWeight: "500",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = "#F9FAFB";
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = "#fff";
+              }}
+            >
+              Cancelar
+            </button>
           </div>
         </div>
       )}
+
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes slideIn {
+          0% { transform: translateX(100%); opacity: 0; }
+          100% { transform: translateX(0); opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 };

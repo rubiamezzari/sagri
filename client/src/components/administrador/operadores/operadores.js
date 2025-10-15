@@ -1,36 +1,76 @@
-import React from "react";
+import React, { useState } from "react";
 import UserListOperador from "./userListOperador";
-import { Link } from "react-router-dom";
+import CreateOperador from "./CreateOperador";
 
-export default function operadores() {
-   const btnCadastrar = {
-    backgroundColor: "#D2EFE6",
-    color: "#000",
-    padding: "5px 15px",
+export default function Operadores() {
+  const [showModal, setShowModal] = useState(false);
+
+  // estilos do botão iguais ao do componente Associados
+  const btnCadastrar = {
+    backgroundColor: "#1B4D3E", // verde escuro
+    color: "#FFFFFF", // texto branco
+    padding: "6px 20px",
     borderRadius: "12px",
-    border: "1px solid #1c3d21",
+    border: "none",
     cursor: "pointer",
-    fontWeight: "500",
-    textDecoration: "none",
+    fontWeight: "600",
+    fontSize: "15px",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    transition: "0.3s",
+  };
+
+  const plusStyle = {
+    color: "#A8E6CF", // verde claro
+    fontSize: "22px",
+    fontWeight: "700",
+    marginRight: "4px",
+  };
+
+  const modalBackdrop = {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100vw",
+    height: "100vh",
+    backgroundColor: "rgba(0,0,0,0.3)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+    overflowY: "auto",
+    padding: "20px",
   };
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div style={{ padding: "20px", fontFamily: "'Segoe UI', sans-serif" }}>
       <div
         style={{
           display: "flex",
           justifyContent: "flex-end",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: "10px",
-          marginBottom: "20px",
+          marginBottom: "30px",
         }}
       >
-        <Link style={btnCadastrar} to="/operadores/create">
-          + Operador
-        </Link>
+        <button
+          style={btnCadastrar}
+          onClick={() => setShowModal(true)}
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#163F33")}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#1B4D3E")}
+        >
+          <span style={plusStyle}>+</span> Novo operador
+        </button>
       </div>
+
       <UserListOperador />
+
+      {showModal && (
+        <div style={modalBackdrop} onClick={() => setShowModal(false)}>
+          <div onClick={(e) => e.stopPropagation()}>
+            <CreateOperador onClose={() => setShowModal(false)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

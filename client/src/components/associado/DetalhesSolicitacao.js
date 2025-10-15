@@ -16,7 +16,7 @@ const layout = {
     padding: "60px 30px",
     maxWidth: "1200px",
     margin: "0 auto",
-    fontFamily: "Inter, sans-serif",
+    fontFamily: "'segoe ui', sans-serif",
   },
   wrapper: {
     display: "flex",

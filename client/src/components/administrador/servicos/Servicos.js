@@ -41,16 +41,7 @@ export default function Servicos() {
 
   return (
     <div style={containerStyle}>
-      <header style={headerStyle}>
-        <button
-          style={hover ? { ...buttonStyle, ...buttonHoverStyle } : buttonStyle}
-          onClick={handleCadastrarClick}
-          onMouseEnter={() => setHover(true)}
-          onMouseLeave={() => setHover(false)}
-        >
-          + Serviço
-        </button>
-      </header>
+    
 
       <ListServicos /> 
     </div>

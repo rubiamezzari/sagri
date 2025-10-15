@@ -75,7 +75,7 @@ const boxStyle = {
   width: "580px", // Um pouco mais largo
   maxWidth: "95%",
   boxShadow: "0 10px 30px rgba(0,0,0,0.1)", // Sombra mais sutil
-  fontFamily: "'Segoe UI', sans-serif",
+  fontFamily: "'segoe ui', sans-serif",
   maxHeight: "85vh",
   overflowY: "auto",
   position: "relative",

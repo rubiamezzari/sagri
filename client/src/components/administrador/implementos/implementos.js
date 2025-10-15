@@ -4,15 +4,27 @@ import { Link } from "react-router-dom";
 
 export default function Implementos() {
    const btnCadastrar = {
-    backgroundColor: "#D2EFE6",
-    color: "#000",
-    padding: "5px 15px",
+    backgroundColor: "#1B4D3E", // verde escuro
+    color: "#FFFFFF", // texto branco
+    padding: "8px 20px",
     borderRadius: "12px",
-    border: "1px solid #1A381F",
+    border: "none",
     cursor: "pointer",
-    fontWeight: "500",
-    textDecoration: "none",
+    fontWeight: "600",
+    fontSize: "15px",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    transition: "0.3s",
   };
+
+  const plusStyle = {
+    color: "#A8E6CF", // verde claro
+    fontSize: "22px",
+    fontWeight: "700",
+    marginRight: "4px",
+  };
+
 
   return (
      <div style={{ padding: "20px" }}>
@@ -23,8 +35,7 @@ export default function Implementos() {
            marginBottom: "30px",
          }}
        >
-         <Link style={btnCadastrar} to="/implementos/create">
-           + Implemento
+         <Link style={btnCadastrar} to="/implementos/create"><span style={plusStyle}>+</span> Implemento
          </Link>
        </div>
  

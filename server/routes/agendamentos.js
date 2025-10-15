@@ -4,56 +4,15 @@ const dbo = require("../db/conn");
 
 const router = express.Router();
 
+// Criar agendamento
 router.post("/create", async (req, res) => {
   const dbConnect = dbo.getDb();
-
   try {
     const dados = req.body;
 
-    if (!dados.tipo_servico || !dados.data_servico || !dados.hora) {
+    if (!dados.tipo_servico || !dados.data_servico || !dados.hora || !dados.usuario_id) {
       return res.status(400).json({ error: "Campos obrigatórios faltando" });
     }
-
-    // Buscar o serviço para saber os tipos de máquina e implemento necessários
-    const servico = await dbConnect.collection("servicos").findOne({ _id: new ObjectId(dados.tipo_servico) });
-    if (!servico) {
-      return res.status(404).json({ error: "Serviço não encontrado" });
-    }
-
-    // Buscar máquinas do tipo do serviço
-    const maquinas = await dbConnect.collection("maquinas").find({ tipo: servico.maquina_tipo }).toArray();
-
-    // Buscar implementos do tipo do serviço
-    const implementos = await dbConnect.collection("implementos").find({ tipo: servico.implemento_tipo }).toArray();
-
-    if (maquinas.length === 0 || implementos.length === 0) {
-      return res.status(400).json({ error: "Equipamentos necessários para o serviço não cadastrados" });
-    }
-
-    // Buscar agendamentos ativos na mesma data e hora que ocupam esses equipamentos
-    // Você pode ajustar para intervalo de tempo se quiser
-    const agendamentosNoDia = await dbConnect.collection("agendamentos").find({
-      data_servico: new Date(dados.data_servico),
-      hora: dados.hora,
-      status: { $in: ["pendente", "confirmado", "em andamento"] },
-      $or: [
-        { maquina_id: { $in: maquinas.map(m => m._id.toString()) } },
-        { implemento_id: { $in: implementos.map(i => i._id.toString()) } }
-      ]
-    }).toArray();
-
-    const maquinasOcupadasIds = agendamentosNoDia.map(a => a.maquina_id);
-    const implementosOcupadosIds = agendamentosNoDia.map(a => a.implemento_id);
-
-    const maquinasDisponiveis = maquinas.filter(m => !maquinasOcupadasIds.includes(m._id.toString()));
-    const implementosDisponiveis = implementos.filter(i => !implementosOcupadosIds.includes(i._id.toString()));
-
-    if (maquinasDisponiveis.length === 0 || implementosDisponiveis.length === 0) {
-      return res.status(400).json({ error: "Não há equipamentos disponíveis para o serviço nessa data e hora" });
-    }
-
-    const maquinaEscolhida = maquinasDisponiveis[0];
-    const implementoEscolhido = implementosDisponiveis[0];
 
     const novoAgendamento = {
       usuario_id: new ObjectId(dados.usuario_id),
@@ -63,9 +22,11 @@ router.post("/create", async (req, res) => {
       hora: dados.hora,
       tempo_estimado: dados.tempo_estimado || "",
       observacao: dados.observacao || "",
-      maquina_id: maquinaEscolhida._id.toString(),
-      implemento_id: implementoEscolhido._id.toString(),
+      maquina_id: dados.maquina_id || "",
+      implemento_id: dados.implemento_id || "",
       status: "pendente",
+      horimetro_inicial: null,
+      horimetro_final: null,
       criadoEm: new Date(),
     };
 
@@ -74,12 +35,95 @@ router.post("/create", async (req, res) => {
     res.status(201).json({
       message: "Agendamento criado com sucesso!",
       agendamentoId: result.insertedId,
-      maquina: maquinaEscolhida,
-      implemento: implementoEscolhido,
     });
   } catch (err) {
     console.error("Erro ao criar agendamento:", err);
     res.status(500).json({ error: "Erro ao criar agendamento", details: err.message });
+  }
+});
+
+// Listar todos os agendamentos
+router.get("/", async (req, res) => {
+  const dbConnect = dbo.getDb();
+  try {
+    const agendamentos = await dbConnect.collection("agendamentos").find().toArray();
+    res.status(200).json(agendamentos);
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao buscar agendamentos", details: err.message });
+  }
+});
+
+// Listar apenas agendamentos aprovados
+router.get("/approved", async (req, res) => {
+  const dbConnect = dbo.getDb();
+  try {
+    const aprovados = await dbConnect.collection("agendamentos").find({ status: "aprovado" }).toArray();
+    res.status(200).json(aprovados);
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao buscar agendamentos aprovados", details: err.message });
+  }
+});
+
+// Atualizar status do agendamento
+router.put("/:id", async (req, res) => {
+  const dbConnect = dbo.getDb();
+  const { id } = req.params;
+  const { status } = req.body;
+
+  if (!status) return res.status(400).json({ error: "Status é obrigatório" });
+
+  try {
+    const result = await dbConnect.collection("agendamentos").updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { status } }
+    );
+
+    if (result.matchedCount === 0) return res.status(404).json({ error: "Agendamento não encontrado" });
+
+    res.status(200).json({ message: "Status atualizado com sucesso" });
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao atualizar status", details: err.message });
+  }
+});
+
+// Cadastrar horímetro (inicial e final)
+router.post("/horimetro/:id", async (req, res) => {
+  const dbConnect = dbo.getDb();
+  const { id } = req.params;
+  const { horimetro_inicial, horimetro_final } = req.body;
+
+  if (horimetro_inicial == null || horimetro_final == null) {
+    return res.status(400).json({ error: "Horímetro inicial e final são obrigatórios" });
+  }
+
+  try {
+    const agendamento = await dbConnect.collection("agendamentos").findOne({ _id: new ObjectId(id) });
+    if (!agendamento) return res.status(404).json({ error: "Agendamento não encontrado" });
+
+    // Só cadastrar se ainda estiver null
+    if (agendamento.horimetro_inicial !== null || agendamento.horimetro_final !== null) {
+      return res.status(400).json({ error: "Horímetro já cadastrado" });
+    }
+
+    await dbConnect.collection("agendamentos").updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { horimetro_inicial, horimetro_final } }
+    );
+
+    res.status(200).json({ message: "Horímetro cadastrado com sucesso" });
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao cadastrar horímetro", details: err.message });
+  }
+});
+
+// Deletar agendamento
+router.delete("/:id", async (req, res) => {
+  const dbConnect = dbo.getDb();
+  try {
+    const result = await dbConnect.collection("agendamentos").deleteOne({ _id: new ObjectId(req.params.id) });
+    res.status(200).json({ message: "Agendamento deletado", result });
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao deletar agendamento", details: err.message });
   }
 });
 

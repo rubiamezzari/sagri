@@ -1,171 +1,214 @@
-import React, { useState } from "react";
-import "bootstrap/dist/css/bootstrap.css";
-import "bootstrap/dist/js/bootstrap.bundle";
-import { NavLink } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import Logo from "./components/Logo.png";
 
-export default function Navbar() {
-    const [dropdownOpen, setDropdownOpen] = useState(false);
+// Ícones reutilizáveis
+const SVG_ICONS = {
+  Home: (props) => (
+    <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}>
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+    </svg>
+  ),
+  Users: (props) => (
+    <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}>
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+    </svg>
+  ),
+  UserTie: (props) => (
+    <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}>
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+    </svg>
+  ),
+  Settings: (props) => (
+    <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}>
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+    </svg>
+  ),
+  Calendar: (props) => (
+    <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}>
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+    </svg>
+  ),
+  Tag: (props) => (
+    <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}>
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+    </svg>
+  ),
+  ChevronDown: (props) => (
+   <svg
+  className={`chevron ${props.className || ""}`}
+  fill="none"
+  stroke="currentColor"
+  viewBox="0 0 24 24"
+  width={12}   // <- menor largura
+  height={12}  // <- menor altura
+  {...props}
+>
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 9l-7 7-7-7"/>
+    </svg>
+  )
+};
 
-    const baseStyle = {
-        fontFamily: '"Inter", sans-serif',
-        fontWeight: 500,
-        textTransform: "uppercase",
-        letterSpacing: "0.5px",
-        fontSize: "12px",
-        color: "#fff",
-        textDecoration: "none",
-        transition: "color 0.3s ease",
-    };
+export default function NavbarAdmin({ children }) {
+  const location = useLocation();
+  const navigate = useNavigate();
 
-    const linkStyle = ({ isActive }) => ({
-        ...baseStyle,
-        color: isActive ? "#fff" : baseStyle.color,
-    });
+  const [equipmentOpen, setEquipmentOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-    const dropdownToggleStyle = {
-        ...baseStyle,
-        background: "none",
-        border: "none",
-        borderRadius: "5px",
-        cursor: "pointer",
-        display: "flex",
-        alignItems: "center",
-        gap: "4px",
-        padding: "4px 0",
-    };
+  const SIDEBAR_WIDTH = "256px";
+  const SIDEBAR_BG = "#1B4D3E";
+  const ACTIVE_BG = "rgba(255, 255, 255, 0.1)";
+  const HOVER_BG = "rgba(255, 255, 255, 0.1)";
+  const MAIN_BG = "#F5F1E8";
 
-    const dropdownMenuStyle = {
-        backgroundColor: "#fff",
-        borderRadius: "8px",
-        boxShadow: "0 4px 6px rgba(0,0,0,0.08)",
-        marginTop: "3px",
-        minWidth: "160px",
-        padding: "6px 0",
-    };
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-    const dropdownItemStyle = ({ isActive }) => ({
-        ...baseStyle,
-        padding: "6px 16px",
-        color: isActive ? "#2f755e" : "#444",
-        backgroundColor: isActive ? "#f1f1f1" : "transparent",
-        fontSize: "13px",
-        display: "block",
-    });
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/login");
+  };
 
+  // Mantém o dropdown aberto se a rota for de equipamentos
+  useEffect(() => {
+    const path = location.pathname;
+    const isEquipmentPath = path.startsWith("/maquinas") || path.startsWith("/implementos") || path.startsWith("/servicos");
+    setEquipmentOpen(isEquipmentPath);
+  }, [location.pathname]);
+
+  const closeSidebar = () => sidebarOpen && setSidebarOpen(false);
+
+  const NavLinkItem = ({ to, children, Icon }) => {
+    const isActive = location.pathname === to;
     return (
-        <>
-            <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap');
-
-                .dropdown-toggle::after {
-                    display: none !important;
-                }
-
-                .dropdown-item:hover {
-                    background-color: #f5f5f5 !important;
-                    color: #2f755e !important;
-                }
-
-                .navbar-nav .nav-link {
-                    padding: 4px 8px !important;
-                }
-            `}</style>
-
-            <nav
-                className="navbar navbar-expand-lg"
-                style={{
-                    backgroundColor: "#1B4D3E",
-                    padding: "2px 20px",
-                    boxShadow: "0 1px 1px rgba(136, 136, 136, 0.2)",
-                }}
-            >
-                <NavLink className="navbar-brand" to="/">
-                    <img style={{ width: "45px" }} src={Logo} alt="Logo" />
-                </NavLink>
-
-                <button
-                    className="navbar-toggler"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#navbarSupportedContent"
-                    aria-controls="navbarSupportedContent"
-                    aria-expanded="false"
-                    aria-label="Toggle navigation"
-                >
-                    <span className="navbar-toggler-icon"></span>
-                </button>
-
-                <div className="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul
-                        className="navbar-nav me-auto mb-2 mb-lg-0"
-                        style={{ gap: "14px", display: "flex", alignItems: "center" }}
-                    >
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/" style={linkStyle}>
-                                Início
-                            </NavLink>
-                        </li>
-
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/associados" style={linkStyle}>
-                                Associados
-                            </NavLink>
-                        </li>
-
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/operadores" style={linkStyle}>
-                                Operadores
-                            </NavLink>
-                        </li>
-
-                        <li
-                            className={`nav-item dropdown${dropdownOpen ? " show" : ""}`}
-                            onMouseEnter={() => setDropdownOpen(true)}
-                            onMouseLeave={() => setDropdownOpen(false)}
-                        >
-                            <button
-                                className="nav-link dropdown-toggle"
-                                role="button"
-                                style={dropdownToggleStyle}
-                            >
-                                Equipamentos <span style={{ fontSize: "10px" }}>▼</span>
-                            </button>
-                            <ul
-                                className={`dropdown-menu${dropdownOpen ? " show" : ""}`}
-                                style={dropdownMenuStyle}
-                            >
-                                <li>
-                                    <NavLink to="/maquinas" className="dropdown-item" style={dropdownItemStyle}>
-                                        Máquinas
-                                    </NavLink>
-                                </li>
-                                <li>
-                                    <NavLink to="/implementos" className="dropdown-item" style={dropdownItemStyle}>
-                                        Implementos
-                                    </NavLink>
-                                </li>
-                                <li>
-                                    <NavLink to="/servicos" className="dropdown-item" style={dropdownItemStyle}>
-                                        Serviços
-                                    </NavLink>
-                                </li>
-                            </ul>
-                        </li>
-
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/agendamentos" style={linkStyle}>
-                                Agendamentos
-                            </NavLink>
-                        </li>
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/marcas" style={linkStyle}>
-                                Marcas
-                            </NavLink>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
-        </>
+      <li className="nav-item">
+        <NavLink
+          to={to}
+          className={`nav-link ${isActive ? "active" : ""}`}
+          onClick={closeSidebar}
+        >
+          {Icon && <Icon />}
+          <span className="nav-link-text">{children}</span>
+        </NavLink>
+      </li>
     );
+  };
+
+  const DropdownLinkItem = ({ to, children }) => {
+    const isActive = location.pathname === to;
+    return (
+      <NavLink
+        to={to}
+        className={`dropdown-item ${isActive ? "active" : ""}`}
+        onClick={closeSidebar}
+      >
+        <span className="dropdown-item-text">{children}</span>
+      </NavLink>
+    );
+  };
+
+  return (
+    <>
+      <style>{`
+        * {margin:0; padding:0; box-sizing:border-box;}
+ .top-navbar {
+    height: 56px; 
+    background-color:${SIDEBAR_BG}; 
+    color:white; 
+    display:flex; 
+    align-items:center; 
+    justify-content:space-between; 
+    padding:0 16px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+  }
+        .hamburger {font-size:24px; cursor:pointer;}
+        .top-logo {position:absolute; left:50%; transform:translateX(-50%);}
+        .top-logo img {height:48px; width: 48px; object-fit:contain;}
+        .logout-btn {cursor:pointer; background:none; border:none; color:white; font-weight:500;}
+        .sidebar {width:${SIDEBAR_WIDTH}; background-color:${SIDEBAR_BG}; color:white; display:flex; flex-direction:column; position:fixed; left:${sidebarOpen ? "0" : `-${SIDEBAR_WIDTH}`}; top:56px; bottom:0; overflow-y:auto; transition:left 0.3s ease;}
+        .sidebar-logo {padding:24px;}
+        .logo-container {width:48px; height:48px; display:flex; align-items:center; justify-content:center; background-color:rgba(255,255,255,0.1); border-radius:12px;}
+        .logo-container img {height:32px; object-fit:contain;}
+        .sidebar-nav {flex:1; padding:0 12px; overflow-y:auto;}
+        .nav-list {list-style:none; padding:0; margin:0;}
+        .nav-item {margin-bottom:4px;}
+        .nav-link, .nav-item button.dropdown-button {display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:8px; color:rgba(255,255,255,0.8); text-decoration:none; cursor:pointer; transition: all 0.2s ease; background-color: transparent; border:none; width:100%; text-align:left; font-family:inherit;}
+        .nav-link:hover, .nav-item button.dropdown-button:hover {background-color:${HOVER_BG}; color:white;}
+        .nav-link.active {background-color:${ACTIVE_BG}; color:white;}
+        .nav-item button.dropdown-button.active {background-color:${ACTIVE_BG}; color:white;}
+        .nav-link-text {text-transform:uppercase; letter-spacing:0.5px; font-size:12px; font-weight:500;}
+        .dropdown-button {justify-content:space-between;}
+        .dropdown-button-content {display:flex; align-items:center; gap:12px;}
+        .dropdown-menu {margin-top:4px; margin-left:16px; padding-left:16px; border-left:2px solid rgba(255,255,255,0.1);}
+        .dropdown-item {display:flex; align-items:center; gap:12px; padding:8px 12px; border-radius:6px; color:rgba(255,255,255,0.7); text-decoration:none; cursor:pointer; transition: all 0.2s ease; background-color: transparent; border:none; width:100%; text-align:left; font-family:inherit; margin-bottom:4px;}
+        .dropdown-item:hover {background-color:rgba(255,255,255,0.05); color:white;}
+        .dropdown-item.active {background-color:${ACTIVE_BG}; color:white;}
+        .dropdown-item-text {text-transform:uppercase; letter-spacing:0.5px; font-size:12px; font-weight:500;}
+        .chevron {width:16px; height:16px; transition: transform 0.3s ease;}
+        .chevron.open {transform:rotate(180deg);}
+        .sidebar-footer {padding:12px; border-top:1px solid rgba(255,255,255,0.1);}
+        .footer-content {padding:8px 12px; color:rgba(255,255,255,0.6); font-size:12px;}
+        .main-content {margin-left:${sidebarOpen ? SIDEBAR_WIDTH : "0"}; flex:1; min-height:calc(100vh - 56px); background-color:${MAIN_BG}; transition:margin-left 0.3s ease; padding:16px;  padding-top:72px;}
+        .icon {width:20px; height:20px; flex-shrink:0;}
+      `}</style>
+
+      <div className="top-navbar">
+        <span className="hamburger" onClick={toggleSidebar}>&#9776;</span>
+        <span className="top-logo"><img src={Logo} alt="Logo" /></span>
+        <button className="logout-btn" onClick={handleLogout}>Sair</button>
+      </div>
+
+      <div className="sidebar">
+        <div className="sidebar-logo">
+          <div className="logo-container">
+            <img src={Logo} alt="Logo" />
+          </div>
+        </div>
+
+        <nav className="sidebar-nav">
+          <ul className="nav-list">
+            <NavLinkItem to="/" Icon={SVG_ICONS.Home}>Início</NavLinkItem>
+            <NavLinkItem to="/associados" Icon={SVG_ICONS.Users}>Associados</NavLinkItem>
+            <NavLinkItem to="/operadores" Icon={SVG_ICONS.UserTie}>Operadores</NavLinkItem>
+
+            {/* Dropdown Equipamentos */}
+            <li className="nav-item">
+              <button 
+                onClick={() => setEquipmentOpen(!equipmentOpen)} 
+                className={`dropdown-button ${equipmentOpen ? "active" : ""}`}
+              >
+                <div className="dropdown-button-content">
+                  <SVG_ICONS.Settings />
+                  <span className="nav-link-text">Equipamentos</span>
+                </div>
+                <SVG_ICONS.ChevronDown className={`${equipmentOpen ? "open" : ""}`} />
+              </button>
+
+              {equipmentOpen && (
+                <div className="dropdown-menu">
+                  <DropdownLinkItem to="/maquinas">Máquinas</DropdownLinkItem>
+                  <DropdownLinkItem to="/implementos">Implementos</DropdownLinkItem>
+                  <DropdownLinkItem to="/servicos">Serviços</DropdownLinkItem>
+                </div>
+              )}
+            </li>
+
+            <NavLinkItem to="/agendamentos" Icon={SVG_ICONS.Calendar}>Agendamentos</NavLinkItem>
+            <NavLinkItem to="/marcas" Icon={SVG_ICONS.Tag}>Marcas</NavLinkItem>
+          </ul>
+        </nav>
+
+        <div className="sidebar-footer">
+          <div className="footer-content"><p>Sistema de Gestão</p></div>
+        </div>
+      </div>
+
+      <main className="main-content">{children}</main>
+    </>
+  );
 }
