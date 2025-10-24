@@ -10,17 +10,57 @@ export default function EditOperador({ id, onClose }) {
     cpf: "",
   });
   const [focusField, setFocusField] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Funções de máscara
+  function maskTelefone(value) {
+    if (!value) return "";
+    const cleaned = value.replace(/\D/g, "");
+    if (cleaned.length <= 10) {
+      return cleaned
+        .replace(/^(\d{2})(\d)/, "($1) $2")
+        .replace(/(\d{4})(\d)/, "$1-$2");
+    }
+    return cleaned
+      .replace(/^(\d{2})(\d)/, "($1) $2")
+      .replace(/(\d{5})(\d)/, "$1-$2")
+      .slice(0, 15);
+  }
+
+  function maskCPF(value) {
+    if (!value) return "";
+    return value
+      .replace(/\D/g, "")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{1,2})$/, "$1-$2")
+      .slice(0, 14);
+  }
 
   useEffect(() => {
     if (!id) return;
     async function fetchData() {
       try {
+        setLoading(true);
         const response = await fetch(`${API_URL}/operadores/${id}`);
-        if (!response.ok) throw new Error();
+        if (!response.ok) throw new Error("Erro ao buscar operador");
         const operador = await response.json();
+        
+        console.log("Dados recebidos:", operador);
+        
+        // Remove o campo 'usuario' se existir e formata os dados
         const { usuario, ...resto } = operador;
-        setForm(resto);
-      } catch {
+        
+        setForm({
+          nome: resto.nome || "",
+          email: resto.email || "",
+          telefone: maskTelefone(resto.telefone || ""),
+          cpf: maskCPF(resto.cpf || ""),
+        });
+        
+        setLoading(false);
+      } catch (error) {
+        console.error("Erro:", error);
         alert("Erro ao buscar operador.");
         onClose();
       }
@@ -30,21 +70,45 @@ export default function EditOperador({ id, onClose }) {
 
   function handleChange(e) {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    
+    let formattedValue = value;
+    
+    // Aplica máscara conforme o campo
+    if (name === "telefone") {
+      formattedValue = maskTelefone(value);
+    } else if (name === "cpf") {
+      formattedValue = maskCPF(value);
+    }
+    
+    setForm((prev) => ({ ...prev, [name]: formattedValue }));
   }
 
   async function handleSalvar() {
     try {
+      // Remove máscaras antes de enviar
+      const cleanData = {
+        nome: form.nome,
+        email: form.email,
+        telefone: form.telefone.replace(/\D/g, ""),
+        cpf: form.cpf.replace(/\D/g, ""),
+      };
+      
       const response = await fetch(`${API_URL}/operadores/update/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(cleanData),
       });
-      if (!response.ok) throw new Error();
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "Erro ao atualizar");
+      }
+      
       alert("Operador atualizado com sucesso!");
       onClose();
-    } catch {
-      alert("Erro ao atualizar operador.");
+    } catch (error) {
+      console.error("Erro ao atualizar:", error);
+      alert("Erro ao atualizar operador: " + error.message);
     }
   }
 
@@ -181,6 +245,12 @@ export default function EditOperador({ id, onClose }) {
     gap: "6px",
   };
 
+  const loadingStyle = {
+    textAlign: "center",
+    padding: "40px",
+    color: "#6B7280",
+  };
+
   // SVG Icons
   const UserIcon = () => (
     <svg
@@ -210,6 +280,22 @@ export default function EditOperador({ id, onClose }) {
       strokeLinejoin="round"
     >
       <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+
+  const LoaderIcon = () => (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ animation: "spin 1s linear infinite" }}
+    >
+      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
     </svg>
   );
 
@@ -252,88 +338,97 @@ export default function EditOperador({ id, onClose }) {
 
         {/* Content */}
         <div style={contentStyle}>
-          <label style={labelStyle}>Nome *</label>
-          <input
-            type="text"
-            name="nome"
-            value={form.nome}
-            onChange={handleChange}
-            onFocus={() => setFocusField("nome")}
-            onBlur={() => setFocusField(null)}
-            style={inputStyle("nome")}
-            placeholder="Digite o nome completo"
-            required
-          />
+          {loading ? (
+            <div style={loadingStyle}>
+              <LoaderIcon />
+              <p>Carregando dados...</p>
+            </div>
+          ) : (
+            <>
+              <label style={labelStyle}>Nome *</label>
+              <input
+                type="text"
+                name="nome"
+                value={form.nome}
+                onChange={handleChange}
+                onFocus={() => setFocusField("nome")}
+                onBlur={() => setFocusField(null)}
+                style={inputStyle("nome")}
+                placeholder="Digite o nome completo"
+                required
+              />
 
-          <label style={labelStyle}>Email</label>
-          <input
-            type="email"
-            name="email"
-            value={form.email}
-            onChange={handleChange}
-            onFocus={() => setFocusField("email")}
-            onBlur={() => setFocusField(null)}
-            style={inputStyle("email")}
-            placeholder="email@exemplo.com"
-            required
-          />
+              <label style={labelStyle}>Email *</label>
+              <input
+                type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                onFocus={() => setFocusField("email")}
+                onBlur={() => setFocusField(null)}
+                style={inputStyle("email")}
+                placeholder="email@exemplo.com"
+                required
+              />
 
-          <label style={labelStyle}>Telefone *</label>
-          <input
-            type="text"
-            name="telefone"
-            value={form.telefone}
-            onChange={handleChange}
-            onFocus={() => setFocusField("telefone")}
-            onBlur={() => setFocusField(null)}
-            style={inputStyle("telefone")}
-            placeholder="(00) 00000-0000"
-            required
-          />
+              <label style={labelStyle}>Telefone *</label>
+              <input
+                type="text"
+                name="telefone"
+                value={form.telefone}
+                onChange={handleChange}
+                onFocus={() => setFocusField("telefone")}
+                onBlur={() => setFocusField(null)}
+                style={inputStyle("telefone")}
+                placeholder="(00) 00000-0000"
+                required
+              />
 
-          <label style={labelStyle}>CPF *</label>
-          <input
-            type="text"
-            name="cpf"
-            value={form.cpf}
-            onChange={handleChange}
-            onFocus={() => setFocusField("cpf")}
-            onBlur={() => setFocusField(null)}
-            style={inputStyle("cpf")}
-            placeholder="000.000.000-00"
-            required
-          />
+              <label style={labelStyle}>CPF *</label>
+              <input
+                type="text"
+                name="cpf"
+                value={form.cpf}
+                onChange={handleChange}
+                onFocus={() => setFocusField("cpf")}
+                onBlur={() => setFocusField(null)}
+                style={inputStyle("cpf")}
+                placeholder="000.000.000-00"
+                required
+              />
 
-          {/* Buttons */}
-          <div style={buttonContainerStyle}>
-            <button
-              style={btnCancelar}
-              onClick={onClose}
-              type="button"
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#F9FAFB";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "#fff";
-              }}
-            >
-              Cancelar
-            </button>
-            <button
-              style={btnSalvar}
-              onClick={handleSalvar}
-              type="button"
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#153D2F";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "#1B4D3E";
-              }}
-            >
-              <CheckIcon />
-              Salvar
-            </button>
-          </div>
+              {/* Buttons */}
+              <div style={buttonContainerStyle}>
+                <button
+                  style={btnCancelar}
+                  onClick={onClose}
+                  type="button"
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#F9FAFB";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "#fff";
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  style={btnSalvar}
+                  onClick={handleSalvar}
+                  type="button"
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#153D2F";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "#1B4D3E";
+                  }}
+                >
+                  <CheckIcon />
+                  Salvar
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -346,6 +441,15 @@ export default function EditOperador({ id, onClose }) {
           to {
             opacity: 1;
             transform: translateY(0);
+          }
+        }
+        
+        @keyframes spin {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
           }
         }
       `}</style>

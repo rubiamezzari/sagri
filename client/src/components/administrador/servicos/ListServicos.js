@@ -1,26 +1,28 @@
-import React, { useEffect, useState } from "react";
-import { Search, Wrench, Tractor, Settings, Plus } from "lucide-react";
 
-const API_URL = "http://localhost:5050";
+import { useEffect, useState } from "react"
+import { Search, Wrench, Tractor, Settings, Plus } from "lucide-react"
+import CreateServico from "./CreateServico"
+
+const API_URL = "http://localhost:5050"
 
 const DetalhesServico = ({ servico, onClose, onDeleted, onUpdated }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [focusField, setFocusField] = useState(null);
-  const servicoId = servico?.id || servico?._id;
+  const [isEditing, setIsEditing] = useState(false)
+  const [focusField, setFocusField] = useState(null)
+  const servicoId = servico?.id || servico?._id
 
   const [form, setForm] = useState({
     nome: servico?.nome || "",
-    maquina_tipo: typeof servico?.maquina_tipo === "string" 
-      ? servico.maquina_tipo 
-      : JSON.stringify(servico?.maquina_tipo) || "",
-    implemento_tipo: typeof servico?.implemento_tipo === "string" 
-      ? servico.implemento_tipo 
-      : JSON.stringify(servico?.implemento_tipo) || "",
+    maquina_tipo:
+      typeof servico?.maquina_tipo === "string" ? servico.maquina_tipo : JSON.stringify(servico?.maquina_tipo) || "",
+    implemento_tipo:
+      typeof servico?.implemento_tipo === "string"
+        ? servico.implemento_tipo
+        : JSON.stringify(servico?.implemento_tipo) || "",
     observacao: servico?.observacao || "",
-  });
+  })
 
   function updateForm(value) {
-    setForm((prev) => ({ ...prev, ...value }));
+    setForm((prev) => ({ ...prev, ...value }))
   }
 
   async function handleSave() {
@@ -29,21 +31,21 @@ const DetalhesServico = ({ servico, onClose, onDeleted, onUpdated }) => {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
-      });
+      })
 
       if (!response.ok) {
-        alert("Erro ao atualizar serviço.");
-        return;
+        alert("Erro ao atualizar serviço.")
+        return
       }
 
-      alert("Serviço atualizado com sucesso!");
-      setIsEditing(false);
+      alert("Serviço atualizado com sucesso!")
+      setIsEditing(false)
       if (onUpdated) {
-        onUpdated({ ...servico, ...form, _id: servicoId });
+        onUpdated({ ...servico, ...form, _id: servicoId })
       }
     } catch (error) {
-      console.error("Erro ao atualizar:", error);
-      alert("Erro ao atualizar serviço.");
+      console.error("Erro ao atualizar:", error)
+      alert("Erro ao atualizar serviço.")
     }
   }
 
@@ -51,37 +53,39 @@ const DetalhesServico = ({ servico, onClose, onDeleted, onUpdated }) => {
     if (window.confirm("Deseja cancelar as alterações?")) {
       setForm({
         nome: servico?.nome || "",
-        maquina_tipo: typeof servico?.maquina_tipo === "string" 
-          ? servico.maquina_tipo 
-          : JSON.stringify(servico?.maquina_tipo) || "",
-        implemento_tipo: typeof servico?.implemento_tipo === "string" 
-          ? servico.implemento_tipo 
-          : JSON.stringify(servico?.implemento_tipo) || "",
+        maquina_tipo:
+          typeof servico?.maquina_tipo === "string"
+            ? servico.maquina_tipo
+            : JSON.stringify(servico?.maquina_tipo) || "",
+        implemento_tipo:
+          typeof servico?.implemento_tipo === "string"
+            ? servico.implemento_tipo
+            : JSON.stringify(servico?.implemento_tipo) || "",
         observacao: servico?.observacao || "",
-      });
-      setIsEditing(false);
+      })
+      setIsEditing(false)
     }
   }
 
   async function handleExcluir() {
-    if (!window.confirm("Tem certeza que deseja excluir este serviço?")) return;
+    if (!window.confirm("Tem certeza que deseja excluir este serviço?")) return
     try {
       const resp = await fetch(`${API_URL}/servicos/${servicoId}`, {
         method: "DELETE",
-      });
+      })
       if (resp.ok) {
-        alert("Serviço excluído com sucesso!");
-        onDeleted && onDeleted(servicoId);
-        onClose && onClose();
+        alert("Serviço excluído com sucesso!")
+        onDeleted && onDeleted(servicoId)
+        onClose && onClose()
       } else {
-        alert("Erro ao excluir serviço.");
+        alert("Erro ao excluir serviço.")
       }
     } catch (err) {
-      alert("Erro: " + err.message);
+      alert("Erro: " + err.message)
     }
   }
 
-  if (!servico) return null;
+  if (!servico) return null
 
   return (
     <div
@@ -187,10 +191,10 @@ const DetalhesServico = ({ servico, onClose, onDeleted, onUpdated }) => {
               transition: "color 0.2s ease",
             }}
             onMouseEnter={(e) => {
-              e.target.style.color = "#6B7280";
+              e.target.style.color = "#6B7280"
             }}
             onMouseLeave={(e) => {
-              e.target.style.color = "#9CA3AF";
+              e.target.style.color = "#9CA3AF"
             }}
           >
             ×
@@ -221,12 +225,7 @@ const DetalhesServico = ({ servico, onClose, onDeleted, onUpdated }) => {
                     gap: "8px",
                   }}
                 >
-                  <svg
-                    style={{ width: "20px", height: "20px" }}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                  <svg style={{ width: "20px", height: "20px" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -260,12 +259,7 @@ const DetalhesServico = ({ servico, onClose, onDeleted, onUpdated }) => {
                     gap: "8px",
                   }}
                 >
-                  <svg
-                    style={{ width: "20px", height: "20px" }}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                  <svg style={{ width: "20px", height: "20px" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -283,18 +277,21 @@ const DetalhesServico = ({ servico, onClose, onDeleted, onUpdated }) => {
                   }}
                 >
                   <EquipmentItem
-                    icon={<Tractor style={{ width: "20px", height: "20px" }} />}
                     label="Máquina"
-                    value={typeof servico?.maquina_tipo === "string" 
-                      ? servico.maquina_tipo 
-                      : JSON.stringify(servico?.maquina_tipo)}
+                    value={
+                      typeof servico?.maquina_tipo === "string"
+                        ? servico.maquina_tipo
+                        : JSON.stringify(servico?.maquina_tipo)
+                    }
                   />
                   <EquipmentItem
-                    icon={<Settings style={{ width: "20px", height: "20px" }} />}
+                   
                     label="Implemento"
-                    value={typeof servico?.implemento_tipo === "string" 
-                      ? servico.implemento_tipo 
-                      : JSON.stringify(servico?.implemento_tipo)}
+                    value={
+                      typeof servico?.implemento_tipo === "string"
+                        ? servico.implemento_tipo
+                        : JSON.stringify(servico?.implemento_tipo)
+                    }
                   />
                 </div>
               </div>
@@ -339,7 +336,15 @@ const DetalhesServico = ({ servico, onClose, onDeleted, onUpdated }) => {
           {isEditing && (
             <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
               <div>
-                <label style={{ display: "block", marginBottom: "6px", color: "#1B4D3E", fontSize: "13px", fontWeight: "500" }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "6px",
+                    color: "#1B4D3E",
+                    fontSize: "13px",
+                    fontWeight: "500",
+                  }}
+                >
                   Nome do Serviço *
                 </label>
                 <input
@@ -367,7 +372,15 @@ const DetalhesServico = ({ servico, onClose, onDeleted, onUpdated }) => {
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                 <div>
-                  <label style={{ display: "block", marginBottom: "6px", color: "#1B4D3E", fontSize: "13px", fontWeight: "500" }}>
+                  <label
+                    style={{
+                      display: "block",
+                      marginBottom: "6px",
+                      color: "#1B4D3E",
+                      fontSize: "13px",
+                      fontWeight: "500",
+                    }}
+                  >
                     Tipo de Máquina *
                   </label>
                   <input
@@ -394,7 +407,15 @@ const DetalhesServico = ({ servico, onClose, onDeleted, onUpdated }) => {
                 </div>
 
                 <div>
-                  <label style={{ display: "block", marginBottom: "6px", color: "#1B4D3E", fontSize: "13px", fontWeight: "500" }}>
+                  <label
+                    style={{
+                      display: "block",
+                      marginBottom: "6px",
+                      color: "#1B4D3E",
+                      fontSize: "13px",
+                      fontWeight: "500",
+                    }}
+                  >
                     Tipo de Implemento *
                   </label>
                   <input
@@ -422,7 +443,15 @@ const DetalhesServico = ({ servico, onClose, onDeleted, onUpdated }) => {
               </div>
 
               <div>
-                <label style={{ display: "block", marginBottom: "6px", color: "#1B4D3E", fontSize: "13px", fontWeight: "500" }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "6px",
+                    color: "#1B4D3E",
+                    fontSize: "13px",
+                    fontWeight: "500",
+                  }}
+                >
                   Observações
                 </label>
                 <textarea
@@ -477,10 +506,10 @@ const DetalhesServico = ({ servico, onClose, onDeleted, onUpdated }) => {
                   transition: "all 0.3s ease",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = "0 4px 12px rgba(27, 77, 62, 0.3)";
+                  e.currentTarget.style.boxShadow = "0 4px 12px rgba(27, 77, 62, 0.3)"
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = "none";
+                  e.currentTarget.style.boxShadow = "none"
                 }}
               >
                 Editar
@@ -500,10 +529,10 @@ const DetalhesServico = ({ servico, onClose, onDeleted, onUpdated }) => {
                   transition: "all 0.2s ease",
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = "#FEE2E2";
+                  e.target.style.backgroundColor = "#FEE2E2"
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = "transparent";
+                  e.target.style.backgroundColor = "transparent"
                 }}
               >
                 Excluir
@@ -525,10 +554,10 @@ const DetalhesServico = ({ servico, onClose, onDeleted, onUpdated }) => {
                   transition: "all 0.2s ease",
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = "#FEE2E2";
+                  e.target.style.backgroundColor = "#FEE2E2"
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = "transparent";
+                  e.target.style.backgroundColor = "transparent"
                 }}
               >
                 Cancelar
@@ -551,15 +580,24 @@ const DetalhesServico = ({ servico, onClose, onDeleted, onUpdated }) => {
                   gap: "8px",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = "0 4px 12px rgba(27, 77, 62, 0.3)";
-                  e.currentTarget.style.transform = "translateY(-2px)";
+                  e.currentTarget.style.boxShadow = "0 4px 12px rgba(27, 77, 62, 0.3)"
+                  e.currentTarget.style.transform = "translateY(-2px)"
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = "none";
-                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "none"
+                  e.currentTarget.style.transform = "translateY(0)"
                 }}
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
                   <polyline points="17 21 17 13 7 13 7 21" />
                   <polyline points="7 3 7 8 15 8" />
@@ -571,8 +609,8 @@ const DetalhesServico = ({ servico, onClose, onDeleted, onUpdated }) => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
 // Helper component for displaying info items
 function InfoItem({ label, value }) {
@@ -600,7 +638,7 @@ function InfoItem({ label, value }) {
         {value || "-"}
       </div>
     </div>
-  );
+  )
 }
 
 // Helper component for equipment items
@@ -646,58 +684,72 @@ function EquipmentItem({ icon, label, value }) {
         {value || "-"}
       </div>
     </div>
-  );
+  )
 }
 
 export default function ListServicos() {
-  const [servicos, setServicos] = useState([]);
-  const [busca, setBusca] = useState("");
-  const [servicoSelecionado, setServicoSelecionado] = useState(null);
-  const [mostrarModal, setMostrarModal] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [servicos, setServicos] = useState([])
+  const [busca, setBusca] = useState("")
+  const [servicoSelecionado, setServicoSelecionado] = useState(null)
+  const [mostrarModal, setMostrarModal] = useState(false)
+  const [mostrarCriarServico, setMostrarCriarServico] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    async function getData() {
-      try {
-        setLoading(true);
-        const response = await fetch(`${API_URL}/servicos`);
-        const data = await response.json();
-        setServicos(data);
-      } catch (error) {
-        console.error("Erro ao buscar serviços:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    getData();
-  }, []);
+    fetchServicos()
+  }, [])
 
-  const servicosFiltrados = servicos.filter((s) =>
-    s.nome?.toLowerCase().includes(busca.toLowerCase()) ||
-    (typeof s.maquina_tipo === "string" && s.maquina_tipo?.toLowerCase().includes(busca.toLowerCase())) ||
-    (typeof s.implemento_tipo === "string" && s.implemento_tipo?.toLowerCase().includes(busca.toLowerCase()))
-  );
+  async function fetchServicos() {
+    try {
+      setLoading(true)
+      const response = await fetch(`${API_URL}/servicos`)
+      const data = await response.json()
+
+      // Ordenar por data de criação (mais recentes primeiro)
+      // Se não houver campo de data, ordenar por _id (ObjectId do MongoDB contém timestamp)
+      const servicosOrdenados = data.sort((a, b) => {
+        if (a.createdAt && b.createdAt) {
+          return new Date(b.createdAt) - new Date(a.createdAt)
+        }
+        // Fallback: ordenar por _id (mais recente primeiro)
+        return b._id?.localeCompare(a._id) || 0
+      })
+
+      setServicos(servicosOrdenados)
+    } catch (error) {
+      console.error("Erro ao buscar serviços:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const servicosFiltrados = servicos.filter(
+    (s) =>
+      s.nome?.toLowerCase().includes(busca.toLowerCase()) ||
+      (typeof s.maquina_tipo === "string" && s.maquina_tipo?.toLowerCase().includes(busca.toLowerCase())) ||
+      (typeof s.implemento_tipo === "string" && s.implemento_tipo?.toLowerCase().includes(busca.toLowerCase())),
+  )
 
   const abrirDetalhes = (servico) => {
-    setServicoSelecionado(servico);
-    setMostrarModal(true);
-  };
+    setServicoSelecionado(servico)
+    setMostrarModal(true)
+  }
 
   const handleDelete = (idDeleted) => {
-    setServicos((old) => old.filter((s) => s._id !== idDeleted));
-    setMostrarModal(false);
-  };
+    setServicos((old) => old.filter((s) => s._id !== idDeleted))
+    setMostrarModal(false)
+  }
 
   const handleUpdate = (servicoAtualizado) => {
-    setServicos((old) =>
-      old.map((s) => (s._id === servicoAtualizado._id ? servicoAtualizado : s))
-    );
-    setMostrarModal(false);
-  };
+    setServicos((old) => old.map((s) => (s._id === servicoAtualizado._id ? servicoAtualizado : s)))
+    setMostrarModal(false)
+  }
 
-  const handleAddClick = () => {
-    window.location.href = "/servicos/create";
-  };
+  const handleServicoCreated = (novoServico) => {
+    // Adicionar o novo serviço no início da lista
+    setServicos((old) => [novoServico, ...old])
+    setMostrarCriarServico(false)
+  }
 
   if (loading) {
     return (
@@ -721,12 +773,10 @@ export default function ListServicos() {
               margin: "0 auto 20px",
             }}
           />
-          <p style={{ color: "#1B4D3E", fontWeight: "600", fontSize: "15px" }}>
-            Carregando serviços...
-          </p>
+          <p style={{ color: "#1B4D3E", fontWeight: "600", fontSize: "15px" }}>Carregando serviços...</p>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -736,7 +786,7 @@ export default function ListServicos() {
         padding: "40px 20px",
       }}
     >
-      <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
+      <div style={{ maxWidth: "1800px", margin: "0 auto",width:"100%"}}>
         {/* Header */}
         <div
           style={{
@@ -760,40 +810,46 @@ export default function ListServicos() {
                 gap: "12px",
               }}
             >
-              
+              Serviços
             </h1>
-            
           </div>
 
           {/* Add Button */}
           <button
-            onClick={handleAddClick}
+            onClick={() => setMostrarCriarServico(true)}
             style={{
-              backgroundColor: "#D2EFE6",
-              color: "#000",
-              padding: "10px 20px",
+              backgroundColor: "#1B4D3E", // verde escuro
+              color: "#FFFFFF", // texto branco
+              padding: "6px 20px",
               borderRadius: "12px",
-              border: "1px solid #1A381F",
+              border: "none",
               cursor: "pointer",
               fontWeight: "600",
-              fontSize: "14px",
+              fontSize: "15px",
               display: "flex",
               alignItems: "center",
-              gap: "6px",
-              transition: "all 0.2s ease",
+              gap: "8px",
+              transition: "0.3s",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#B8E5D3";
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.1)";
+              e.currentTarget.style.backgroundColor = "#153D2F"
+              e.currentTarget.style.transform = "translateY(-2px)"
+              e.currentTarget.style.boxShadow = "0 4px 12px rgba(27, 77, 62, 0.3)"
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "#D2EFE6";
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "none";
+              e.currentTarget.style.backgroundColor = "#1B4D3E"
+              e.currentTarget.style.transform = "translateY(0)"
+              e.currentTarget.style.boxShadow = "0 2px 8px rgba(27, 77, 62, 0.2)"
             }}
           >
-            <Plus style={{ width: "18px", height: "18px" }} />
+            <Plus
+              style={{
+                color: "#A8E6CF", // verde claro
+                fontSize: "22px",
+                fontWeight: "700",
+                marginRight: "4px",
+              }}
+            />
             Novo Serviço
           </button>
         </div>
@@ -828,12 +884,12 @@ export default function ListServicos() {
               boxShadow: "0 1px 3px rgba(0, 0, 0, 0.08)",
             }}
             onFocus={(e) => {
-              e.target.style.borderColor = "#1B4D3E";
-              e.target.style.boxShadow = "0 0 0 3px rgba(27, 77, 62, 0.1)";
+              e.target.style.borderColor = "#1B4D3E"
+              e.target.style.boxShadow = "0 0 0 3px rgba(27, 77, 62, 0.1)"
             }}
             onBlur={(e) => {
-              e.target.style.borderColor = "#E5E7EB";
-              e.target.style.boxShadow = "0 1px 3px rgba(0, 0, 0, 0.08)";
+              e.target.style.borderColor = "#E5E7EB"
+              e.target.style.boxShadow = "0 1px 3px rgba(0, 0, 0, 0.08)"
             }}
           />
         </div>
@@ -875,9 +931,7 @@ export default function ListServicos() {
               Nenhum serviço encontrado
             </h3>
             <p style={{ color: "#9CA3AF", fontSize: "14px" }}>
-              {busca
-                ? "Tente ajustar sua busca"
-                : "Você ainda não possui serviços cadastrados"}
+              {busca ? "Tente ajustar sua busca" : "Você ainda não possui serviços cadastrados"}
             </p>
           </div>
         )}
@@ -886,8 +940,8 @@ export default function ListServicos() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-            gap: "16px",
+            gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+            gap: "12px",
           }}
         >
           {servicosFiltrados.map((servico) => (
@@ -896,7 +950,7 @@ export default function ListServicos() {
               onClick={() => abrirDetalhes(servico)}
               style={{
                 backgroundColor: "#fff",
-                padding: "24px 20px",
+                padding: "16px 14px",
                 borderRadius: "16px",
                 border: "1px solid #E5E7EB",
                 cursor: "pointer",
@@ -908,42 +962,42 @@ export default function ListServicos() {
                 textAlign: "center",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#FAFAF9";
-                e.currentTarget.style.borderColor = "#1B4D3E";
-                e.currentTarget.style.transform = "translateY(-4px)";
-                e.currentTarget.style.boxShadow = "0 10px 25px rgba(0, 0, 0, 0.12)";
+                e.currentTarget.style.backgroundColor = "#FAFAF9"
+                e.currentTarget.style.borderColor = "#1B4D3E"
+                e.currentTarget.style.transform = "translateY(-4px)"
+                e.currentTarget.style.boxShadow = "0 10px 25px rgba(0, 0, 0, 0.12)"
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "#fff";
-                e.currentTarget.style.borderColor = "#E5E7EB";
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.06)";
+                e.currentTarget.style.backgroundColor = "#fff"
+                e.currentTarget.style.borderColor = "#E5E7EB"
+                e.currentTarget.style.transform = "translateY(0)"
+                e.currentTarget.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.06)"
               }}
             >
               {/* Icon */}
               <div
                 style={{
-                  width: "56px",
-                  height: "56px",
-                  borderRadius: "14px",
+                  width: "44px",
+                  height: "44px",
+                  borderRadius: "12px",
                   background: "linear-gradient(135deg, #1B4D3E 0%, #153D2F 100%)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   boxShadow: "0 4px 12px rgba(27, 77, 62, 0.2)",
-                  marginBottom: "16px",
+                  marginBottom: "12px",
                 }}
               >
-                <Wrench style={{ width: "26px", height: "26px", color: "#fff" }} />
+                <Wrench style={{ width: "20px", height: "20px", color: "#fff" }} />
               </div>
 
               {/* Service Name */}
               <h3
                 style={{
-                  fontSize: "16px",
+                  fontSize: "15px",
                   fontWeight: "700",
                   color: "#1B4D3E",
-                  margin: "0 0 8px 0",
+                  margin: "0 0 6px 0",
                   lineHeight: "1.3",
                 }}
               >
@@ -956,7 +1010,7 @@ export default function ListServicos() {
                   style={{
                     fontSize: "12px",
                     color: "#6B7280",
-                    margin: "0 0 12px 0",
+                    margin: "0 0 8px 0",
                     lineHeight: "1.5",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
@@ -973,7 +1027,7 @@ export default function ListServicos() {
               <div
                 style={{
                   marginTop: "auto",
-                  paddingTop: "12px",
+                  paddingTop: "8px",
                   display: "flex",
                   alignItems: "center",
                   gap: "4px",
@@ -983,25 +1037,15 @@ export default function ListServicos() {
                 }}
               >
                 Ver detalhes
-                <svg
-                  style={{ width: "16px", height: "16px" }}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
+                <svg style={{ width: "16px", height: "16px" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Modal */}
+        {/* Modal de Detalhes */}
         {mostrarModal && servicoSelecionado && (
           <DetalhesServico
             servico={servicoSelecionado}
@@ -1012,6 +1056,11 @@ export default function ListServicos() {
         )}
       </div>
 
+      {/* Modal de Criar Serviço - Renderizado fora do container principal */}
+      {mostrarCriarServico && (
+        <CreateServico onClose={() => setMostrarCriarServico(false)} onCreated={handleServicoCreated} />
+      )}
+
       <style>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }
@@ -1019,5 +1068,5 @@ export default function ListServicos() {
         }
       `}</style>
     </div>
-  );
+  )
 }

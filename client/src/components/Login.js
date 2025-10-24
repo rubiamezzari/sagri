@@ -26,45 +26,48 @@ export default function Login({ onLoginSuccess }) {
   };
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setErro("");
+  e.preventDefault();
+  setLoading(true);
+  setErro("");
 
-    try {
-      const cleanCpf = cpf.replace(/\D/g, "");
+  try {
+    const cleanCpf = cpf.replace(/\D/g, "");
 
-      const response = await axios.post(`${API_URL}/login`, {
-        cpf: cleanCpf,
-        senha,
-      });
+    const response = await axios.post(`${API_URL}/login`, {
+      cpf: cleanCpf,
+      senha,
+    });
 
-      const usuario = response.data;
-      const tipo = usuario.tipo;
+    const usuario = response.data;
+    const tipo = usuario.tipo;
 
-      if (!tipo) {
-        setErro("Tipo de usuário não reconhecido.");
-        setLoading(false);
-        return;
-      }
-
-      localStorage.setItem("usuarioLogado", JSON.stringify(usuario));
-      localStorage.setItem("tipoUsuario", tipo);
-
-      if (typeof onLoginSuccess === "function") {
-        onLoginSuccess(tipo);
-      } else {
-        // fallback de navegação
-        if (tipo === "associado") navigate("/associado");
-        else if (tipo === "admin") navigate("/admin");
-        else if (tipo === "operador") navigate("/operador");
-        else navigate("/");
-      }
-    } catch (error) {
-      setErro(error.response?.data?.mensagem || "Erro ao fazer login");
-    } finally {
+    if (!tipo) {
+      setErro("Tipo de usuário não reconhecido.");
       setLoading(false);
+      return;
     }
-  };
+
+    // Armazena dados no localStorage
+    localStorage.setItem("usuarioLogado", JSON.stringify(usuario));
+    localStorage.setItem("tipoUsuario", tipo);
+    localStorage.setItem("nomeUsuario", usuario.nome); // ✅ aqui
+    localStorage.setItem("usuarioId", usuario.id);     // ✅ e aqui
+
+    if (typeof onLoginSuccess === "function") {
+      onLoginSuccess(tipo);
+    } else {
+      if (tipo === "associado") navigate("/associado");
+      else if (tipo === "admin") navigate("/admin");
+      else if (tipo === "operador") navigate("/operador");
+      else navigate("/");
+    }
+  } catch (error) {
+    setErro(error.response?.data?.mensagem || "Erro ao fazer login");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div style={containerStyle}>

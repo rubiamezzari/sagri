@@ -11,6 +11,8 @@ import {
   isToday,
   isSameDay,
   isWeekend,
+  isBefore,
+  startOfDay,
 } from "date-fns";
 import ptBR from "date-fns/locale/pt-BR";
 
@@ -137,6 +139,16 @@ export default function CreateSolicitacao() {
 
   const isDayInCurrentMonth = (day) => {
     return day.getMonth() === mesAtual.getMonth();
+  };
+
+  const isPastDate = (day) => {
+    return isBefore(startOfDay(day), startOfDay(new Date()));
+  };
+
+  const canGoToPreviousMonth = () => {
+    const currentMonth = startOfMonth(new Date());
+    const displayedMonth = startOfMonth(mesAtual);
+    return !isBefore(displayedMonth, currentMonth);
   };
 
   return (
@@ -276,7 +288,7 @@ export default function CreateSolicitacao() {
                 letterSpacing: "-0.02em",
               }}
             >
-              {etapa === 1 ? "" : ""}
+              {etapa === 1 ? " " : "   "}
             </h1>
             <p
               style={{
@@ -287,7 +299,9 @@ export default function CreateSolicitacao() {
                 lineHeight: "1.5",
               }}
             >
-              {etapa === 1 ? "" : ""}
+              {etapa === 1
+                ? ""
+                : ""}
             </p>
           </div>
         </div>
@@ -314,33 +328,39 @@ export default function CreateSolicitacao() {
               }}
             >
               <button
-                onClick={() => setMesAtual(subMonths(mesAtual, 1))}
+                onClick={() => canGoToPreviousMonth() && setMesAtual(subMonths(mesAtual, 1))}
+                disabled={!canGoToPreviousMonth()}
                 style={{
                   width: "36px",
                   height: "36px",
                   borderRadius: "8px",
                   border: "2px solid #E5E7EB",
-                  backgroundColor: "#fff",
-                  color: "#1B4D3E",
+                  backgroundColor: canGoToPreviousMonth() ? "#fff" : "#F3F4F6",
+                  color: canGoToPreviousMonth() ? "#1B4D3E" : "#D1D5DB",
                   fontSize: "18px",
                   fontWeight: "600",
-                  cursor: "pointer",
+                  cursor: canGoToPreviousMonth() ? "pointer" : "not-allowed",
                   transition: "all 0.3s ease",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
+                  opacity: canGoToPreviousMonth() ? 1 : 0.5,
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "#1B4D3E";
-                  e.currentTarget.style.color = "#fff";
-                  e.currentTarget.style.borderColor = "#1B4D3E";
-                  e.currentTarget.style.transform = "scale(1.05)";
+                  if (canGoToPreviousMonth()) {
+                    e.currentTarget.style.backgroundColor = "#1B4D3E";
+                    e.currentTarget.style.color = "#fff";
+                    e.currentTarget.style.borderColor = "#1B4D3E";
+                    e.currentTarget.style.transform = "scale(1.05)";
+                  }
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "#fff";
-                  e.currentTarget.style.color = "#1B4D3E";
-                  e.currentTarget.style.borderColor = "#E5E7EB";
-                  e.currentTarget.style.transform = "scale(1)";
+                  if (canGoToPreviousMonth()) {
+                    e.currentTarget.style.backgroundColor = "#fff";
+                    e.currentTarget.style.color = "#1B4D3E";
+                    e.currentTarget.style.borderColor = "#E5E7EB";
+                    e.currentTarget.style.transform = "scale(1)";
+                  }
                 }}
               >
                 <svg
@@ -447,8 +467,9 @@ export default function CreateSolicitacao() {
               {/* Days */}
               {dias.map((dia, index) => {
                 const inMonth = isDayInCurrentMonth(dia);
+                const isPast = isPastDate(dia);
                 const isAprovado = inMonth && isDayAprovado(dia);
-                const isClickable = inMonth && !isAprovado;
+                const isClickable = inMonth && !isAprovado && !isPast;
                 const isHoje = isToday(dia);
 
                 return (
@@ -473,6 +494,8 @@ export default function CreateSolicitacao() {
                         ? "#1B4D3E"
                         : isClickable
                         ? "#F0FDF4"
+                        : inMonth && isPast
+                        ?  "rgba(218, 218, 218, 0.25)"
                         : inMonth
                         ? "#F3F4F6"
                         : "transparent",
@@ -480,6 +503,8 @@ export default function CreateSolicitacao() {
                         ? "#fff"
                         : isClickable
                         ? "#065F46"
+                        : inMonth && isPast
+                        ? "#3a3a3a"
                         : inMonth
                         ? "#D1D5DB"
                         : "transparent",
@@ -596,6 +621,24 @@ export default function CreateSolicitacao() {
                   style={{ fontSize: "12px", color: "#374151", fontWeight: "600" }}
                 >
                   Indisponível
+                </span>
+              </div>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <div
+                  style={{
+                    width: "18px",
+                    height: "18px",
+                    borderRadius: "6px",
+                    backgroundColor:  "#dadada",
+                    border:"#3a3a3a",
+                  }}
+                />
+                <span
+                  style={{ fontSize: "12px", color: "#374151", fontWeight: "600" }}
+                >
+                  Data Passada
                 </span>
               </div>
             </div>
@@ -774,11 +817,13 @@ export default function CreateSolicitacao() {
                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                       />
                     </svg>
-                    Horário
+                    Horário de Início
                   </label>
                   <input
                     name="hora"
                     type="time"
+                    min="07:00"
+                    max="17:00"
                     value={form.hora}
                     onChange={handleInput}
                     onFocus={() => setFocusField("hora")}
@@ -800,6 +845,15 @@ export default function CreateSolicitacao() {
                           : "none",
                     }}
                   />
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      color: "#9CA3AF",
+                      marginTop: "4px",
+                    }}
+                  >
+                    Disponível das 07:00 às 17:00
+                  </div>
                 </div>
 
                 <div>
@@ -827,12 +881,10 @@ export default function CreateSolicitacao() {
                         d="M13 10V3L4 14h7v7l9-11h-7z"
                       />
                     </svg>
-                    Tempo Estimado
+                    Duração Estimada
                   </label>
-                  <input
+                  <select
                     name="tempo"
-                    type="text"
-                    placeholder="Ex: 2 horas"
                     value={form.tempo}
                     onChange={handleInput}
                     onFocus={() => setFocusField("tempo")}
@@ -847,13 +899,25 @@ export default function CreateSolicitacao() {
                       outline: "none",
                       transition: "all 0.3s ease",
                       boxSizing: "border-box",
+                      backgroundColor: "#fff",
+                      color: "#1F2937",
                       borderColor: focusField === "tempo" ? "#1B4D3E" : "#E5E7EB",
                       boxShadow:
                         focusField === "tempo"
                           ? "0 0 0 3px rgba(27, 77, 62, 0.1)"
                           : "none",
                     }}
-                  />
+                  >
+                    <option value="">Selecione a duração...</option>
+                    <option value="1 hora">1 hora</option>
+                    <option value="2 horas">2 horas</option>
+                    <option value="3 horas">3 horas</option>
+                    <option value="4 horas">4 horas</option>
+                    <option value="5 horas">5 horas</option>
+                    <option value="6 horas">6 horas</option>
+                    <option value="7 horas">7 horas</option>
+                    <option value="8 horas">8 horas</option>
+                  </select>
                 </div>
               </div>
 

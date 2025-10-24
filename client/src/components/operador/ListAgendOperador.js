@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 
 const API_URL = "http://localhost:5050";
 
@@ -15,8 +16,17 @@ const Detalhes = ({ agendamentos, handleHorimetroUpdate }) => {
       : null;
 
   const isDone = agendamentos.status?.toLowerCase() === "concluido";
+  const endereco = agendamentos.enderecoUsuario || {};
 
   const saveHorimetro = async () => {
+    if (!horimetroInicial || !horimetroFinal) {
+      alert("Por favor, preencha ambos os campos de horímetro.");
+      return;
+    }
+    if (Number(horimetroFinal) <= Number(horimetroInicial)) {
+      alert("O horímetro final deve ser maior que o inicial.");
+      return;
+    }
     await handleHorimetroUpdate(
       agendamentos._id,
       Number(horimetroInicial),
@@ -154,6 +164,71 @@ const Detalhes = ({ agendamentos, handleHorimetroUpdate }) => {
         </div>
       </div>
 
+      {/* Endereço do Solicitante */}
+      {(endereco.rua || endereco.cidade) && (
+        <div
+          style={{
+            padding: "16px 18px",
+            backgroundColor: "#F0FDF4",
+            borderRadius: "12px",
+            border: "1px solid #BBF7D0",
+            marginBottom: "20px",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              marginBottom: "10px",
+            }}
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#166534"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+            <div
+              style={{
+                fontSize: "11px",
+                color: "#166534",
+                fontWeight: "600",
+                textTransform: "uppercase",
+                letterSpacing: "0.5px",
+              }}
+            >
+              Endereço do Local
+            </div>
+          </div>
+          <div style={{ fontSize: "14px", color: "#166534", lineHeight: "1.6" }}>
+            {endereco.rua && endereco.numero && (
+              <div style={{ marginBottom: "4px" }}>
+                <strong>
+                  {endereco.rua}, {endereco.numero}
+                </strong>
+                {endereco.complemento && ` - ${endereco.complemento}`}
+              </div>
+            )}
+            {endereco.bairro && <div style={{ marginBottom: "4px" }}>{endereco.bairro}</div>}
+            {(endereco.cidade || endereco.uf || endereco.cep) && (
+              <div>
+                {endereco.cidade && `${endereco.cidade}`}
+                {endereco.uf && ` - ${endereco.uf}`}
+                {endereco.cep && ` • CEP: ${endereco.cep}`}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Máquina e Implemento */}
       {(agendamentos.maquina_id || agendamentos.implemento_id) && (
         <div
@@ -254,6 +329,7 @@ const Detalhes = ({ agendamentos, handleHorimetroUpdate }) => {
         <div
           style={{
             padding: "18px 20px",
+            backgroundColor: "#ECFDF5",
             borderRadius: "12px",
             marginBottom: "16px",
             border: "1px solid #A7F3D0",
@@ -494,6 +570,7 @@ const Detalhes = ({ agendamentos, handleHorimetroUpdate }) => {
             alignItems: "center",
             gap: "6px",
             padding: "8px 16px",
+            backgroundColor: "#D1FAE5",
             color: "#065F46",
             borderRadius: "20px",
             fontSize: "13px",
@@ -525,46 +602,56 @@ export default function ListAgendOperador() {
   const [solicitacoes, setSolicitacoes] = useState([]);
   const [expandedId, setExpandedId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [filtroAtivo, setFiltroAtivo] = useState("todos"); // "todos", "pendentes", "concluidos"
 
   useEffect(() => {
-    async function carregarSolicitacoes() {
-      try {
-        setLoading(true);
-        const res = await fetch(`${API_URL}/solicitacoes`);
-        const data = await res.json();
-        const aprovadas = data.filter((s) =>
-          ["aprovado", "concluido"].includes(s.status?.toLowerCase())
-        );
-        const solicitacoesComNomes = await Promise.all(
-          aprovadas.map(async (s) => {
-            if (s.usuario_id) {
-              try {
-                const userRes = await fetch(
-                  `${API_URL}/associados/${s.usuario_id}`
-                );
-                const userData = await userRes.json();
-                return { ...s, nomeUsuario: userData.nome || "Associado" };
-              } catch {
-                return { ...s, nomeUsuario: "Desconhecido" };
-              }
-            }
-            return { ...s, nomeUsuario: "Desconhecido" };
-          })
-        );
-        setSolicitacoes(solicitacoesComNomes.reverse());
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
     carregarSolicitacoes();
   }, []);
 
+  async function carregarSolicitacoes() {
+    try {
+      setLoading(true);
+      const res = await fetch(`${API_URL}/solicitacoes`);
+      const data = await res.json();
+      const aprovadas = data.filter((s) =>
+        ["aprovado", "concluido"].includes(s.status?.toLowerCase())
+      );
+      const solicitacoesComNomes = await Promise.all(
+        aprovadas.map(async (s) => {
+          if (s.usuario_id) {
+            try {
+              const userRes = await fetch(`${API_URL}/associados/${s.usuario_id}`);
+              const userData = await userRes.json();
+              return {
+                ...s,
+                nomeUsuario: userData.nome || "Associado",
+                enderecoUsuario: userData.endereco || {},
+              };
+            } catch {
+              return { ...s, nomeUsuario: "Desconhecido", enderecoUsuario: {} };
+            }
+          }
+          return { ...s, nomeUsuario: "Desconhecido", enderecoUsuario: {} };
+        })
+      );
+      // Sort by newest first
+      const sorted = solicitacoesComNomes.sort((a, b) => {
+        const dateA = new Date(a.data_servico);
+        const dateB = new Date(b.data_servico);
+        return dateB - dateA;
+      });
+      setSolicitacoes(sorted);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const handleHorimetroUpdate = async (id, inicial, final) => {
     try {
-      await fetch(`${API_URL}/solicitacoes/horimetro/${id}`, {
-        method: "POST",
+      const response = await fetch(`${API_URL}/solicitacoes/${id}`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           horimetro_inicial: inicial,
@@ -572,6 +659,13 @@ export default function ListAgendOperador() {
           status: "concluido",
         }),
       });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "Erro ao cadastrar horímetro");
+      }
+
+      // Atualizar o estado local
       setSolicitacoes((prev) =>
         prev.map((s) =>
           s._id === id
@@ -584,11 +678,24 @@ export default function ListAgendOperador() {
             : s
         )
       );
+
+      alert("Horímetro cadastrado com sucesso!");
     } catch (err) {
-      console.error(err);
-      alert("Erro ao cadastrar horímetro.");
+      console.error("Erro ao cadastrar horímetro:", err);
+      alert("Erro ao cadastrar horímetro: " + err.message);
     }
   };
+
+  // Filtrar solicitações baseado no filtro ativo
+  const solicitacoesFiltradas = solicitacoes.filter((s) => {
+    if (filtroAtivo === "todos") return true;
+    if (filtroAtivo === "pendentes") return s.status?.toLowerCase() === "aprovado";
+    if (filtroAtivo === "concluidos") return s.status?.toLowerCase() === "concluido";
+    return true;
+  });
+
+  const countPendentes = solicitacoes.filter((s) => s.status?.toLowerCase() === "aprovado").length;
+  const countConcluidos = solicitacoes.filter((s) => s.status?.toLowerCase() === "concluido").length;
 
   if (loading) {
     return (
@@ -639,24 +746,130 @@ export default function ListAgendOperador() {
         <div style={{ marginBottom: "32px" }}>
           <h1
             style={{
-              fontSize: "36px",
+              fontSize: "32px",
               fontWeight: "700",
               color: "#1B4D3E",
-              marginBottom: "8px",
-              letterSpacing: "-0.02em",
+              margin: "0 0 8px 0",
             }}
           >
             Meus Agendamentos
           </h1>
-          <p style={{ color: "#6B7280", fontSize: "15px" }}>
-            {solicitacoes.length} agendamento
-            {solicitacoes.length !== 1 ? "s" : ""} aprovado
-            {solicitacoes.length !== 1 ? "s" : ""}
+          <p style={{ fontSize: "15px", color: "#6B7280", margin: 0 }}>
+            Gerencie seus agendamentos aprovados e concluídos
           </p>
         </div>
 
+        {/* Filtros */}
+        <div
+          style={{
+            backgroundColor: "#fff",
+            borderRadius: "12px",
+            padding: "8px",
+            marginBottom: "24px",
+            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.06)",
+            display: "inline-flex",
+            gap: "8px",
+          }}
+        >
+          <button
+            onClick={() => setFiltroAtivo("todos")}
+            style={{
+              padding: "10px 20px",
+              borderRadius: "8px",
+              border: "none",
+              backgroundColor: filtroAtivo === "todos" ? "#1B4D3E" : "transparent",
+              color: filtroAtivo === "todos" ? "#fff" : "#6B7280",
+              fontSize: "14px",
+              fontWeight: "600",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+            }}
+          >
+            Todos
+            <span
+              style={{
+                backgroundColor: filtroAtivo === "todos" ? "rgba(255,255,255,0.25)" : "#E5E7EB",
+                color: filtroAtivo === "todos" ? "#fff" : "#6B7280",
+                padding: "2px 8px",
+                borderRadius: "12px",
+                fontSize: "12px",
+                fontWeight: "600",
+              }}
+            >
+              {solicitacoes.length}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setFiltroAtivo("pendentes")}
+            style={{
+              padding: "10px 20px",
+              borderRadius: "8px",
+              border: "none",
+              backgroundColor: filtroAtivo === "pendentes" ? "#1B4D3E" : "transparent",
+              color: filtroAtivo === "pendentes" ? "#fff" : "#6B7280",
+              fontSize: "14px",
+              fontWeight: "600",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+            }}
+          >
+            A Fazer
+            <span
+              style={{
+                backgroundColor: filtroAtivo === "pendentes" ? "rgba(255,255,255,0.25)" : "#FEF3C7",
+                color: filtroAtivo === "pendentes" ? "#fff" : "#92400E",
+                padding: "2px 8px",
+                borderRadius: "12px",
+                fontSize: "12px",
+                fontWeight: "600",
+              }}
+            >
+              {countPendentes}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setFiltroAtivo("concluidos")}
+            style={{
+              padding: "10px 20px",
+              borderRadius: "8px",
+              border: "none",
+              backgroundColor: filtroAtivo === "concluidos" ? "#1B4D3E" : "transparent",
+              color: filtroAtivo === "concluidos" ? "#fff" : "#6B7280",
+              fontSize: "14px",
+              fontWeight: "600",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+            }}
+          >
+            Concluídos
+            <span
+              style={{
+                backgroundColor: filtroAtivo === "concluidos" ? "rgba(255,255,255,0.25)" : "#D1FAE5",
+                color: filtroAtivo === "concluidos" ? "#fff" : "#065F46",
+                padding: "2px 8px",
+                borderRadius: "12px",
+                fontSize: "12px",
+                fontWeight: "600",
+              }}
+            >
+              {countConcluidos}
+            </span>
+          </button>
+        </div>
+
         {/* Lista de Agendamentos */}
-        {solicitacoes.length === 0 ? (
+        {solicitacoesFiltradas.length === 0 ? (
           <div
             style={{
               padding: "60px 20px",
@@ -685,18 +898,28 @@ export default function ListAgendOperador() {
               />
             </svg>
             <p style={{ color: "#6B7280", fontSize: "15px" }}>
-              Nenhum agendamento aprovado encontrado
+              {filtroAtivo === "todos" && "Nenhum agendamento encontrado"}
+              {filtroAtivo === "pendentes" && "Nenhum agendamento pendente"}
+              {filtroAtivo === "concluidos" && "Nenhum agendamento concluído"}
             </p>
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-            {solicitacoes.map((s) => {
+          <motion.div 
+            layout
+            style={{ display: "flex", flexDirection: "column", gap: "16px" }}
+          >
+            {solicitacoesFiltradas.map((s) => {
               const isExpanded = expandedId === s._id;
               const isDone = s.status?.toLowerCase() === "concluido";
 
               return (
-                <div
+                <motion.div
                   key={s._id}
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
                   style={{
                     backgroundColor: "#fff",
                     borderRadius: "16px",
@@ -778,7 +1001,15 @@ export default function ListAgendOperador() {
                           </div>
                         )}
                       </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: "12px", fontSize: "13px", color: "#6B7280" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "12px",
+                          fontSize: "13px",
+                          color: "#6B7280",
+                        }}
+                      >
                         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                           <svg
                             style={{ width: "14px", height: "14px" }}
@@ -851,15 +1082,12 @@ export default function ListAgendOperador() {
                       transition: "max-height 0.4s ease-in-out",
                     }}
                   >
-                    <Detalhes
-                      agendamentos={s}
-                      handleHorimetroUpdate={handleHorimetroUpdate}
-                    />
+                    <Detalhes agendamentos={s} handleHorimetroUpdate={handleHorimetroUpdate} />
                   </div>
-                </div>
+                </motion.div>
               );
             })}
-          </div>
+          </motion.div>
         )}
       </div>
 

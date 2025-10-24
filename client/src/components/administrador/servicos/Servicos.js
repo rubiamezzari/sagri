@@ -15,17 +15,21 @@ const headerStyle = {
   marginBottom: "20px",
 };
 
-const buttonStyle = {
-  padding: "4px 20px",
-  backgroundColor: "#D2EFE6",
-  color: "#1a381f",
-  border: "1.5px solid #1a381f",
-  borderRadius: "12px",
-  cursor: "pointer",
-  fontWeight: "600",
-  fontSize: "1rem",
-  transition: "background-color 0.3s",
-};
+  const btnCadastrar = {
+    backgroundColor: "#1B4D3E", // verde escuro
+    color: "#FFFFFF", // texto branco
+    padding: "6px 20px",
+    borderRadius: "12px",
+    border: "none",
+    cursor: "pointer",
+    fontWeight: "600",
+    fontSize: "15px",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    transition: "0.3s",
+  };
+
 
 const buttonHoverStyle = {
   backgroundColor: "#c2ddb7",

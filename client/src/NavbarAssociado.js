@@ -73,7 +73,7 @@ export default function NavbarAssociado({ children }) {
         <nav className="sidebar-nav">
           <ul className="nav-list">
             <li className="nav-item">
-              <NavLink to="/" className={({isActive})=>`nav-link ${isActive ? "active" : ""}`}>Início</NavLink>
+              <NavLink to="/associado" className={({isActive})=>`nav-link ${isActive ? "active" : ""}`}>Início</NavLink>
             </li>
             <li className="nav-item dropdown">
               <button className="dropdown-button" onClick={()=>setDropdownOpen(!dropdownOpen)}>

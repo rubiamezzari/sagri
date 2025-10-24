@@ -1307,19 +1307,19 @@ export default function MaquinasImplementos() {
   const itensFiltrados =
     activeView === "maquinas"
       ? maquinas.filter(
-          (item) =>
-            item.tipo?.toLowerCase().includes(busca.toLowerCase()) ||
-            item.marca?.toLowerCase().includes(busca.toLowerCase()) ||
-            item.modelo?.toLowerCase().includes(busca.toLowerCase()) ||
-            item.status?.toLowerCase().includes(busca.toLowerCase())
-        )
+        (item) =>
+          item.tipo?.toLowerCase().includes(busca.toLowerCase()) ||
+          item.marca?.toLowerCase().includes(busca.toLowerCase()) ||
+          item.modelo?.toLowerCase().includes(busca.toLowerCase()) ||
+          item.status?.toLowerCase().includes(busca.toLowerCase())
+      )
       : implementos.filter(
-          (item) =>
-            item.tipo?.toLowerCase().includes(busca.toLowerCase()) ||
-            item.marca?.toLowerCase().includes(busca.toLowerCase()) ||
-            item.modelo?.toLowerCase().includes(busca.toLowerCase()) ||
-            item.status?.toLowerCase().includes(busca.toLowerCase())
-        );
+        (item) =>
+          item.tipo?.toLowerCase().includes(busca.toLowerCase()) ||
+          item.marca?.toLowerCase().includes(busca.toLowerCase()) ||
+          item.modelo?.toLowerCase().includes(busca.toLowerCase()) ||
+          item.status?.toLowerCase().includes(busca.toLowerCase())
+      );
 
   const abrirDetalhes = (item) => {
     setItemSelecionado(item);
@@ -1469,31 +1469,35 @@ export default function MaquinasImplementos() {
           <button
             onClick={handleAddClick}
             style={{
-              backgroundColor: "#D2EFE6",
-              color: "#000",
-              padding: "10px 20px",
+              backgroundColor: "#1B4D3E", // verde escuro
+              color: "#FFFFFF", // texto branco
+              padding: "6px 20px",
               borderRadius: "12px",
-              border: "1px solid #1A381F",
+              border: "none",
               cursor: "pointer",
               fontWeight: "600",
-              fontSize: "14px",
+              fontSize: "15px",
               display: "flex",
               alignItems: "center",
-              gap: "6px",
-              transition: "all 0.2s ease",
+              gap: "8px",
+              transition: "0.3s",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#B8E5D3";
+              e.currentTarget.style.backgroundColor = "#1B4D3E";
               e.currentTarget.style.transform = "translateY(-2px)";
               e.currentTarget.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.1)";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "#D2EFE6";
+              e.currentTarget.style.backgroundColor = "#163F33";
               e.currentTarget.style.transform = "translateY(0)";
               e.currentTarget.style.boxShadow = "none";
             }}
           >
-            <Plus style={{ width: "18px", height: "18px" }} />
+            <Plus style={{
+    color: "#A8E6CF", // verde claro
+    fontSize: "22px",
+    fontWeight: "700",
+    marginRight: "4px", }} />
             {activeView === "maquinas" ? "Nova Máquina" : "Novo Implemento"}
           </button>
         </div>

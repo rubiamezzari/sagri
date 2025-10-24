@@ -6,6 +6,7 @@ const REACT_APP_YOUR_HOSTNAME = "http://localhost:5050";
 export default function CreateAssociado() {
   const [step, setStep] = useState(1);
   const [focusField, setFocusField] = useState(null);
+  const [errors, setErrors] = useState({});
 
   const [form, setForm] = useState({
     nome: "",
@@ -29,8 +30,133 @@ export default function CreateAssociado() {
     },
   });
 
+  // Funções de máscara
+  function maskTelefone(value) {
+    const cleaned = value.replace(/\D/g, "");
+    if (cleaned.length <= 10) {
+      return cleaned
+        .replace(/^(\d{2})(\d)/, "($1) $2")
+        .replace(/(\d{4})(\d)/, "$1-$2");
+    }
+    return cleaned
+      .replace(/^(\d{2})(\d)/, "($1) $2")
+      .replace(/(\d{5})(\d)/, "$1-$2")
+      .slice(0, 15);
+  }
+
+  function maskCPF(value) {
+    return value
+      .replace(/\D/g, "")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{1,2})$/, "$1-$2")
+      .slice(0, 14);
+  }
+
+  function maskCEP(value) {
+    return value
+      .replace(/\D/g, "")
+      .replace(/(\d{5})(\d)/, "$1-$2")
+      .slice(0, 9);
+  }
+
+  // Funções de validação
+  function validateEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  function validateTelefone(telefone) {
+    const cleaned = telefone.replace(/\D/g, "");
+    return cleaned.length === 10 || cleaned.length === 11;
+  }
+
+  function validateCPF(cpf) {
+    const cleaned = cpf.replace(/\D/g, "");
+    return cleaned.length === 11;
+  }
+
+  function validateCEP(cep) {
+    if (!cep) return true; // CEP é opcional
+    const cleaned = cep.replace(/\D/g, "");
+    return cleaned.length === 8;
+  }
+
+  function validateStep1() {
+    const newErrors = {};
+
+    if (!form.nome.trim()) {
+      newErrors.nome = "Nome completo é obrigatório";
+    } else if (form.nome.trim().length < 3) {
+      newErrors.nome = "Nome deve ter pelo menos 3 caracteres";
+    }
+
+    if (form.email && !validateEmail(form.email)) {
+      newErrors.email = "Email inválido";
+    }
+
+    if (!form.telefone) {
+      newErrors.telefone = "Telefone é obrigatório";
+    } else if (!validateTelefone(form.telefone)) {
+      newErrors.telefone = "Telefone deve ter 10 ou 11 dígitos";
+    }
+
+    if (!form.cpf) {
+      newErrors.cpf = "CPF é obrigatório";
+    } else if (!validateCPF(form.cpf)) {
+      newErrors.cpf = "CPF deve ter 11 dígitos";
+    }
+
+    if (!form.senha) {
+      newErrors.senha = "Senha é obrigatória";
+    } else if (form.senha.length < 6) {
+      newErrors.senha = "Senha deve ter no mínimo 6 caracteres";
+    }
+
+    if (!form.data_associacao) {
+      newErrors.data_associacao = "Data de associação é obrigatória";
+    }
+
+    return newErrors;
+  }
+
+  function validateStep2() {
+    const newErrors = {};
+
+    if (form.endereco.cep && !validateCEP(form.endereco.cep)) {
+      newErrors.cep = "CEP deve ter 8 dígitos";
+    }
+
+    return newErrors;
+  }
+
+  function handleNextStep() {
+    let newErrors = {};
+
+    if (step === 1) {
+      newErrors = validateStep1();
+    } else if (step === 2) {
+      newErrors = validateStep2();
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
+    setStep(step + 1);
+  }
+
   function updateForm(value) {
     setForm((prev) => ({ ...prev, ...value }));
+    // Limpar erro do campo quando ele for modificado
+    if (value.nome !== undefined) setErrors((prev) => ({ ...prev, nome: undefined }));
+    if (value.email !== undefined) setErrors((prev) => ({ ...prev, email: undefined }));
+    if (value.telefone !== undefined) setErrors((prev) => ({ ...prev, telefone: undefined }));
+    if (value.cpf !== undefined) setErrors((prev) => ({ ...prev, cpf: undefined }));
+    if (value.senha !== undefined) setErrors((prev) => ({ ...prev, senha: undefined }));
+    if (value.data_associacao !== undefined) setErrors((prev) => ({ ...prev, data_associacao: undefined }));
   }
 
   function updateEndereco(value) {
@@ -38,6 +164,8 @@ export default function CreateAssociado() {
       ...prev,
       endereco: { ...prev.endereco, ...value },
     }));
+    // Limpar erro do campo quando ele for modificado
+    if (value.cep !== undefined) setErrors((prev) => ({ ...prev, cep: undefined }));
   }
 
   function updateDocumentos(value) {
@@ -49,6 +177,17 @@ export default function CreateAssociado() {
 
   async function onSubmit(e) {
     e.preventDefault();
+
+    // Validar step final antes de submeter
+    const step1Errors = validateStep1();
+    const step2Errors = validateStep2();
+    const allErrors = { ...step1Errors, ...step2Errors };
+
+    if (Object.keys(allErrors).length > 0) {
+      setErrors(allErrors);
+      alert("Por favor, corrija os erros no formulário antes de cadastrar.");
+      return;
+    }
 
     const formData = new FormData();
     formData.append("dados", JSON.stringify(form));
@@ -88,6 +227,7 @@ export default function CreateAssociado() {
           caf: null,
         },
       });
+      setErrors({});
       setStep(1);
     } catch (err) {
       alert("Erro: " + err.message);
@@ -153,6 +293,14 @@ export default function CreateAssociado() {
     </svg>
   );
 
+  const AlertTriangleIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+      <line x1="12" y1="9" x2="12" y2="13" />
+      <line x1="12" y1="17" x2="12.01" y2="17" />
+    </svg>
+  );
+
   const getStepIcon = (stepNum) => {
     if (stepNum === 1) return <UserIcon />;
     if (stepNum === 2) return <MapPinIcon />;
@@ -168,10 +316,10 @@ export default function CreateAssociado() {
         justifyContent: "center",
         padding: "20px",
         backgroundColor: "",
-        width: "100%", maxWidth: "700px", minwidth:"700px",
+        width: "100%", maxWidth: "700px", minWidth: "700px",
       }}
     >
-      <div style={{ width: "100%", maxWidth: "700px", minwidth:"700px",}}>
+      <div style={{ width: "100%", maxWidth: "700px", minWidth: "700px",}}>
         {/* Form Card */}
       <div
   style={{
@@ -182,7 +330,7 @@ export default function CreateAssociado() {
     width: "100%",
     maxWidth: "700px",
     minWidth: "700px",
-    minHeight: "400px", // 👈 força altura constante para todos os steps
+    minHeight: "400px",
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
@@ -300,7 +448,7 @@ export default function CreateAssociado() {
                     Dados Pessoais
                   </h2>
 
-                  <div style={{ display: "flex", flexDirection: "column", gap: "16px", maxWidth:"700px", width:"100%S"}}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "16px", maxWidth: "700px", width: "100%"}}>
                     {/* Linha 1 - Nome e Email */}
                     <div style={{ display: "grid", gridTemplateColumns: "3fr 2fr", gap: "16px" }}>
                       <div>
@@ -320,7 +468,7 @@ export default function CreateAssociado() {
                             height: "40px",
                             padding: "0 12px",
                             border: "2px solid",
-                            borderColor: focusField === "nome" ? "#1B4D3E" : "#D4E7D7",
+                            borderColor: errors.nome ? "#dc2626" : (focusField === "nome" ? "#1B4D3E" : "#D4E7D7"),
                             borderRadius: "8px",
                             backgroundColor: "#FEFDFB",
                             fontSize: "14px",
@@ -329,6 +477,12 @@ export default function CreateAssociado() {
                             boxSizing: "border-box",
                           }}
                         />
+                        {errors.nome && (
+                          <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "4px", color: "#dc2626", fontSize: "12px" }}>
+                            <AlertTriangleIcon />
+                            <span>{errors.nome}</span>
+                          </div>
+                        )}
                       </div>
 
                       <div>
@@ -347,7 +501,7 @@ export default function CreateAssociado() {
                             height: "40px",
                             padding: "0 12px",
                             border: "2px solid",
-                            borderColor: focusField === "email" ? "#1B4D3E" : "#D4E7D7",
+                            borderColor: errors.email ? "#dc2626" : (focusField === "email" ? "#1B4D3E" : "#D4E7D7"),
                             borderRadius: "8px",
                             backgroundColor: "#FEFDFB",
                             fontSize: "14px",
@@ -356,6 +510,12 @@ export default function CreateAssociado() {
                             boxSizing: "border-box",
                           }}
                         />
+                        {errors.email && (
+                          <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "4px", color: "#dc2626", fontSize: "12px" }}>
+                            <AlertTriangleIcon />
+                            <span>{errors.email}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -370,7 +530,7 @@ export default function CreateAssociado() {
                           type="text"
                           placeholder="(00) 00000-0000"
                           value={form.telefone}
-                          onChange={(e) => updateForm({ telefone: e.target.value })}
+                          onChange={(e) => updateForm({ telefone: maskTelefone(e.target.value) })}
                           onFocus={() => setFocusField("telefone")}
                           onBlur={() => setFocusField(null)}
                           required
@@ -379,7 +539,7 @@ export default function CreateAssociado() {
                             height: "40px",
                             padding: "0 12px",
                             border: "2px solid",
-                            borderColor: focusField === "telefone" ? "#1B4D3E" : "#D4E7D7",
+                            borderColor: errors.telefone ? "#dc2626" : (focusField === "telefone" ? "#1B4D3E" : "#D4E7D7"),
                             borderRadius: "8px",
                             backgroundColor: "#FEFDFB",
                             fontSize: "14px",
@@ -388,6 +548,12 @@ export default function CreateAssociado() {
                             boxSizing: "border-box",
                           }}
                         />
+                        {errors.telefone && (
+                          <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "4px", color: "#dc2626", fontSize: "12px" }}>
+                            <AlertTriangleIcon />
+                            <span>{errors.telefone}</span>
+                          </div>
+                        )}
                       </div>
 
                       <div>
@@ -399,7 +565,7 @@ export default function CreateAssociado() {
                           type="text"
                           placeholder="000.000.000-00"
                           value={form.cpf}
-                          onChange={(e) => updateForm({ cpf: e.target.value })}
+                          onChange={(e) => updateForm({ cpf: maskCPF(e.target.value) })}
                           onFocus={() => setFocusField("cpf")}
                           onBlur={() => setFocusField(null)}
                           required
@@ -408,7 +574,7 @@ export default function CreateAssociado() {
                             height: "40px",
                             padding: "0 12px",
                             border: "2px solid",
-                            borderColor: focusField === "cpf" ? "#1B4D3E" : "#D4E7D7",
+                            borderColor: errors.cpf ? "#dc2626" : (focusField === "cpf" ? "#1B4D3E" : "#D4E7D7"),
                             borderRadius: "8px",
                             backgroundColor: "#FEFDFB",
                             fontSize: "14px",
@@ -417,6 +583,12 @@ export default function CreateAssociado() {
                             boxSizing: "border-box",
                           }}
                         />
+                        {errors.cpf && (
+                          <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "4px", color: "#dc2626", fontSize: "12px" }}>
+                            <AlertTriangleIcon />
+                            <span>{errors.cpf}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -439,7 +611,7 @@ export default function CreateAssociado() {
                             height: "40px",
                             padding: "0 12px",
                             border: "2px solid",
-                            borderColor: focusField === "senha" ? "#1B4D3E" : "#D4E7D7",
+                            borderColor: errors.senha ? "#dc2626" : (focusField === "senha" ? "#1B4D3E" : "#D4E7D7"),
                             borderRadius: "8px",
                             backgroundColor: "#FEFDFB",
                             fontSize: "14px",
@@ -448,6 +620,12 @@ export default function CreateAssociado() {
                             boxSizing: "border-box",
                           }}
                         />
+                        {errors.senha && (
+                          <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "4px", color: "#dc2626", fontSize: "12px" }}>
+                            <AlertTriangleIcon />
+                            <span>{errors.senha}</span>
+                          </div>
+                        )}
                       </div>
 
                       <div>
@@ -467,7 +645,7 @@ export default function CreateAssociado() {
                             height: "40px",
                             padding: "0 12px",
                             border: "2px solid",
-                            borderColor: focusField === "data_associacao" ? "#1B4D3E" : "#D4E7D7",
+                            borderColor: errors.data_associacao ? "#dc2626" : (focusField === "data_associacao" ? "#1B4D3E" : "#D4E7D7"),
                             borderRadius: "8px",
                             backgroundColor: "#FEFDFB",
                             fontSize: "14px",
@@ -476,6 +654,12 @@ export default function CreateAssociado() {
                             boxSizing: "border-box",
                           }}
                         />
+                        {errors.data_associacao && (
+                          <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "4px", color: "#dc2626", fontSize: "12px" }}>
+                            <AlertTriangleIcon />
+                            <span>{errors.data_associacao}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -773,7 +957,7 @@ export default function CreateAssociado() {
                           type="text"
                           placeholder="00000-000"
                           value={form.endereco.cep}
-                          onChange={(e) => updateEndereco({ cep: e.target.value })}
+                          onChange={(e) => updateEndereco({ cep: maskCEP(e.target.value) })}
                           onFocus={() => setFocusField("cep")}
                           onBlur={() => setFocusField(null)}
                           style={{
@@ -781,7 +965,7 @@ export default function CreateAssociado() {
                             height: "40px",
                             padding: "0 12px",
                             border: "2px solid",
-                            borderColor: focusField === "cep" ? "#1B4D3E" : "#D4E7D7",
+                            borderColor: errors.cep ? "#dc2626" : (focusField === "cep" ? "#1B4D3E" : "#D4E7D7"),
                             borderRadius: "8px",
                             backgroundColor: "#FEFDFB",
                             fontSize: "14px",
@@ -790,6 +974,12 @@ export default function CreateAssociado() {
                             boxSizing: "border-box",
                           }}
                         />
+                        {errors.cep && (
+                          <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "4px", color: "#dc2626", fontSize: "12px" }}>
+                            <AlertTriangleIcon />
+                            <span>{errors.cep}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -966,7 +1156,7 @@ export default function CreateAssociado() {
                 {step < 3 ? (
                   <button
                     type="button"
-                    onClick={() => setStep(step + 1)}
+                    onClick={handleNextStep}
                     style={{
                       display: "flex",
                       alignItems: "center",
@@ -1021,6 +1211,7 @@ export default function CreateAssociado() {
                               caf: null,
                             },
                           });
+                          setErrors({});
                           setStep(1);
                         }
                       }}

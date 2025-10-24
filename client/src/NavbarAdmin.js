@@ -192,7 +192,6 @@ export default function NavbarAdmin({ children }) {
               {equipmentOpen && (
                 <div className="dropdown-menu">
                   <DropdownLinkItem to="/maquinas">Máquinas</DropdownLinkItem>
-                  <DropdownLinkItem to="/implementos">Implementos</DropdownLinkItem>
                   <DropdownLinkItem to="/servicos">Serviços</DropdownLinkItem>
                 </div>
               )}

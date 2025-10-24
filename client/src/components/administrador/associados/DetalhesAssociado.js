@@ -25,7 +25,6 @@ export default function DetalhesAssociado({ associado, onClose, onDeleted, onUpd
       cep: associado?.endereco?.cep || "",
     },
     documentos: {
-      anuidade: associado?.documentos?.anuidade || "",
       caf: associado?.documentos?.caf || "",
     },
   });
@@ -91,7 +90,6 @@ export default function DetalhesAssociado({ associado, onClose, onDeleted, onUpd
           cep: associado?.endereco?.cep || "",
         },
         documentos: {
-          anuidade: associado?.documentos?.anuidade || "",
           caf: associado?.documentos?.caf || "",
         },
       });
@@ -380,137 +378,7 @@ export default function DetalhesAssociado({ associado, onClose, onDeleted, onUpd
                   Documentos
                 </h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                  {docs.anuidade ? (
-                    <a
-                      href={`${API_URL}/uploads/anuidade/${docs.anuidade}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "12px",
-                        padding: "16px",
-                        backgroundColor: "#F0FDF4",
-                        border: "1px solid #BBF7D0",
-                        borderRadius: "12px",
-                        textDecoration: "none",
-                        transition: "all 0.2s ease",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = "#DCFCE7";
-                        e.currentTarget.style.transform = "translateX(4px)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = "#F0FDF4";
-                        e.currentTarget.style.transform = "translateX(0)";
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: "40px",
-                          height: "40px",
-                          borderRadius: "8px",
-                          backgroundColor: "#309274",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <svg
-                          style={{ width: "20px", height: "20px", color: "#fff" }}
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                          />
-                        </svg>
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div
-                          style={{
-                            fontSize: "14px",
-                            fontWeight: "600",
-                            color: "#1B4D3E",
-                          }}
-                        >
-                          Comprovante de Anuidade
-                        </div>
-                        <div style={{ fontSize: "12px", color: "#309274" }}>
-                          Clique para visualizar
-                        </div>
-                      </div>
-                      <svg
-                        style={{ width: "20px", height: "20px", color: "#309274" }}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                        />
-                      </svg>
-                    </a>
-                  ) : (
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "12px",
-                        padding: "16px",
-                        backgroundColor: "#F9FAFB",
-                        border: "1px solid #E5E7EB",
-                        borderRadius: "12px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: "40px",
-                          height: "40px",
-                          borderRadius: "8px",
-                          backgroundColor: "#E5E7EB",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <svg
-                          style={{ width: "20px", height: "20px", color: "#9CA3AF" }}
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div
-                          style={{
-                            fontSize: "14px",
-                            fontWeight: "600",
-                            color: "#6B7280",
-                          }}
-                        >
-                          Comprovante de Anuidade
-                        </div>
-                        <div style={{ fontSize: "12px", color: "#9CA3AF" }}>
-                          Documento não disponível
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                 
 
                   {docs.caf ? (
                     <a

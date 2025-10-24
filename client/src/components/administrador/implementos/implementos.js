@@ -6,7 +6,7 @@ export default function Implementos() {
    const btnCadastrar = {
     backgroundColor: "#1B4D3E", // verde escuro
     color: "#FFFFFF", // texto branco
-    padding: "8px 20px",
+    padding: "6px 20px",
     borderRadius: "12px",
     border: "none",
     cursor: "pointer",

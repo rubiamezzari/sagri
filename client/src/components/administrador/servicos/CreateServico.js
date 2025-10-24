@@ -1,206 +1,353 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+"use client"
 
-const API_URL = "http://localhost:5050";
+import { useState } from "react"
+import { X } from "lucide-react"
 
-// Estilos base para os botões (mantidos dos componentes anteriores)
-const btnBase = {
-  padding: "8px 18px",
-  borderRadius: "20px",
-  fontWeight: 500,
-  fontSize: "0.9rem",
-  border: "1px solid #99c9a0",
-  cursor: "pointer",
-  transition: "all 0.2s ease",
-  marginLeft: "10px",
-  textDecoration: "none", 
-};
+const API_URL = "http://localhost:5050"
 
-const btnSalvar = {
-  ...btnBase,
-  backgroundColor: "#e6f4ea",
-  color: "#386641",
-};
-
-const btnExcluir = {
-  ...btnBase,
-  backgroundColor: "transparent",
-  color: "#88a88c",
-  border: "1px solid #d0e7d3",
-};
-
-const containerStyle = {
-  maxWidth: "800px",
-  margin: "40px auto",
-  padding: "30px 40px",
-  backgroundColor: "#ffffff",
-  borderRadius: "5px",
-  textAlign: "center",
-};
-
-const sectionTitle = {
-  color: "#100f0d",
-  marginBottom: "16px",
-  fontWeight: "500",
-  fontSize: "1rem",
-  borderBottom: "0.5px solid rgb(131, 148, 131)",
-  paddingBottom: "6px",
-};
-
-const labelStyle = {
-  display: "block",
-  marginBottom: "6px",
-  fontWeight: "600",
-  color: "#100f0d",
-  fontSize: "0.8rem",
-  textAlign: "left",
-};
-
-const inputStyle = {
-  width: "100%",
-  padding: "8px 10px",
-  marginBottom: "10px",
-  borderRadius: "5px",
-  border: "1px solid #e8e8e8",
-  fontSize: "1rem",
-  boxSizing: "border-box",
-  transition: "border-color 0.3s",
-};
-
-const inputFocus = {
-  borderColor: "#1c3d21",
-  outline: "none",
-};
-
-export default function CreateServico() {
+export default function CreateServico({ onClose, onCreated }) {
   const [form, setForm] = useState({
     nome: "",
     maquina_tipo: "",
     implemento_tipo: "",
     observacao: "",
-  });
+  })
+  const [focusField, setFocusField] = useState(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const [tiposMaquina, setTiposMaquina] = useState([]);
-  const [tiposImplemento, setTiposImplemento] = useState([]);
-  const [focusField, setFocusField] = useState(null);
-  const navigate = useNavigate();
+  function updateForm(value) {
+    setForm((prev) => ({ ...prev, ...value }))
+  }
 
-  useEffect(() => {
-    fetch(`${API_URL}/maquinas`)
-      .then((res) => res.json())
-      .then((data) => {
-        const tiposUnicos = [...new Set(data.map((m) => m.tipo))];
-        setTiposMaquina(tiposUnicos);
-      });
+  async function handleSubmit(e) {
+    e.preventDefault()
 
-    fetch(`${API_URL}/implementos`)
-      .then((res) => res.json())
-      .then((data) => {
-        const tiposUnicos = [...new Set(data.map((i) => i.tipo))];
-        setTiposImplemento(tiposUnicos);
-      });
-  }, []);
+    if (!form.nome || !form.maquina_tipo || !form.implemento_tipo) {
+      alert("Por favor, preencha todos os campos obrigatórios.")
+      return
+    }
 
-  async function onSubmit(e) {
-    e.preventDefault();
+    setIsSubmitting(true)
 
     try {
-      const response = await fetch(`${API_URL}/servicos/create`, {
+      const response = await fetch(`${API_URL}/servicos`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
-      });
+      })
 
       if (!response.ok) {
-        const errorText = await response.text();
-        alert("Erro ao cadastrar serviço: " + errorText);
-        return;
+        throw new Error("Erro ao criar serviço")
       }
 
-      alert("Serviço cadastrado com sucesso!");
-      navigate("/servicos", { replace: true });
+      const novoServico = await response.json()
+      alert("Serviço criado com sucesso!")
+
+      if (onCreated) {
+        onCreated(novoServico)
+      }
+
+      onClose()
     } catch (error) {
-      alert("Erro na comunicação com o servidor.");
+      console.error("Erro ao criar serviço:", error)
+      alert("Erro ao criar serviço: " + error.message)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
-  function getInputStyle(name) {
-    return focusField === name ? { ...inputStyle, ...inputFocus } : inputStyle;
-  }
-
   return (
-    <div style={containerStyle}>
-      <form onSubmit={onSubmit}>
-        <h5 style={sectionTitle}>DADOS DO SERVIÇO</h5>
-
-        <label style={labelStyle} htmlFor="nome">Nome do Serviço</label>
-        <input
-          id="nome"
-          type="text"
-          style={getInputStyle("nome")}
-          value={form.nome}
-          onChange={(e) => setForm({ ...form, nome: e.target.value })}
-          onFocus={() => setFocusField("nome")}
-          onBlur={() => setFocusField(null)}
-          required
-        />
-
-        <label style={labelStyle}>Tipo de Máquina</label>
-        <select
-          style={getInputStyle("maquina_tipo")}
-          value={form.maquina_tipo}
-          onChange={(e) => setForm({ ...form, maquina_tipo: e.target.value })}
-          onFocus={() => setFocusField("maquina_tipo")}
-          onBlur={() => setFocusField(null)}
-          required
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 1000,
+        padding: "20px",
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          backgroundColor: "#fff",
+          borderRadius: "16px",
+          maxWidth: "600px",
+          width: "100%",
+          maxHeight: "90vh",
+          overflow: "hidden",
+          boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
+          display: "flex",
+          flexDirection: "column",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div
+          style={{
+            padding: "24px 32px",
+            borderBottom: "1px solid #E5E7EB",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
         >
-          <option value="">Selecione...</option>
-          {tiposMaquina.map((tipo, index) => (
-            <option key={index} value={tipo}>{tipo}</option>
-          ))}
-        </select>
+          <h2
+            style={{
+              fontSize: "24px",
+              fontWeight: "600",
+              color: "#1F2937",
+              margin: 0,
+            }}
+          >
+            Criar Novo Serviço
+          </h2>
+          <button
+            onClick={onClose}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "#9CA3AF",
+              padding: "4px",
+              transition: "color 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.color = "#6B7280"
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.color = "#9CA3AF"
+            }}
+          >
+            <X style={{ width: "24px", height: "24px" }} />
+          </button>
+        </div>
 
-        <label style={labelStyle}>Tipo de Implemento</label>
-        <select
-          style={getInputStyle("implemento_tipo")}
-          value={form.implemento_tipo}
-          onChange={(e) => setForm({ ...form, implemento_tipo: e.target.value })}
-          onFocus={() => setFocusField("implemento_tipo")}
-          onBlur={() => setFocusField(null)}
-          required
+        {/* Form */}
+        <form onSubmit={handleSubmit} style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "8px",
+                  color: "#1B4D3E",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                }}
+              >
+                Nome do Serviço *
+              </label>
+              <input
+                type="text"
+                value={form.nome}
+                onChange={(e) => updateForm({ nome: e.target.value })}
+                onFocus={() => setFocusField("nome")}
+                onBlur={() => setFocusField(null)}
+                required
+                placeholder="Ex: Plantio de Soja"
+                style={{
+                  width: "100%",
+                  height: "44px",
+                  padding: "0 14px",
+                  border: "2px solid",
+                  borderColor: focusField === "nome" ? "#1B4D3E" : "#D4E7D7",
+                  borderRadius: "8px",
+                  backgroundColor: "#FEFDFB",
+                  fontSize: "15px",
+                  outline: "none",
+                  transition: "all 0.3s",
+                  boxSizing: "border-box",
+                }}
+              />
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+              <div>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "8px",
+                    color: "#1B4D3E",
+                    fontSize: "14px",
+                    fontWeight: "600",
+                  }}
+                >
+                  Tipo de Máquina *
+                </label>
+                <input
+                  type="text"
+                  value={form.maquina_tipo}
+                  onChange={(e) => updateForm({ maquina_tipo: e.target.value })}
+                  onFocus={() => setFocusField("maquina_tipo")}
+                  onBlur={() => setFocusField(null)}
+                  required
+                  placeholder="Ex: Trator"
+                  style={{
+                    width: "100%",
+                    height: "44px",
+                    padding: "0 14px",
+                    border: "2px solid",
+                    borderColor: focusField === "maquina_tipo" ? "#1B4D3E" : "#D4E7D7",
+                    borderRadius: "8px",
+                    backgroundColor: "#FEFDFB",
+                    fontSize: "15px",
+                    outline: "none",
+                    transition: "all 0.3s",
+                    boxSizing: "border-box",
+                  }}
+                />
+              </div>
+
+              <div>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "8px",
+                    color: "#1B4D3E",
+                    fontSize: "14px",
+                    fontWeight: "600",
+                  }}
+                >
+                  Tipo de Implemento *
+                </label>
+                <input
+                  type="text"
+                  value={form.implemento_tipo}
+                  onChange={(e) => updateForm({ implemento_tipo: e.target.value })}
+                  onFocus={() => setFocusField("implemento_tipo")}
+                  onBlur={() => setFocusField(null)}
+                  required
+                  placeholder="Ex: Plantadeira"
+                  style={{
+                    width: "100%",
+                    height: "44px",
+                    padding: "0 14px",
+                    border: "2px solid",
+                    borderColor: focusField === "implemento_tipo" ? "#1B4D3E" : "#D4E7D7",
+                    borderRadius: "8px",
+                    backgroundColor: "#FEFDFB",
+                    fontSize: "15px",
+                    outline: "none",
+                    transition: "all 0.3s",
+                    boxSizing: "border-box",
+                  }}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "8px",
+                  color: "#1B4D3E",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                }}
+              >
+                Observações
+              </label>
+              <textarea
+                value={form.observacao}
+                onChange={(e) => updateForm({ observacao: e.target.value })}
+                onFocus={() => setFocusField("observacao")}
+                onBlur={() => setFocusField(null)}
+                rows={4}
+                placeholder="Adicione observações sobre o serviço..."
+                style={{
+                  width: "100%",
+                  padding: "12px 14px",
+                  border: "2px solid",
+                  borderColor: focusField === "observacao" ? "#1B4D3E" : "#D4E7D7",
+                  borderRadius: "8px",
+                  backgroundColor: "#FEFDFB",
+                  fontSize: "15px",
+                  outline: "none",
+                  transition: "all 0.3s",
+                  boxSizing: "border-box",
+                  fontFamily: "inherit",
+                  resize: "vertical",
+                }}
+              />
+            </div>
+          </div>
+        </form>
+
+        {/* Footer */}
+        <div
+          style={{
+            padding: "24px 32px",
+            borderTop: "1px solid #E5E7EB",
+            display: "flex",
+            gap: "12px",
+            justifyContent: "flex-end",
+          }}
         >
-          <option value="">Selecione...</option>
-          {tiposImplemento.map((tipo, index) => (
-            <option key={index} value={tipo}>{tipo}</option>
-          ))}
-        </select>
-
-        <label style={labelStyle} htmlFor="observacao">Observação</label>
-        <textarea
-          id="observacao"
-          style={{ ...getInputStyle("observacao"), height: "80px", resize: "none" }}
-          value={form.observacao}
-          onChange={(e) => setForm({ ...form, observacao: e.target.value })}
-          onFocus={() => setFocusField("observacao")}
-          onBlur={() => setFocusField(null)}
-        />
-
-        <div style={{ marginTop: "30px", textAlign: "right", display: "flex", justifyContent: "flex-end", gap: "10px" }}>
           <button
             type="button"
-            style={btnExcluir}
-            onClick={() => navigate("/servicos")}
+            onClick={onClose}
+            disabled={isSubmitting}
+            style={{
+              padding: "12px 24px",
+              borderRadius: "8px",
+              border: "2px solid #E5E7EB",
+              backgroundColor: "transparent",
+              color: "#6B7280",
+              fontSize: "14px",
+              fontWeight: "600",
+              cursor: isSubmitting ? "not-allowed" : "pointer",
+              transition: "all 0.2s ease",
+              opacity: isSubmitting ? 0.5 : 1,
+            }}
+            onMouseEnter={(e) => {
+              if (!isSubmitting) {
+                e.target.style.backgroundColor = "#F9FAFB"
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = "transparent"
+            }}
           >
             Cancelar
           </button>
+
           <button
             type="submit"
-            style={btnSalvar}
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            style={{
+              padding: "12px 24px",
+              borderRadius: "8px",
+              border: "none",
+              backgroundColor: "#1B4D3E",
+              color: "#fff",
+              fontSize: "14px",
+              fontWeight: "600",
+              cursor: isSubmitting ? "not-allowed" : "pointer",
+              transition: "all 0.3s ease",
+              opacity: isSubmitting ? 0.7 : 1,
+            }}
+            onMouseEnter={(e) => {
+              if (!isSubmitting) {
+                e.currentTarget.style.boxShadow = "0 4px 12px rgba(27, 77, 62, 0.3)"
+                e.currentTarget.style.transform = "translateY(-2px)"
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = "none"
+              e.currentTarget.style.transform = "translateY(0)"
+            }}
           >
-            Enviar
+            {isSubmitting ? "Criando..." : "Criar Serviço"}
           </button>
         </div>
-      </form>
+      </div>
     </div>
-  );
+  )
 }
