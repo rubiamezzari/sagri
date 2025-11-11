@@ -146,7 +146,6 @@ export default function ListOperadores() {
         padding: "32px 20px",
       }}
     >
-      {/* Header */}
       
 
       {/* Search Bar */}
@@ -453,13 +452,11 @@ export default function ListOperadores() {
       {/* Modal */}
       {mostrarModal && operadorSelecionado && (
         <EditOperador
-          operador={operadorSelecionado}
-          onClose={() => setMostrarModal(false)}
-          onDeleted={(id) => {
-            setOperadores((old) => old.filter((op) => op._id !== id));
+          id={operadorSelecionado._id}
+          onClose={() => {
             setMostrarModal(false);
+            buscarOperadores(); // Recarrega a lista após fechar
           }}
-          onUpdated={handleUpdate}
         />
       )}
     </div>

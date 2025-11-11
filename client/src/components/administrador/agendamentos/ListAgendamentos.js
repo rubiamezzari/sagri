@@ -39,7 +39,6 @@ export default function ListAgendamentos() {
         }),
       )
 
-      // Ordenar por data mais recente
       const sorted = dataComNomes.sort((a, b) => {
         const dateA = new Date(a.data_servico)
         const dateB = new Date(b.data_servico)
@@ -56,7 +55,6 @@ export default function ListAgendamentos() {
 
   const itensPorPagina = 9
 
-  // Filtrar por status
   const filtradas = solicitacoes
     .filter((s) => {
       if (filtroAtivo === "todos") return true
@@ -86,8 +84,6 @@ export default function ListAgendamentos() {
         body.motivo_recusa = motivoRecusa.trim()
       }
 
-      console.log("[v0] Atualizando status:", { id, status, body })
-
       const response = await fetch(`${API_URL}/solicitacoes/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -96,13 +92,10 @@ export default function ListAgendamentos() {
 
       if (!response.ok) {
         const errorText = await response.text()
-        console.error("[v0] Erro na resposta:", response.status, errorText)
         throw new Error(`Erro ${response.status}: ${errorText}`)
       }
 
       const updatedData = await response.json()
-      console.log("[v0] Resposta do servidor:", updatedData)
-      console.log("[v0] motivo_recusa recebido:", updatedData.motivo_recusa)
 
       const motivoRecusaToSave = status === "recusado" && motivoRecusa.trim() ? motivoRecusa.trim() : null
 
@@ -133,19 +126,38 @@ export default function ListAgendamentos() {
         setAgendamentoSelecionado(null)
       }
     } catch (error) {
-      console.error("[v0] Erro ao atualizar status:", error)
+      console.error("Erro ao atualizar status:", error)
       alert(`Erro ao atualizar status: ${error.message}`)
     }
   }
 
   const deletarAgendamento = async (id) => {
     if (!window.confirm("Deseja realmente excluir este agendamento?")) return
+
     try {
-      await fetch(`${API_URL}/solicitacoes/${id}`, { method: "DELETE" })
+      const response = await fetch(`${API_URL}/solicitacoes/${id}`, {
+        method: "DELETE",
+      })
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          alert(
+            "Erro: O servidor não suporta exclusão de agendamentos.\n\nVerifique se o endpoint DELETE está configurado no backend.",
+          )
+          return
+        }
+
+        alert(`Erro ao excluir: Falha no servidor (código ${response.status})`)
+        return
+      }
+
       setSolicitacoes((old) => old.filter((s) => s._id !== id))
       fecharModal()
-    } catch {
-      alert("Erro ao excluir")
+
+      alert("Agendamento excluído com sucesso!")
+    } catch (error) {
+      console.error("Erro ao excluir agendamento:", error)
+      alert("Erro ao excluir: Não foi possível conectar ao servidor.\n\nVerifique se o servidor está rodando.")
     }
   }
 
@@ -154,34 +166,24 @@ export default function ListAgendamentos() {
       pendente: {
         backgroundColor: "#FFF9E6",
         color: "#8B6914",
-        dotColor: "#F59E0B",
-        borderColor: "#FDE68A",
       },
       aprovado: {
         backgroundColor: "#E8F5E9",
         color: "#1B5E20",
-        dotColor: "#10B981",
-        borderColor: "#A8D5BA",
       },
       recusado: {
         backgroundColor: "#FBE9E7",
         color: "#BF360C",
-        dotColor: "#EF4444",
-        borderColor: "#FFCCBC",
       },
       concluido: {
         backgroundColor: "#E0F2F1",
         color: "#00695C",
-        dotColor: "#14B8A6",
-        borderColor: "#80CBC4",
       },
     }
 
     const style = styles[status?.toLowerCase()] || {
       backgroundColor: "#F5F5F5",
       color: "#757575",
-      dotColor: "#9E9E9E",
-      borderColor: "#E0E0E0",
     }
 
     return (
@@ -200,14 +202,6 @@ export default function ListAgendamentos() {
           border: `1px solid ${style.borderColor}`,
         }}
       >
-        <div
-          style={{
-            width: "8px",
-            height: "8px",
-            borderRadius: "50%",
-            backgroundColor: style.dotColor,
-          }}
-        />
         {status}
       </div>
     )
@@ -224,7 +218,7 @@ export default function ListAgendamentos() {
     <div
       style={{
         width: "100%",
-        maxWidth: "1400px",
+        maxWidth: "100%",
         margin: "0 auto",
         padding: "32px 20px",
       }}
@@ -572,7 +566,6 @@ export default function ListAgendamentos() {
               width: "80px",
               height: "80px",
               margin: "0 auto 24px",
-              background: "linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%)",
               borderRadius: "50%",
               display: "flex",
               alignItems: "center",
@@ -645,8 +638,38 @@ export default function ListAgendamentos() {
                 e.currentTarget.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.06)"
               }}
             >
-              {/* Status Badge - Top Right */}
-              <div style={{ position: "absolute", top: "20px", right: "20px" }}>{getStatusBadge(s.status)}</div>
+              {/* Status Badge & Horímetro - Top Right */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: "20px",
+                  right: "20px",
+                  display: "flex",
+                  gap: "8px",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  justifyContent: "flex-end",
+                }}
+              >
+                {s.status?.toLowerCase() === "concluido" &&
+                  s.horimetro_inicial != null &&
+                  s.horimetro_final != null && (
+                    <div
+                      style={{
+                        backgroundColor: "#F3F4F6",
+                        color: "#6B7280",
+                        padding: "6px 10px",
+                        borderRadius: "8px",
+                        fontSize: "12px",
+                        fontWeight: "600",
+                        border: "1px solid #E5E7EB",
+                      }}
+                    >
+                      {Number(s.horimetro_final) - Number(s.horimetro_inicial)}h
+                    </div>
+                  )}
+                {getStatusBadge(s.status)}
+              </div>
 
               {/* Header with Avatar */}
               <div
@@ -793,41 +816,6 @@ export default function ListAgendamentos() {
                     </div>
                   </div>
                 )}
-
-                {/* Horímetro Info */}
-                {s.status?.toLowerCase() === "concluido" &&
-                  s.horimetro_inicial != null &&
-                  s.horimetro_final != null && (
-                    <div
-                      style={{
-                        marginTop: "12px",
-                        padding: "16px",
-                        background: "linear-gradient(135deg, #DFF0E8 0%, #C8E6D4 100%)",
-                        borderRadius: "12px",
-                        border: "2px solid #A8D5BA",
-                        boxShadow: "0 2px 8px rgba(168, 213, 186, 0.3)",
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontSize: "11px",
-                          color: "#0D4A2C",
-                          fontWeight: "700",
-                          marginBottom: "6px",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.5px",
-                        }}
-                      >
-                        Horímetro
-                      </div>
-                      <div style={{ fontSize: "15px", color: "#0D4A2C", fontWeight: "700" }}>
-                        {Number(s.horimetro_final) - Number(s.horimetro_inicial)}h trabalhadas
-                      </div>
-                      <div style={{ fontSize: "12px", color: "#0D4A2C", marginTop: "6px", opacity: 0.85 }}>
-                        {s.horimetro_inicial}h → {s.horimetro_final}h
-                      </div>
-                    </div>
-                  )}
               </div>
 
               {/* Footer */}
@@ -959,7 +947,6 @@ export default function ListAgendamentos() {
             right: 0,
             bottom: 0,
             backgroundColor: "rgba(0, 0, 0, 0.6)",
-            backdropFilter: "blur(4px)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -1164,7 +1151,7 @@ export default function ListAgendamentos() {
                   </div>
                 </div>
 
-                {/* Horímetro Details - se concluído */}
+                {/* Horímetro Details - Menos chamativo quando concluído */}
                 {agendamentoSelecionado.status?.toLowerCase() === "concluido" &&
                   agendamentoSelecionado.horimetro_inicial != null &&
                   agendamentoSelecionado.horimetro_final != null && (
@@ -1179,43 +1166,53 @@ export default function ListAgendamentos() {
                           marginBottom: "16px",
                         }}
                       >
-                        Horímetro Registrado
+                        Horímetro
                       </h3>
                       <div
                         style={{
-                          background: "linear-gradient(135deg, #DFF0E8 0%, #C8E6D4 100%)",
-                          padding: "24px",
-                          borderRadius: "16px",
-                          border: "2px solid #A8D5BA",
-                          boxShadow: "0 4px 12px rgba(168, 213, 186, 0.3)",
+                          background: "linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%)",
+                          padding: "16px 20px",
+                          borderRadius: "12px",
+                          border: "1px solid #E5E7EB",
+                          display: "flex",
+                          gap: "20px",
+                          alignItems: "center",
                         }}
                       >
-                        <div style={{ fontSize: "32px", color: "#0D4A2C", fontWeight: "800", marginBottom: "10px" }}>
-                          {Number(agendamentoSelecionado.horimetro_final) -
-                            Number(agendamentoSelecionado.horimetro_inicial)}
-                          h
+                        <div>
+                          <div style={{ fontSize: "11px", color: "#9CA3AF", fontWeight: "600", marginBottom: "4px" }}>
+                            Total
+                          </div>
+                          <div style={{ fontSize: "20px", fontWeight: "700", color: "#374151" }}>
+                            {Number(agendamentoSelecionado.horimetro_final) -
+                              Number(agendamentoSelecionado.horimetro_inicial)}
+                            <span style={{ fontSize: "13px", color: "#9CA3AF", marginLeft: "3px" }}>h</span>
+                          </div>
                         </div>
-                        <div style={{ fontSize: "14px", color: "#0D4A2C", opacity: 0.9, fontWeight: "600" }}>
-                          Horas trabalhadas no total
-                        </div>
-                        <div
-                          style={{
-                            marginTop: "16px",
-                            paddingTop: "16px",
-                            borderTop: "2px solid #A8D5BA",
-                            display: "flex",
-                            gap: "24px",
-                            fontSize: "14px",
-                            color: "#0D4A2C",
-                          }}
-                        >
-                          <div>
-                            <span style={{ opacity: 0.8 }}>Inicial: </span>
+                        <div style={{ flex: 1, borderLeft: "1px solid #E5E7EB", paddingLeft: "16px" }}>
+                          <div
+                            style={{
+                              fontSize: "11px",
+                              color: "#9CA3AF",
+                              fontWeight: "600",
+                              marginBottom: "6px",
+                            }}
+                          >
+                            DETALHES
+                          </div>
+                          <div
+                            style={{
+                              fontSize: "12px",
+                              color: "#6B7280",
+                              fontWeight: "500",
+                              marginBottom: "3px",
+                            }}
+                          >
+                            Inicial:{" "}
                             <span style={{ fontWeight: "700" }}>{agendamentoSelecionado.horimetro_inicial}h</span>
                           </div>
-                          <div>
-                            <span style={{ opacity: 0.8 }}>Final: </span>
-                            <span style={{ fontWeight: "700" }}>{agendamentoSelecionado.horimetro_final}h</span>
+                          <div style={{ fontSize: "12px", color: "#6B7280", fontWeight: "500" }}>
+                            Final: <span style={{ fontWeight: "700" }}>{agendamentoSelecionado.horimetro_final}h</span>
                           </div>
                         </div>
                       </div>
@@ -1267,6 +1264,7 @@ export default function ListAgendamentos() {
                           marginBottom: "16px",
                           display: "flex",
                           alignItems: "center",
+                          borderRadius: "8px",
                           gap: "8px",
                         }}
                       >
@@ -1520,19 +1518,20 @@ export default function ListAgendamentos() {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Refusal Modal Header */}
             <div
               style={{
                 padding: "32px 36px",
                 borderBottom: "2px solid #E5E7EB",
-                background: "linear-gradient(to bottom, #FBE9E7 0%, #fff 100%)",
+                background: "linear-gradient(135deg, #E8F3ED 0%, #D4E9DD 100%)",
+                borderTopLeftRadius: "24px",
+                borderTopRightRadius: "24px",
               }}
             >
               <h2
                 style={{
                   fontSize: "22px",
                   fontWeight: "700",
-                  color: "#1F2937",
+                  color: "#1B4D3E",
                   margin: 0,
                   letterSpacing: "-0.3px",
                 }}
@@ -1542,7 +1541,7 @@ export default function ListAgendamentos() {
               <p
                 style={{
                   fontSize: "15px",
-                  color: "#6B7280",
+                  color: "#2D7A5F",
                   marginTop: "10px",
                   marginBottom: 0,
                   lineHeight: "1.6",
@@ -1552,7 +1551,6 @@ export default function ListAgendamentos() {
               </p>
             </div>
 
-            {/* Refusal Modal Content */}
             <div style={{ padding: "32px 36px" }}>
               <textarea
                 value={motivoRecusa}
@@ -1560,31 +1558,33 @@ export default function ListAgendamentos() {
                 placeholder="Digite o motivo da recusa..."
                 style={{
                   width: "100%",
-                  minHeight: "140px",
-                  padding: "16px 18px",
-                  borderRadius: "12px",
-                  border: "2px solid #D4E7D7",
-                  backgroundColor: "#FEFDFB",
+                  minHeight: "150px",
+                  padding: "18px 20px",
+                  borderRadius: "20px",
+                  border: "2.5px solid #D4E9DD",
+                  backgroundColor: "#FAFAF9",
                   fontSize: "15px",
                   color: "#1F2937",
                   fontFamily: "inherit",
                   resize: "vertical",
                   outline: "none",
-                  transition: "all 0.2s ease",
-                  lineHeight: "1.6",
+                  transition: "all 0.3s ease",
+                  lineHeight: "1.7",
+                  fontWeight: "500",
                 }}
                 onFocus={(e) => {
                   e.target.style.borderColor = "#1B4D3E"
-                  e.target.style.boxShadow = "0 0 0 4px rgba(27, 77, 62, 0.1)"
+                  e.target.style.backgroundColor = "#FFFFFF"
+                  e.target.style.boxShadow = "0 0 0 5px rgba(27, 77, 62, 0.12), 0 4px 12px rgba(27, 77, 62, 0.08)"
                 }}
                 onBlur={(e) => {
-                  e.target.style.borderColor = "#D4E7D7"
+                  e.target.style.borderColor = "#D4E9DD"
+                  e.target.style.backgroundColor = "#FAFAF9"
                   e.target.style.boxShadow = "none"
                 }}
               />
             </div>
 
-            {/* Refusal Modal Footer */}
             <div
               style={{
                 padding: "24px 36px",
@@ -1593,6 +1593,8 @@ export default function ListAgendamentos() {
                 gap: "12px",
                 justifyContent: "flex-end",
                 background: "linear-gradient(to top, #FAFAF9 0%, #fff 100%)",
+                borderBottomLeftRadius: "24px",
+                borderBottomRightRadius: "24px",
               }}
             >
               <button
@@ -1601,8 +1603,8 @@ export default function ListAgendamentos() {
                   setMotivoRecusa("")
                 }}
                 style={{
-                  padding: "12px 28px",
-                  borderRadius: "12px",
+                  padding: "14px 32px",
+                  borderRadius: "14px",
                   border: "2px solid #E5E7EB",
                   backgroundColor: "#fff",
                   color: "#6B7280",
@@ -1615,10 +1617,12 @@ export default function ListAgendamentos() {
                 onMouseEnter={(e) => {
                   e.target.style.backgroundColor = "#F9FAFB"
                   e.target.style.borderColor = "#D1D5DB"
+                  e.target.style.transform = "translateY(-1px)"
                 }}
                 onMouseLeave={(e) => {
                   e.target.style.backgroundColor = "#fff"
                   e.target.style.borderColor = "#E5E7EB"
+                  e.target.style.transform = "translateY(0)"
                 }}
               >
                 Cancelar
@@ -1632,8 +1636,8 @@ export default function ListAgendamentos() {
                   atualizarStatus(agendamentoSelecionado._id, "recusado")
                 }}
                 style={{
-                  padding: "12px 28px",
-                  borderRadius: "12px",
+                  padding: "14px 32px",
+                  borderRadius: "14px",
                   border: "2px solid #C17B5C",
                   background: "linear-gradient(135deg, #8B4513 0%, #6F3710 100%)",
                   color: "#fff",

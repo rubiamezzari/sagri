@@ -22,7 +22,7 @@ const colors = {
 };
 
 export default function HomeAssociado() {
-  const nomeUsuario = localStorage.getItem("nomeUsuario") ;
+  const nomeUsuario = localStorage.getItem("nomeUsuario");
   const usuarioId = localStorage.getItem("usuarioId") || null;
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [minhasSolicitacoes, setMinhasSolicitacoes] = useState([]);
@@ -150,6 +150,7 @@ export default function HomeAssociado() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          background: colors.background,
         }}
       >
         <div style={{ textAlign: "center" }}>
@@ -180,7 +181,8 @@ export default function HomeAssociado() {
     <div
       style={{
         minHeight: "100vh",
-        padding: "40px 20px",
+        padding: "32px 20px",
+        background: colors.background,
       }}
     >
       <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
@@ -188,26 +190,28 @@ export default function HomeAssociado() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          style={{ marginBottom: "40px" }}
+          style={{ marginBottom: "28px" }}
         >
           <h1
             style={{
               color: colors.primary,
-              fontSize: "36px",
+              fontSize: "28px",
               fontWeight: "700",
-              marginBottom: "8px",
+              marginBottom: "4px",
               letterSpacing: "-0.02em",
             }}
           >
             Bem-vindo, {nomeUsuario}!
           </h1>
-          <p style={{ color: colors.textSecondary, fontSize: "15px", margin: 0 }}>
+          <p style={{ color: colors.textSecondary, fontSize: "14px", margin: 0 }}>
+            Gerencie suas solicitações de maquinário agrícola
           </p>
         </motion.div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: "24px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: "20px" }}>
           {/* Left Column - Calendar and Appointments */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+
             {/* Calendar Card */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -217,9 +221,9 @@ export default function HomeAssociado() {
               <div
                 style={{
                   backgroundColor: colors.cardBg,
-                  borderRadius: "16px",
-                  padding: "24px",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                  borderRadius: "14px",
+                  padding: "20px",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
                 }}
               >
                 {/* Week Navigation */}
@@ -228,7 +232,7 @@ export default function HomeAssociado() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
-                    marginBottom: "24px",
+                    marginBottom: "20px",
                   }}
                 >
                   <button
@@ -257,7 +261,7 @@ export default function HomeAssociado() {
                   <div style={{ textAlign: "center" }}>
                     <h3
                       style={{
-                        fontSize: "18px",
+                        fontSize: "16px",
                         fontWeight: "700",
                         color: colors.primary,
                         margin: 0,
@@ -320,7 +324,7 @@ export default function HomeAssociado() {
                   style={{
                     display: "grid",
                     gridTemplateColumns: "repeat(7, 1fr)",
-                    gap: "12px",
+                    gap: "10px",
                   }}
                 >
                   {weekDates.map((date, index) => {
@@ -335,14 +339,14 @@ export default function HomeAssociado() {
                         whileTap={{ scale: 0.95 }}
                         onClick={() => setSelectedDate(date)}
                         style={{
-                          padding: "16px 8px",
+                          padding: "14px 8px",
                           backgroundColor: isToday
                             ? colors.primary
                             : isSelected
                             ? colors.accent
                             : colors.cardBg,
                           border: isSelected && !isToday ? `2px solid ${colors.primary}` : `1px solid ${colors.border}`,
-                          borderRadius: "12px",
+                          borderRadius: "10px",
                           cursor: "pointer",
                           textAlign: "center",
                           transition: "all 0.2s",
@@ -361,7 +365,7 @@ export default function HomeAssociado() {
                         </div>
                         <div
                           style={{
-                            fontSize: "20px",
+                            fontSize: "18px",
                             fontWeight: "700",
                             color: isToday ? "#fff" : colors.textPrimary,
                           }}
@@ -396,9 +400,9 @@ export default function HomeAssociado() {
               <div
                 style={{
                   backgroundColor: colors.cardBg,
-                  borderRadius: "16px",
-                  padding: "24px",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                  borderRadius: "14px",
+                  padding: "20px",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
                 }}
               >
                 <div
@@ -406,12 +410,12 @@ export default function HomeAssociado() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
-                    marginBottom: "20px",
+                    marginBottom: "16px",
                   }}
                 >
                   <h3
                     style={{
-                      fontSize: "20px",
+                      fontSize: "18px",
                       fontWeight: "700",
                       color: colors.primary,
                       margin: 0,
@@ -435,7 +439,7 @@ export default function HomeAssociado() {
                   </div>
                 </div>
 
-                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
                   <AnimatePresence>
                     {selectedDayAppointments.length > 0 ? (
                       selectedDayAppointments.map((sol, index) => (
@@ -448,9 +452,9 @@ export default function HomeAssociado() {
                           whileHover={{ scale: 1.01 }}
                           style={{
                             position: "relative",
-                            padding: "24px",
+                            padding: "20px",
                             background: "#FFFFFF",
-                            borderRadius: "16px",
+                            borderRadius: "12px",
                             boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
                             border: `1px solid ${colors.border}`,
                             overflow: "hidden",
@@ -463,7 +467,7 @@ export default function HomeAssociado() {
                               position: "absolute",
                               top: 0,
                               left: 0,
-                              width: "5px",
+                              width: "4px",
                               height: "100%",
                               background: `linear-gradient(180deg, ${getStatusColor(sol.status)} 0%, ${colors.secondary} 100%)`,
                             }}
@@ -475,29 +479,29 @@ export default function HomeAssociado() {
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "space-between",
-                              marginBottom: "16px",
-                              paddingBottom: "12px",
+                              marginBottom: "14px",
+                              paddingBottom: "10px",
                               borderBottom: `1px solid ${colors.border}`,
                             }}
                           >
                             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                               <div
                                 style={{
-                                  width: "40px",
-                                  height: "40px",
-                                  borderRadius: "12px",
+                                  width: "36px",
+                                  height: "36px",
+                                  borderRadius: "10px",
                                   background: `linear-gradient(135deg, ${colors.accent} 0%, ${colors.accentDark}20 100%)`,
                                   display: "flex",
                                   alignItems: "center",
                                   justifyContent: "center",
                                 }}
                               >
-                                <Clock size={20} color={colors.primary} strokeWidth={2.5} />
+                                <Clock size={18} color={colors.primary} strokeWidth={2.5} />
                               </div>
                               <div>
                                 <div
                                   style={{
-                                    fontSize: "18px",
+                                    fontSize: "16px",
                                     fontWeight: "700",
                                     color: colors.primary,
                                     lineHeight: "1.2",
@@ -508,7 +512,7 @@ export default function HomeAssociado() {
                                 {sol.tempo_estimado && (
                                   <div
                                     style={{
-                                      fontSize: "12px",
+                                      fontSize: "11px",
                                       color: colors.textSecondary,
                                       marginTop: "2px",
                                     }}
@@ -520,10 +524,10 @@ export default function HomeAssociado() {
                             </div>
                             <div
                               style={{
-                                padding: "6px 14px",
-                                borderRadius: "20px",
+                                padding: "5px 12px",
+                                borderRadius: "16px",
                                 background: getStatusColor(sol.status),
-                                fontSize: "12px",
+                                fontSize: "11px",
                                 fontWeight: "600",
                                 color: "#FFFFFF",
                                 textTransform: "capitalize",
@@ -535,10 +539,10 @@ export default function HomeAssociado() {
 
                           {/* Service Type */}
                           {sol.tipoServico && (
-                            <div style={{ marginBottom: "16px" }}>
+                            <div style={{ marginBottom: "14px" }}>
                               <div
                                 style={{
-                                  fontSize: "20px",
+                                  fontSize: "18px",
                                   fontWeight: "700",
                                   color: colors.textPrimary,
                                   lineHeight: "1.3",
@@ -550,24 +554,24 @@ export default function HomeAssociado() {
                           )}
 
                           {/* Details */}
-                          <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "12px" }}>
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "10px" }}>
                             {/* Machine */}
                             {sol.maquina_id && (
                               <div
                                 style={{
                                   display: "flex",
                                   alignItems: "center",
-                                  gap: "12px",
-                                  padding: "12px",
-                                  borderRadius: "10px",
+                                  gap: "10px",
+                                  padding: "10px",
+                                  borderRadius: "8px",
                                   background: colors.background,
                                 }}
                               >
                                 <div
                                   style={{
-                                    width: "36px",
-                                    height: "36px",
-                                    borderRadius: "10px",
+                                    width: "32px",
+                                    height: "32px",
+                                    borderRadius: "8px",
                                     background: "#FFFFFF",
                                     display: "flex",
                                     alignItems: "center",
@@ -575,12 +579,12 @@ export default function HomeAssociado() {
                                     flexShrink: 0,
                                   }}
                                 >
-                                  <Wrench size={18} color={colors.primary} />
+                                  <Wrench size={16} color={colors.primary} />
                                 </div>
                                 <div style={{ flex: 1 }}>
                                   <div
                                     style={{
-                                      fontSize: "11px",
+                                      fontSize: "10px",
                                       color: colors.textSecondary,
                                       marginBottom: "2px",
                                       textTransform: "uppercase",
@@ -591,7 +595,7 @@ export default function HomeAssociado() {
                                   </div>
                                   <div
                                     style={{
-                                      fontSize: "14px",
+                                      fontSize: "13px",
                                       fontWeight: "600",
                                       color: colors.textPrimary,
                                     }}
@@ -608,17 +612,17 @@ export default function HomeAssociado() {
                                 style={{
                                   display: "flex",
                                   alignItems: "flex-start",
-                                  gap: "12px",
-                                  padding: "12px",
-                                  borderRadius: "10px",
+                                  gap: "10px",
+                                  padding: "10px",
+                                  borderRadius: "8px",
                                   background: colors.background,
                                 }}
                               >
                                 <div
                                   style={{
-                                    width: "36px",
-                                    height: "36px",
-                                    borderRadius: "10px",
+                                    width: "32px",
+                                    height: "32px",
+                                    borderRadius: "8px",
                                     background: "#FFFFFF",
                                     display: "flex",
                                     alignItems: "center",
@@ -626,12 +630,12 @@ export default function HomeAssociado() {
                                     flexShrink: 0,
                                   }}
                                 >
-                                  <Info size={18} color={colors.primary} />
+                                  <Info size={16} color={colors.primary} />
                                 </div>
                                 <div style={{ flex: 1 }}>
                                   <div
                                     style={{
-                                      fontSize: "11px",
+                                      fontSize: "10px",
                                       color: colors.textSecondary,
                                       marginBottom: "2px",
                                       textTransform: "uppercase",
@@ -642,7 +646,7 @@ export default function HomeAssociado() {
                                   </div>
                                   <div
                                     style={{
-                                      fontSize: "14px",
+                                      fontSize: "13px",
                                       fontWeight: "500",
                                       color: colors.textPrimary,
                                       lineHeight: "1.5",
@@ -659,10 +663,10 @@ export default function HomeAssociado() {
                           {sol.data_solicitacao && (
                             <div
                               style={{
-                                marginTop: "16px",
-                                paddingTop: "12px",
+                                marginTop: "12px",
+                                paddingTop: "10px",
                                 borderTop: `1px solid ${colors.border}`,
-                                fontSize: "11px",
+                                fontSize: "10px",
                                 color: colors.textSecondary,
                               }}
                             >
@@ -682,11 +686,11 @@ export default function HomeAssociado() {
                       <div
                         style={{
                           textAlign: "center",
-                          padding: "60px 20px",
+                          padding: "52px 20px",
                           color: colors.textSecondary,
                         }}
                       >
-                        <Calendar size={48} style={{ color: "#D1D5DB", margin: "0 auto 16px" }} />
+                        <Calendar size={44} style={{ color: "#D1D5DB", margin: "0 auto 14px" }} />
                         <p style={{ margin: 0 }}>Nenhuma solicitação para este dia</p>
                       </div>
                     )}
@@ -697,7 +701,7 @@ export default function HomeAssociado() {
           </div>
 
           {/* Right Column - Action Cards */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
             {/* New Request Card */}
             <motion.a
               href="/solicitacoes/create"
@@ -709,9 +713,9 @@ export default function HomeAssociado() {
                 textDecoration: "none",
                 display: "block",
                 backgroundColor: colors.cardBg,
-                borderRadius: "16px",
-                padding: "24px",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                borderRadius: "14px",
+                padding: "20px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
                 border: "2px solid transparent",
                 transition: "all 0.3s",
               }}
@@ -721,36 +725,36 @@ export default function HomeAssociado() {
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.borderColor = "transparent";
-                e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)";
+                e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.06)";
               }}
             >
               <div
                 style={{
-                  width: "56px",
-                  height: "56px",
-                  borderRadius: "14px",
+                  width: "50px",
+                  height: "50px",
+                  borderRadius: "12px",
                   background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  marginBottom: "16px",
+                  marginBottom: "14px",
                 }}
               >
-                <Plus size={28} color="#FFFFFF" strokeWidth={2.5} />
+                <Plus size={26} color="#FFFFFF" strokeWidth={2.5} />
               </div>
               <h3
                 style={{
-                  fontSize: "20px",
+                  fontSize: "18px",
                   fontWeight: "700",
                   color: colors.primary,
-                  marginBottom: "8px",
+                  marginBottom: "6px",
                 }}
               >
                 Nova Solicitação
               </h3>
               <p
                 style={{
-                  fontSize: "14px",
+                  fontSize: "13px",
                   color: colors.textSecondary,
                   lineHeight: "1.6",
                   margin: 0,
@@ -771,9 +775,9 @@ export default function HomeAssociado() {
                 textDecoration: "none",
                 display: "block",
                 backgroundColor: colors.cardBg,
-                borderRadius: "16px",
-                padding: "24px",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                borderRadius: "14px",
+                padding: "20px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
                 border: "2px solid transparent",
                 transition: "all 0.3s",
               }}
@@ -783,36 +787,36 @@ export default function HomeAssociado() {
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.borderColor = "transparent";
-                e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)";
+                e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.06)";
               }}
             >
               <div
                 style={{
-                  width: "56px",
-                  height: "56px",
-                  borderRadius: "14px",
+                  width: "50px",
+                  height: "50px",
+                  borderRadius: "12px",
                   background: `linear-gradient(135deg, ${colors.accentDark} 0%, ${colors.primary} 100%)`,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  marginBottom: "16px",
+                  marginBottom: "14px",
                 }}
               >
-                <FileText size={28} color="#FFFFFF" strokeWidth={2.5} />
+                <FileText size={26} color="#FFFFFF" strokeWidth={2.5} />
               </div>
               <h3
                 style={{
-                  fontSize: "20px",
+                  fontSize: "18px",
                   fontWeight: "700",
                   color: colors.primary,
-                  marginBottom: "8px",
+                  marginBottom: "6px",
                 }}
               >
                 Minhas Solicitações
               </h3>
               <p
                 style={{
-                  fontSize: "14px",
+                  fontSize: "13px",
                   color: colors.textSecondary,
                   lineHeight: "1.6",
                   margin: 0,
@@ -822,166 +826,73 @@ export default function HomeAssociado() {
               </p>
             </motion.a>
 
-            {/* Summary Card */}
+            {/* Info Card */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
               style={{
                 backgroundColor: colors.cardBg,
-                borderRadius: "16px",
-                padding: "24px",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                borderRadius: "14px",
+                padding: "20px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
               }}
             >
-              <h3
-                style={{
-                  fontSize: "18px",
-                  fontWeight: "700",
-                  color: colors.primary,
-                  marginBottom: "20px",
-                }}
-              >
-                Resumo
-              </h3>
-
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
                 <div
                   style={{
-                    padding: "16px",
-                    backgroundColor: colors.accent,
+                    width: "36px",
+                    height: "36px",
                     borderRadius: "10px",
+                    background: `linear-gradient(135deg, ${colors.accent} 0%, ${colors.accentDark}20 100%)`,
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "space-between",
+                    justifyContent: "center",
                   }}
                 >
-                  <div>
-                    <div
-                      style={{
-                        fontSize: "12px",
-                        color: colors.textSecondary,
-                        marginBottom: "4px",
-                      }}
-                    >
-                      Total de Solicitações
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "28px",
-                        fontWeight: "700",
-                        color: colors.primary,
-                      }}
-                    >
-                      {minhasSolicitacoes.length}
-                    </div>
-                  </div>
-                  <FileText size={32} color={colors.primary} style={{ opacity: 0.5 }} />
+                  <Info size={18} color={colors.primary} />
                 </div>
-
-                <div
+                <h3
                   style={{
-                    padding: "16px",
-                    backgroundColor: "#FEF3C7",
-                    borderRadius: "10px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
+                    fontSize: "16px",
+                    fontWeight: "700",
+                    color: colors.primary,
+                    margin: 0,
                   }}
                 >
-                  <div>
-                    <div
-                      style={{
-                        fontSize: "12px",
-                        color: colors.textSecondary,
-                        marginBottom: "4px",
-                      }}
-                    >
-                      Esta Semana
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "28px",
-                        fontWeight: "700",
-                        color: "#92400E",
-                      }}
-                    >
-                      {weekDates.reduce((acc, date) => acc + getAppointmentsForDate(date).length, 0)}
-                    </div>
-                  </div>
-                  <Calendar size={32} color="#92400E" style={{ opacity: 0.5 }} />
+                  Informações Importantes
+                </h3>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                  <CheckCircle size={18} color={colors.success} style={{ flexShrink: 0, marginTop: "2px" }} />
+                  <p style={{ margin: 0, fontSize: "13px", color: colors.textSecondary, lineHeight: "1.6" }}>
+                    Todas as solicitações passam por análise antes da aprovação
+                  </p>
+                </div>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                  <CheckCircle size={18} color={colors.success} style={{ flexShrink: 0, marginTop: "2px" }} />
+                  <p style={{ margin: 0, fontSize: "13px", color: colors.textSecondary, lineHeight: "1.6" }}>
+                    Você será notificado sobre mudanças no status das suas solicitações
+                  </p>
+                </div>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                  <CheckCircle size={18} color={colors.success} style={{ flexShrink: 0, marginTop: "2px" }} />
+                  <p style={{ margin: 0, fontSize: "13px", color: colors.textSecondary, lineHeight: "1.6" }}>
+                    É importante especificar corretamente a data e horário desejados
+                  </p>
+                </div>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                  <AlertCircle size={18} color={colors.warning} style={{ flexShrink: 0, marginTop: "2px" }} />
+                  <p style={{ margin: 0, fontSize: "13px", color: colors.textSecondary, lineHeight: "1.6" }}>
+                    Em caso de dúvidas, entre em contato com a administração
+                  </p>
                 </div>
               </div>
             </motion.div>
           </div>
         </div>
-
-        {/* Info Card at Bottom */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          style={{
-            marginTop: "24px",
-            backgroundColor: colors.cardBg,
-            borderRadius: "16px",
-            padding: "24px",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
-            <div
-              style={{
-                width: "40px",
-                height: "40px",
-                borderRadius: "10px",
-                background: `linear-gradient(135deg, ${colors.accent} 0%, ${colors.accentDark}20 100%)`,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Info size={20} color={colors.primary} />
-            </div>
-            <h3
-              style={{
-                fontSize: "20px",
-                fontWeight: "700",
-                color: colors.primary,
-                margin: 0,
-              }}
-            >
-              Informações Importantes
-            </h3>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "16px" }}>
-            <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
-              <CheckCircle size={20} color={colors.success} style={{ flexShrink: 0, marginTop: "2px" }} />
-              <p style={{ margin: 0, fontSize: "14px", color: colors.textSecondary, lineHeight: "1.6" }}>
-                Todas as solicitações passam por análise antes da aprovação
-              </p>
-            </div>
-            <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
-              <CheckCircle size={20} color={colors.success} style={{ flexShrink: 0, marginTop: "2px" }} />
-              <p style={{ margin: 0, fontSize: "14px", color: colors.textSecondary, lineHeight: "1.6" }}>
-                Você será notificado sobre mudanças no status das suas solicitações
-              </p>
-            </div>
-            <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
-              <CheckCircle size={20} color={colors.success} style={{ flexShrink: 0, marginTop: "2px" }} />
-              <p style={{ margin: 0, fontSize: "14px", color: colors.textSecondary, lineHeight: "1.6" }}>
-                É importante especificar corretamente a data e horário desejados
-              </p>
-            </div>
-            <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
-              <AlertCircle size={20} color={colors.warning} style={{ flexShrink: 0, marginTop: "2px" }} />
-              <p style={{ margin: 0, fontSize: "14px", color: colors.textSecondary, lineHeight: "1.6" }}>
-                Em caso de dúvidas, entre em contato com a administração
-              </p>
-            </div>
-          </div>
-        </motion.div>
       </div>
     </div>
   );

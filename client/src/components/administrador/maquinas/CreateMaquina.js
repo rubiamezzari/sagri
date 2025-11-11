@@ -1,10 +1,18 @@
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+"use client"
 
-const REACT_APP_YOUR_HOSTNAME = "http://localhost:5050";
+import { useState, useEffect } from "react"
+import { motion } from "framer-motion"
+import { Truck, X, AlertCircle, Loader2 } from "lucide-react"
 
-export default function CreateMaquina() {
+const API_URL = "http://localhost:5050"
+
+export default function CreateMaquina({ onClose, onCreated }) {
+  const [focusField, setFocusField] = useState(null)
+  const [errors, setErrors] = useState({})
+  const [loading, setLoading] = useState(true)
+  const [marcas, setMarcas] = useState([])
+  const [tipos, setTipos] = useState([])
+
   const [form, setForm] = useState({
     tipo: "",
     marca: "",
@@ -12,429 +20,613 @@ export default function CreateMaquina() {
     potencia: "",
     n_serie: "",
     observacao: "",
-  });
+  })
 
-  const [tipos, setTipos] = useState([]);
-  const [marcas, setMarcas] = useState([]);
-  const [focusField, setFocusField] = useState(null);
-  const navigate = useNavigate();
-
-  // Carrega tipos e marcas do backend
   useEffect(() => {
-    fetch(`${REACT_APP_YOUR_HOSTNAME}/tipos?categoria=maquina`)
-      .then((res) => res.json())
-      .then((data) => setTipos(data))
-      .catch(console.error);
+    fetchData()
+  }, [])
 
-    fetch(`${REACT_APP_YOUR_HOSTNAME}/marcas`)
-      .then((res) => res.json())
-      .then((data) => setMarcas(data))
-      .catch(console.error);
-  }, []);
-
-  function updateForm(value) {
-    setForm((prev) => ({ ...prev, ...value }));
-  }
-
-  async function onSubmit(e) {
-    e.preventDefault();
+  const fetchData = async () => {
     try {
-      const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/maquinas/create`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
+      setLoading(true)
+      const [marcasRes, tiposRes] = await Promise.all([
+        fetch(`${API_URL}/marcas`),
+        fetch(`${API_URL}/tipos?categoria=maquina`),
+      ])
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        alert("Erro ao cadastrar máquina: " + errorText);
-        return;
-      }
+      const marcasData = await marcasRes.json()
+      const tiposData = await tiposRes.json()
 
-      const data = await response.json();
-      alert(data.message || "Máquina cadastrada com sucesso!");
-      setForm({ tipo: "", marca: "", modelo: "", potencia: "", n_serie: "", observacao: "" });
-      navigate("/maquinas");
+      setMarcas(marcasData)
+      setTipos(tiposData.filter((t) => t.categoria === "maquina"))
     } catch (error) {
-      alert("Erro na comunicação com o servidor.");
-      console.error(error);
+      console.error("Erro ao buscar dados:", error)
+    } finally {
+      setLoading(false)
     }
   }
 
-  // SVG Icons
-  const SettingsIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="3" />
-      <path d="M12 1v6m0 6v6m0-18a9 9 0 1 1 0 18 9 9 0 0 1 0-18Z" />
-      <path d="M19.07 4.93A10 10 0 0 0 4.93 19.07M4.93 4.93A10 10 0 0 1 19.07 19.07" />
-    </svg>
-  );
+  function updateForm(value) {
+    setForm((prev) => ({ ...prev, ...value }))
+    Object.keys(value).forEach((key) => {
+      if (errors[key]) {
+        setErrors((prev) => ({ ...prev, [key]: undefined }))
+      }
+    })
+  }
 
-  const TruckIcon = () => (
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M1 3h15v13H1z" />
-      <path d="M16 8h4l3 3v5h-7V8z" />
-      <circle cx="5.5" cy="18.5" r="2.5" />
-      <circle cx="18.5" cy="18.5" r="2.5" />
-    </svg>
-  );
+  function validateForm() {
+    const newErrors = {}
 
-  const CheckIcon = () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  );
+    if (!form.tipo.trim()) {
+      newErrors.tipo = "Tipo de máquina é obrigatório"
+    }
+
+    if (!form.marca.trim()) {
+      newErrors.marca = "Marca é obrigatória"
+    }
+
+    if (!form.modelo.trim()) {
+      newErrors.modelo = "Modelo é obrigatório"
+    }
+
+    return newErrors
+  }
+
+  async function onSubmit(e) {
+    e.preventDefault()
+
+    const newErrors = validateForm()
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      alert("Por favor, corrija os erros no formulário antes de cadastrar.")
+      return
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/maquinas`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      })
+
+      if (!response.ok) {
+        throw new Error("Erro ao criar máquina")
+      }
+
+      const novaMaquina = await response.json()
+      alert("Máquina criada com sucesso!")
+
+      if (onCreated) {
+        onCreated(novaMaquina)
+      }
+
+      setForm({
+        tipo: "",
+        marca: "",
+        modelo: "",
+        potencia: "",
+        n_serie: "",
+        observacao: "",
+      })
+      setErrors({})
+      onClose()
+    } catch (error) {
+      console.error("Erro ao criar máquina:", error)
+      alert("Erro ao criar máquina: " + error.message)
+    }
+  }
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
       style={{
-        minHeight: "100vh",
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(27, 77, 62, 0.15)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        zIndex: 1000,
         padding: "20px",
-        background: "linear-gradient(135deg, #F5F1E8 0%, #E8E4D8 100%)",
+        backdropFilter: "blur(8px)",
       }}
+      onClick={onClose}
     >
-      <div style={{ width: "100%", maxWidth: "640px" }}>
-        {/* Form Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        style={{
+          backgroundColor: "#FFFFFF",
+          borderRadius: "20px",
+          maxWidth: "720px",
+          width: "100%",
+          maxHeight: "90vh",
+          overflow: "hidden",
+          boxShadow: "0 25px 50px -12px rgba(27, 77, 62, 0.25), 0 0 0 1px rgba(27, 77, 62, 0.05)",
+          display: "flex",
+          flexDirection: "column",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header with Icon */}
+        <div
           style={{
-            backgroundColor: "#FFFFFF",
-            borderRadius: "12px",
-            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
-            overflow: "hidden",
+            background: "#FFFFFF",
+            padding: "32px 32px 24px",
+            borderBottom: "1px solid #E5E7EB",
+            position: "relative",
           }}
         >
-          {/* Header with Icon */}
-          
+          {/* Green accent line */}
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: "4px",
+              background: "linear-gradient(90deg, #1B4D3E 0%, #2A6B4F 100%)",
+            }}
+          />
 
-          <div style={{ padding: "28px" }}>
-            <form onSubmit={onSubmit}>
-              <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-                {/* Tipo e Marca */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "16px" }}>
-                  <div>
-                    <label
-                      htmlFor="tipo"
-                      style={{
-                        display: "block",
-                        marginBottom: "6px",
-                        color: "#1B4D3E",
-                        fontSize: "13px",
-                        fontWeight: "500",
-                      }}
-                    >
-                      Tipo *
-                    </label>
-                    <select
-                      id="tipo"
-                      value={form.tipo}
-                      onChange={(e) => updateForm({ tipo: e.target.value })}
-                      onFocus={() => setFocusField("tipo")}
-                      onBlur={() => setFocusField(null)}
-                      required
-                      style={{
-                        width: "100%",
-                        height: "42px",
-                        padding: "0 12px",
-                        border: "2px solid",
-                        borderColor: focusField === "tipo" ? "#1B4D3E" : "#D4E7D7",
-                        borderRadius: "8px",
-                        backgroundColor: "#FEFDFB",
-                        fontSize: "14px",
-                        outline: "none",
-                        transition: "all 0.3s",
-                        boxSizing: "border-box",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <option value="">Selecione um tipo</option>
-                      {tipos.map((t) => (
-                        <option key={t._id} value={t.tipo}>
-                          {t.tipo}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+          <button
+            onClick={onClose}
+            style={{
+              position: "absolute",
+              top: "20px",
+              right: "20px",
+              border: "1px solid #E5E7EB",
+              borderRadius: "10px",
+              width: "40px",
+              height: "40px",
+              cursor: "pointer",
+              color: "#6B7280",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "all 0.2s ease",
+              backgroundColor: "#F9FAFB",
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = "#F3F4F6"
+              e.target.style.borderColor = "#D1D5DB"
+              e.target.style.color = "#1F2937"
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = "#F9FAFB"
+              e.target.style.borderColor = "#E5E7EB"
+              e.target.style.color = "#6B7280"
+            }}
+          >
+            <X size={20} />
+          </button>
 
-                  <div>
-                    <label
-                      htmlFor="marca"
-                      style={{
-                        display: "block",
-                        marginBottom: "6px",
-                        color: "#1B4D3E",
-                        fontSize: "13px",
-                        fontWeight: "500",
-                      }}
-                    >
-                      Marca *
-                    </label>
-                    <select
-                      id="marca"
-                      value={form.marca}
-                      onChange={(e) => updateForm({ marca: e.target.value })}
-                      onFocus={() => setFocusField("marca")}
-                      onBlur={() => setFocusField(null)}
-                      required
-                      style={{
-                        width: "100%",
-                        height: "42px",
-                        padding: "0 12px",
-                        border: "2px solid",
-                        borderColor: focusField === "marca" ? "#1B4D3E" : "#D4E7D7",
-                        borderRadius: "8px",
-                        backgroundColor: "#FEFDFB",
-                        fontSize: "14px",
-                        outline: "none",
-                        transition: "all 0.3s",
-                        boxSizing: "border-box",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <option value="">Selecione uma marca</option>
-                      {marcas.map((m) => (
-                        <option key={m._id} value={m.nome}>
-                          {m.nome}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                {/* Modelo e Potência */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "16px" }}>
-                  <div>
-                    <label
-                      htmlFor="modelo"
-                      style={{
-                        display: "block",
-                        marginBottom: "6px",
-                        color: "#1B4D3E",
-                        fontSize: "13px",
-                        fontWeight: "500",
-                      }}
-                    >
-                      Modelo
-                    </label>
-                    <input
-                      id="modelo"
-                      type="text"
-                      value={form.modelo}
-                      onChange={(e) => updateForm({ modelo: e.target.value })}
-                      onFocus={() => setFocusField("modelo")}
-                      onBlur={() => setFocusField(null)}
-                      placeholder="Ex: TX68"
-                      style={{
-                        width: "100%",
-                        height: "42px",
-                        padding: "0 12px",
-                        border: "2px solid",
-                        borderColor: focusField === "modelo" ? "#1B4D3E" : "#D4E7D7",
-                        borderRadius: "8px",
-                        backgroundColor: "#FEFDFB",
-                        fontSize: "14px",
-                        outline: "none",
-                        transition: "all 0.3s",
-                        boxSizing: "border-box",
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="potencia"
-                      style={{
-                        display: "block",
-                        marginBottom: "6px",
-                        color: "#1B4D3E",
-                        fontSize: "13px",
-                        fontWeight: "500",
-                      }}
-                    >
-                      Potência
-                    </label>
-                    <input
-                      id="potencia"
-                      type="text"
-                      value={form.potencia}
-                      onChange={(e) => updateForm({ potencia: e.target.value })}
-                      onFocus={() => setFocusField("potencia")}
-                      onBlur={() => setFocusField(null)}
-                      placeholder="Ex: 180 cv"
-                      style={{
-                        width: "100%",
-                        height: "42px",
-                        padding: "0 12px",
-                        border: "2px solid",
-                        borderColor: focusField === "potencia" ? "#1B4D3E" : "#D4E7D7",
-                        borderRadius: "8px",
-                        backgroundColor: "#FEFDFB",
-                        fontSize: "14px",
-                        outline: "none",
-                        transition: "all 0.3s",
-                        boxSizing: "border-box",
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* Número de Série */}
-                <div>
-                  <label
-                    htmlFor="n_serie"
-                    style={{
-                      display: "block",
-                      marginBottom: "6px",
-                      color: "#1B4D3E",
-                      fontSize: "13px",
-                      fontWeight: "500",
-                    }}
-                  >
-                    Número de Série
-                  </label>
-                  <input
-                    id="n_serie"
-                    type="text"
-                    value={form.n_serie}
-                    onChange={(e) => updateForm({ n_serie: e.target.value })}
-                    onFocus={() => setFocusField("n_serie")}
-                    onBlur={() => setFocusField(null)}
-                    placeholder="Digite o número de série"
-                    style={{
-                      width: "100%",
-                      height: "42px",
-                      padding: "0 12px",
-                      border: "2px solid",
-                      borderColor: focusField === "n_serie" ? "#1B4D3E" : "#D4E7D7",
-                      borderRadius: "8px",
-                      backgroundColor: "#FEFDFB",
-                      fontSize: "14px",
-                      outline: "none",
-                      transition: "all 0.3s",
-                      boxSizing: "border-box",
-                    }}
-                  />
-                </div>
-
-                {/* Observação */}
-                <div>
-                  <label
-                    htmlFor="observacao"
-                    style={{
-                      display: "block",
-                      marginBottom: "6px",
-                      color: "#1B4D3E",
-                      fontSize: "13px",
-                      fontWeight: "500",
-                    }}
-                  >
-                    Observação
-                  </label>
-                  <textarea
-                    id="observacao"
-                    value={form.observacao}
-                    onChange={(e) => updateForm({ observacao: e.target.value })}
-                    onFocus={() => setFocusField("observacao")}
-                    onBlur={() => setFocusField(null)}
-                    placeholder="Informações adicionais sobre a máquina..."
-                    rows={4}
-                    style={{
-                      width: "100%",
-                      padding: "12px",
-                      border: "2px solid",
-                      borderColor: focusField === "observacao" ? "#1B4D3E" : "#D4E7D7",
-                      borderRadius: "8px",
-                      backgroundColor: "#FEFDFB",
-                      fontSize: "14px",
-                      outline: "none",
-                      transition: "all 0.3s",
-                      boxSizing: "border-box",
-                      resize: "vertical",
-                      fontFamily: "inherit",
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            <div
+              style={{
+                width: "56px",
+                height: "56px",
+                borderRadius: "14px",
+                background: "linear-gradient(135deg, #1B4D3E 0%, #2A6B4F 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                boxShadow: "0 4px 12px rgba(27, 77, 62, 0.15)",
+              }}
+            >
+              <Truck size={28} color="#fff" />
+            </div>
+            <div>
+              <h2
                 style={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  gap: "10px",
-                  marginTop: "28px",
-                  paddingTop: "20px",
-                  borderTop: "1px solid #E5E7EB",
+                  fontSize: "24px",
+                  fontWeight: "700",
+                  margin: 0,
+                  color: "#1F2937",
+                  letterSpacing: "-0.5px",
                 }}
               >
-                <button
-                  type="button"
-                  onClick={() => navigate("/maquinas")}
-                  style={{
-                    padding: "10px 20px",
-                    border: "2px solid #9CA3AF",
-                    borderRadius: "8px",
-                    backgroundColor: "transparent",
-                    color: "#6B7280",
-                    fontWeight: "500",
-                    cursor: "pointer",
-                    transition: "all 0.3s",
-                    fontSize: "14px",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "#F3F4F6";
-                    e.currentTarget.style.borderColor = "#6B7280";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "transparent";
-                    e.currentTarget.style.borderColor = "#9CA3AF";
-                  }}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    padding: "10px 28px",
-                    border: "none",
-                    borderRadius: "8px",
-                    backgroundColor: "#1B4D3E",
-                    color: "#F5F1E8",
-                    fontWeight: "500",
-                    cursor: "pointer",
-                    transition: "all 0.3s",
-                    fontSize: "14px",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.boxShadow = "0 4px 12px rgba(27, 77, 62, 0.25)";
-                    e.currentTarget.style.transform = "translateY(-2px)";
-                    e.currentTarget.style.backgroundColor = "#153d31";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.boxShadow = "none";
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.backgroundColor = "#1B4D3E";
-                  }}
-                >
-                  <CheckIcon />
-                  Cadastrar
-                </button>
-              </div>
-            </form>
+                Criar Máquina
+              </h2>
+              <p
+                style={{
+                  fontSize: "14px",
+                  color: "#6B7280",
+                  margin: "4px 0 0 0",
+                }}
+              >
+                Adicione uma nova máquina ao sistema
+              </p>
+            </div>
           </div>
-        </motion.div>
+        </div>
 
-        {/* Info Card */}
-       
-      </div>
+        {/* Content */}
+        <div
+          style={{
+            padding: "32px",
+            overflowY: "auto",
+            flex: 1,
+            backgroundColor: "#F9FAFB",
+          }}
+        >
+          {loading ? (
+            <div
+              style={{
+                textAlign: "center",
+                padding: "60px 20px",
+                color: "#6B7280",
+              }}
+            >
+              <Loader2
+                size={48}
+                color="#1B4D3E"
+                style={{
+                  animation: "spin 1s linear infinite",
+                  margin: "0 auto 16px",
+                  display: "block",
+                }}
+              />
+              <p style={{ fontSize: "15px", fontWeight: "500" }}>Carregando dados...</p>
+            </div>
+          ) : (
+            <div
+              style={{
+                backgroundColor: "#FFFFFF",
+                borderRadius: "16px",
+                padding: "24px",
+                border: "1px solid #E5E7EB",
+                boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
+              }}
+            >
+              <form onSubmit={onSubmit}>
+                <div
+                  style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "20px" }}
+                >
+                  <SelectField
+                    label="Tipo de Máquina"
+                    name="tipo"
+                    value={form.tipo}
+                    onChange={(e) => updateForm({ tipo: e.target.value })}
+                    options={tipos}
+                    placeholder="Selecione o tipo"
+                    required
+                    error={errors.tipo}
+                  />
+
+                  <SelectField
+                    label="Marca"
+                    name="marca"
+                    value={form.marca}
+                    onChange={(e) => updateForm({ marca: e.target.value })}
+                    options={marcas}
+                    placeholder="Selecione a marca"
+                    required
+                    error={errors.marca}
+                  />
+
+                  <InputField
+                    label="Modelo"
+                    name="modelo"
+                    type="text"
+                    value={form.modelo}
+                    onChange={(e) => updateForm({ modelo: e.target.value })}
+                    placeholder="Digite o modelo"
+                    required
+                    error={errors.modelo}
+                  />
+
+                  <InputField
+                    label="Potência"
+                    name="potencia"
+                    type="text"
+                    value={form.potencia}
+                    onChange={(e) => updateForm({ potencia: e.target.value })}
+                    placeholder="Ex: 180 CV"
+                  />
+
+                  <div style={{ gridColumn: "1 / -1" }}>
+                    <InputField
+                      label="Número de Série"
+                      name="n_serie"
+                      type="text"
+                      value={form.n_serie}
+                      onChange={(e) => updateForm({ n_serie: e.target.value })}
+                      placeholder="Digite o número de série"
+                    />
+                  </div>
+
+                  <div style={{ gridColumn: "1 / -1" }}>
+                    <TextAreaField
+                      label="Observações"
+                      name="observacao"
+                      value={form.observacao}
+                      onChange={(e) => updateForm({ observacao: e.target.value })}
+                      placeholder="Informações adicionais sobre a máquina..."
+                      rows={4}
+                    />
+                  </div>
+                </div>
+              </form>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div
+          style={{
+            padding: "24px 32px",
+            borderTop: "1px solid #E5E7EB",
+            backgroundColor: "#FFFFFF",
+            display: "flex",
+            gap: "12px",
+            justifyContent: "flex-end",
+          }}
+        >
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              padding: "12px 28px",
+              borderRadius: "10px",
+              border: "1px solid #D1D5DB",
+              backgroundColor: "#FFFFFF",
+              color: "#6B7280",
+              fontSize: "14px",
+              fontWeight: "600",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = "#F9FAFB"
+              e.target.style.transform = "translateY(-2px)"
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = "#FFFFFF"
+              e.target.style.transform = "translateY(0)"
+            }}
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={onSubmit}
+            disabled={loading}
+            style={{
+              padding: "12px 28px",
+              borderRadius: "10px",
+              border: "none",
+              background: loading ? "#D1D5DB" : "linear-gradient(135deg, #1B4D3E 0%, #2A6B4F 100%)",
+              color: "#FFFFFF",
+              fontSize: "14px",
+              fontWeight: "600",
+              cursor: loading ? "not-allowed" : "pointer",
+              transition: "all 0.2s ease",
+              boxShadow: loading ? "none" : "0 4px 12px rgba(27, 77, 62, 0.2)",
+            }}
+            onMouseEnter={(e) => {
+              if (!loading) {
+                e.target.style.transform = "translateY(-2px)"
+                e.target.style.boxShadow = "0 6px 16px rgba(27, 77, 62, 0.3)"
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!loading) {
+                e.target.style.transform = "translateY(0)"
+                e.target.style.boxShadow = "0 4px 12px rgba(27, 77, 62, 0.2)"
+              }
+            }}
+          >
+            Criar Máquina
+          </button>
+        </div>
+      </motion.div>
+
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
+    </motion.div>
+  )
+}
+
+// Helper Components
+function InputField({ label, name, type, value, onChange, placeholder, required = false, error }) {
+  return (
+    <div>
+      <label
+        style={{
+          display: "block",
+          fontSize: "12px",
+          fontWeight: "600",
+          color: "#374151",
+          marginBottom: "8px",
+        }}
+      >
+        {label}
+        {required && <span style={{ color: "#DC2626", marginLeft: "4px" }}>*</span>}
+      </label>
+      <input
+        type={type}
+        name={name}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        required={required}
+        style={{
+          width: "100%",
+          padding: "12px 14px",
+          borderRadius: "10px",
+          border: error ? "1px solid #DC2626" : "1px solid #E5E7EB",
+          fontSize: "14px",
+          color: "#1F2937",
+          outline: "none",
+          transition: "all 0.2s ease",
+          boxSizing: "border-box",
+          backgroundColor: "#fff",
+        }}
+        onFocus={(e) => {
+          if (!error) {
+            e.target.style.borderColor = "#1B4D3E"
+            e.target.style.boxShadow = "0 0 0 3px rgba(27, 77, 62, 0.1)"
+          }
+        }}
+        onBlur={(e) => {
+          e.target.style.borderColor = error ? "#DC2626" : "#E5E7EB"
+          e.target.style.boxShadow = "none"
+        }}
+      />
+      {error && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
+            marginTop: "4px",
+            color: "#DC2626",
+            fontSize: "12px",
+          }}
+        >
+          <AlertCircle size={14} />
+          <span>{error}</span>
+        </div>
+      )}
     </div>
-  );
+  )
+}
+
+function SelectField({ label, name, value, onChange, options, placeholder, required = false, error }) {
+  return (
+    <div>
+      <label
+        style={{
+          display: "block",
+          fontSize: "12px",
+          fontWeight: "600",
+          color: "#374151",
+          marginBottom: "8px",
+        }}
+      >
+        {label}
+        {required && <span style={{ color: "#DC2626", marginLeft: "4px" }}>*</span>}
+      </label>
+      <select
+        name={name}
+        value={value}
+        onChange={onChange}
+        required={required}
+        style={{
+          width: "100%",
+          padding: "12px 14px",
+          borderRadius: "10px",
+          border: error ? "1px solid #DC2626" : "1px solid #E5E7EB",
+          fontSize: "14px",
+          color: value ? "#1F2937" : "#9CA3AF",
+          outline: "none",
+          transition: "all 0.2s ease",
+          boxSizing: "border-box",
+          backgroundColor: "#fff",
+          cursor: "pointer",
+        }}
+        onFocus={(e) => {
+          if (!error) {
+            e.target.style.borderColor = "#1B4D3E"
+            e.target.style.boxShadow = "0 0 0 3px rgba(27, 77, 62, 0.1)"
+          }
+        }}
+        onBlur={(e) => {
+          e.target.style.borderColor = error ? "#DC2626" : "#E5E7EB"
+          e.target.style.boxShadow = "none"
+        }}
+      >
+        <option value="" disabled>
+          {placeholder}
+        </option>
+        {options.map((option) => {
+          const displayValue = option.tipo || option.nome || option._id
+          const optionValue = option.tipo || option.nome || option._id
+
+          return (
+            <option key={option._id} value={optionValue}>
+              {displayValue}
+            </option>
+          )
+        })}
+      </select>
+      {error && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
+            marginTop: "4px",
+            color: "#DC2626",
+            fontSize: "12px",
+          }}
+        >
+          <AlertCircle size={14} />
+          <span>{error}</span>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function TextAreaField({ label, name, value, onChange, placeholder, rows = 3 }) {
+  return (
+    <div>
+      <label
+        style={{
+          display: "block",
+          fontSize: "12px",
+          fontWeight: "600",
+          color: "#374151",
+          marginBottom: "8px",
+        }}
+      >
+        {label}
+      </label>
+      <textarea
+        name={name}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        rows={rows}
+        style={{
+          width: "100%",
+          padding: "12px 14px",
+          borderRadius: "10px",
+          border: "1px solid #E5E7EB",
+          fontSize: "14px",
+          color: "#1F2937",
+          outline: "none",
+          transition: "all 0.2s ease",
+          boxSizing: "border-box",
+          fontFamily: "inherit",
+          resize: "vertical",
+          backgroundColor: "#fff",
+        }}
+        onFocus={(e) => {
+          e.target.style.borderColor = "#1B4D3E"
+          e.target.style.boxShadow = "0 0 0 3px rgba(27, 77, 62, 0.1)"
+        }}
+        onBlur={(e) => {
+          e.target.style.borderColor = "#E5E7EB"
+          e.target.style.boxShadow = "none"
+        }}
+      />
+    </div>
+  )
 }

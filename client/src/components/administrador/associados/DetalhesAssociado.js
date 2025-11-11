@@ -2,18 +2,19 @@ import React, { useState } from "react";
 
 const API_URL = "http://localhost:5050";
 
-export default function DetalhesAssociado({ associado, onClose, onDeleted, onUpdated }) {
-  const [activeTab, setActiveTab] = useState("pessoal");
-  const [isEditing, setIsEditing] = useState(false);
-  const [focusField, setFocusField] = useState(null);
-  const associadoId = associado?.id || associado?._id;
+const ESTADOS_BRASILEIROS = [
+  "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", 
+  "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", 
+  "SP", "SE", "TO"
+];
 
-  const [form, setForm] = useState({
+export default function DetalhesAssociadoAlt({ associado, onClose, onDeleted, onUpdated }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
     nome: associado?.nome || "",
-    email: associado?.email || "",
-    telefone: associado?.telefone || "",
     cpf: associado?.cpf || "",
-    senha: "",
+    telefone: associado?.telefone || "",
+    email: associado?.email || "",
     data_associacao: associado?.data_associacao || "",
     endereco: {
       rua: associado?.endereco?.rua || "",
@@ -24,88 +25,22 @@ export default function DetalhesAssociado({ associado, onClose, onDeleted, onUpd
       uf: associado?.endereco?.uf || "",
       cep: associado?.endereco?.cep || "",
     },
-    documentos: {
-      caf: associado?.documentos?.caf || "",
-    },
   });
+  const [loading, setLoading] = useState(false);
 
-  function updateForm(value) {
-    setForm((prev) => ({ ...prev, ...value }));
-  }
-
-  function updateEndereco(value) {
-    setForm((prev) => ({
-      ...prev,
-      endereco: { ...prev.endereco, ...value },
-    }));
-  }
-
-  function updateDocumentos(value) {
-    setForm((prev) => ({
-      ...prev,
-      documentos: { ...prev.documentos, ...value },
-    }));
-  }
-
-  async function handleSave() {
-    try {
-      const response = await fetch(`${API_URL}/associados/update/${associadoId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-
-      if (!response.ok) {
-        alert("Erro ao atualizar associado.");
-        return;
-      }
-
-      alert("Associado atualizado com sucesso!");
-      setIsEditing(false);
-      if (onUpdated) {
-        onUpdated({ ...associado, ...form, _id: associadoId });
-      }
-    } catch (error) {
-      console.error("Erro ao atualizar:", error);
-      alert("Erro ao atualizar associado.");
-    }
-  }
-
-  function handleCancelEdit() {
-    if (window.confirm("Deseja cancelar as alterações?")) {
-      setForm({
-        nome: associado?.nome || "",
-        email: associado?.email || "",
-        telefone: associado?.telefone || "",
-        cpf: associado?.cpf || "",
-        senha: "",
-        data_associacao: associado?.data_associacao || "",
-        endereco: {
-          rua: associado?.endereco?.rua || "",
-          numero: associado?.endereco?.numero || "",
-          complemento: associado?.endereco?.complemento || "",
-          bairro: associado?.endereco?.bairro || "",
-          cidade: associado?.endereco?.cidade || "",
-          uf: associado?.endereco?.uf || "",
-          cep: associado?.endereco?.cep || "",
-        },
-        documentos: {
-          caf: associado?.documentos?.caf || "",
-        },
-      });
-      setIsEditing(false);
-    }
-  }
+  const associadoId = associado?.id || associado?._id;
 
   async function handleExcluir() {
-    if (!window.confirm("Tem certeza que deseja excluir este associado?")) return;
+    if (!window.confirm("Tem certeza que deseja excluir este associado?"))
+      return;
     try {
-      const resp = await fetch(`${API_URL}/associados/${associadoId}`, {
+      const id = associadoId;
+      const resp = await fetch(`${API_URL}/associados/${id}`, {
         method: "DELETE",
       });
       if (resp.ok) {
         alert("Associado excluído com sucesso!");
-        onDeleted && onDeleted(associadoId);
+        onDeleted && onDeleted(id);
         onClose && onClose();
       } else {
         alert("Erro ao excluir associado.");
@@ -115,19 +50,45 @@ export default function DetalhesAssociado({ associado, onClose, onDeleted, onUpd
     }
   }
 
+  async function handleSalvar(e) {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const resp = await fetch(`${API_URL}/associados/${associadoId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (resp.ok) {
+        const updated = await resp.json();
+        onUpdated && onUpdated(updated);
+        setIsEditing(false);
+      } else {
+        alert("Erro ao atualizar associado.");
+      }
+    } catch (err) {
+      alert("Erro: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const handleChange = (field, value) => {
+    if (field.includes(".")) {
+      const [parent, child] = field.split(".");
+      setFormData((prev) => ({
+        ...prev,
+        [parent]: { ...prev[parent], [child]: value },
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, [field]: value }));
+    }
+  };
+
   const endereco = associado?.endereco || {};
   const docs = associado?.documentos || {};
 
   if (!associado) return null;
-
-  // SVG Icons
-  const UploadIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-      <polyline points="17 8 12 3 7 8" />
-      <line x1="12" y1="3" x2="12" y2="15" />
-    </svg>
-  );
 
   return (
     <div
@@ -137,1015 +98,455 @@ export default function DetalhesAssociado({ associado, onClose, onDeleted, onUpd
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        backgroundColor: "rgba(27, 77, 62, 0.15)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         zIndex: 1000,
         padding: "20px",
+        backdropFilter: "blur(8px)",
       }}
       onClick={onClose}
     >
       <div
         style={{
-          backgroundColor: "#fff",
-          borderRadius: "16px",
-          maxWidth: "800px",
+          backgroundColor: "#FFFFFF",
+          borderRadius: "20px",
+          maxWidth: "950px",
           width: "100%",
-          maxHeight: "90vh",
+          maxHeight: "92vh",
           overflow: "hidden",
-          boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
+          boxShadow: "0 25px 50px -12px rgba(27, 77, 62, 0.25), 0 0 0 1px rgba(27, 77, 62, 0.05)",
           display: "flex",
           flexDirection: "column",
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
+        {/* Header with Gradient */}
         <div
           style={{
-            padding: "24px 32px",
+            background: "#FFFFFF",
+            padding: "32px 36px",
             borderBottom: "1px solid #E5E7EB",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
+            position: "relative",
           }}
         >
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "16px",
-                marginBottom: "8px",
-              }}
-            >
-              <div
-                style={{
-                  width: "56px",
-                  height: "56px",
-                  borderRadius: "50%",
-                  backgroundColor: "#1B4D3E",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#fff",
-                  fontSize: "22px",
-                  fontWeight: "600",
-                  flexShrink: 0,
-                }}
-              >
-                {associado?.nome
-                  ?.split(" ")
-                  .map((n) => n[0])
-                  .slice(0, 2)
-                  .join("")
-                  .toUpperCase() || "?"}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <h2
-                  style={{
-                    fontSize: "24px",
-                    fontWeight: "600",
-                    color: "#1F2937",
-                    margin: 0,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {isEditing ? "Editar Associado" : associado?.nome || "Associado"}
-                </h2>
-                <p
-                  style={{
-                    fontSize: "14px",
-                    color: "#6B7280",
-                    margin: "4px 0 0 0",
-                  }}
-                >
-                  {isEditing ? "Atualize as informações abaixo" : `ID: ${associadoId || "-"}`}
-                </p>
-              </div>
-            </div>
-          </div>
+          {/* Green accent line */}
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: "4px",
+              background: "linear-gradient(90deg, #1B4D3E 0%, #2A6B4F 100%)",
+            }}
+          />
+
           <button
             onClick={onClose}
             style={{
-              background: "none",
-              border: "none",
-              fontSize: "28px",
+              position: "absolute",
+              top: "20px",
+              right: "20px",
+              border: "1px solid #E5E7EB",
+              borderRadius: "10px",
+              width: "40px",
+              height: "40px",
+              fontSize: "20px",
               cursor: "pointer",
-              color: "#9CA3AF",
-              padding: "4px",
-              marginLeft: "16px",
-              lineHeight: "1",
-              transition: "color 0.2s ease",
+              color: "#6B7280",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "all 0.2s ease",
+              zIndex: 1,
             }}
             onMouseEnter={(e) => {
-              e.target.style.color = "#6B7280";
+              e.target.style.backgroundColor = "#F3F4F6";
+              e.target.style.borderColor = "#D1D5DB";
+              e.target.style.color = "#1F2937";
             }}
             onMouseLeave={(e) => {
-              e.target.style.color = "#9CA3AF";
+              e.target.style.backgroundColor = "#F9FAFB";
+              e.target.style.borderColor = "#E5E7EB";
+              e.target.style.color = "#6B7280";
             }}
           >
             ×
           </button>
-        </div>
 
-        {/* Tabs */}
-        {!isEditing && (
-          <div
-            style={{
-              display: "flex",
-              gap: "0",
-              padding: "0 32px",
-              borderBottom: "2px solid #E5E7EB",
-            }}
-          >
-            <button
-              onClick={() => setActiveTab("pessoal")}
+          <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+            <div
               style={{
-                padding: "16px 24px",
-                border: "none",
-                borderBottom: activeTab === "pessoal" ? "3px solid #1B4D3E" : "none",
-                backgroundColor: "transparent",
-                color: activeTab === "pessoal" ? "#1B4D3E" : "#6B7280",
-                cursor: "pointer",
-                fontWeight: activeTab === "pessoal" ? "600" : "500",
-                fontSize: "15px",
-                transition: "all 0.2s ease",
-                marginBottom: "-2px",
+                width: "72px",
+                height: "72px",
+                borderRadius: "14px",
+                background: "linear-gradient(135deg, #1B4D3E 0%, #2A6B4F 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "26px",
+                fontWeight: "700",
+                color: "#FFFFFF",
+                flexShrink: 0,
+                boxShadow: "0 4px 12px rgba(27, 77, 62, 0.15)",
               }}
             >
-              Dados Pessoais
-            </button>
-            <button
-              onClick={() => setActiveTab("endereco")}
-              style={{
-                padding: "16px 24px",
-                border: "none",
-                borderBottom: activeTab === "endereco" ? "3px solid #1B4D3E" : "none",
-                backgroundColor: "transparent",
-                color: activeTab === "endereco" ? "#1B4D3E" : "#6B7280",
-                cursor: "pointer",
-                fontWeight: activeTab === "endereco" ? "600" : "500",
-                fontSize: "15px",
-                transition: "all 0.2s ease",
-                marginBottom: "-2px",
-              }}
-            >
-              Endereço
-            </button>
+              {associado?.nome
+                ?.split(" ")
+                .map((n) => n[0])
+                .slice(0, 2)
+                .join("")
+                .toUpperCase() || "?"}
+            </div>
+            <div style={{ flex: 1 }}>
+              <h2
+                style={{
+                  fontSize: "24px",
+                  fontWeight: "700",
+                  margin: 0,
+                  marginBottom: "8px",
+                  color: "#1F2937",
+                  letterSpacing: "-0.5px",
+                }}
+              >
+                {associado?.nome || "Associado"}
+              </h2>
+              <div style={{ display: "flex", gap: "16px", fontSize: "13px", color: "#6B7280", flexWrap: "wrap" }}>
+                <span style={{ 
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  backgroundColor: "#F9FAFB",
+                  padding: "4px 10px",
+                  borderRadius: "6px",
+                  fontWeight: "600",
+                }}>
+                  <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd" />
+                  </svg>
+                  ID: {associadoId || "-"}
+                </span>
+                {associado?.data_associacao && (
+                  <span style={{ 
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    backgroundColor: "#F0F9F6",
+                    padding: "4px 10px",
+                    borderRadius: "6px",
+                    fontWeight: "600",
+                    color: "#1B4D3E",
+                  }}>
+                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                    </svg>
+                    Associado desde {associado.data_associacao}
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
-        )}
+        </div>
 
         {/* Content */}
         <div
           style={{
-            padding: "32px",
+            padding: "36px",
             overflowY: "auto",
             flex: 1,
+            backgroundColor: "#F9FAFB",
           }}
         >
-          {/* VIEW MODE */}
-          {!isEditing && activeTab === "pessoal" && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-              <div>
-                <h3
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: "600",
-                    color: "#1B4D3E",
-                    marginBottom: "16px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                  }}
-                >
-                  <svg
-                    style={{ width: "20px", height: "20px" }}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                    />
-                  </svg>
-                  Informações Pessoais
-                </h3>
+          {!isEditing ? (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "24px",
+              }}
+            >
+              {/* Left Column - Contact & Personal */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+                {/* Contact Card */}
                 <div
                   style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: "16px",
+                    backgroundColor: "#FFFFFF",
+                    borderRadius: "16px",
+                    padding: "28px",
+                    border: "1px solid #E5E7EB",
+                    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
                   }}
                 >
-                  <InfoItem label="CPF" value={associado?.cpf} />
-                  <InfoItem label="Data Associação" value={associado?.data_associacao} />
-                  <InfoItem label="Telefone" value={associado?.telefone} />
-                  <InfoItem label="E-mail" value={associado?.email} />
+                  <h3
+                    style={{
+                      fontSize: "11px",
+                      fontWeight: "700",
+                      color: "#1B4D3E",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.5px",
+                      marginBottom: "20px",
+                    }}
+                  >
+                    Informações de Contato
+                  </h3>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                    <InfoItem label="Telefone" value={associado?.telefone} />
+                    <InfoItem label="E-mail" value={associado?.email} />
+                    <InfoItem label="CPF" value={associado?.cpf} />
+                  </div>
+                </div>
+
+                {/* Documents Card */}
+                <div
+                  style={{
+                    backgroundColor: "#FFFFFF",
+                    borderRadius: "16px",
+                    padding: "28px",
+                    border: "1px solid #E5E7EB",
+                    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
+                  }}
+                >
+                  <h3
+                    style={{
+                      fontSize: "11px",
+                      fontWeight: "700",
+                      color: "#1B4D3E",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.5px",
+                      marginBottom: "20px",
+                    }}
+                  >
+                    Documentos
+                  </h3>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                   
+                    <DocumentItem
+                      label="CAF"
+                      available={!!docs.caf}
+                      url={docs.caf ? `${API_URL}/uploads/caf/${docs.caf}` : null}
+                    />
+                  </div>
                 </div>
               </div>
 
+              {/* Right Column - Address */}
               <div>
-                <h3
+                <div
                   style={{
-                    fontSize: "16px",
-                    fontWeight: "600",
-                    color: "#1B4D3E",
-                    marginBottom: "16px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
+                    backgroundColor: "#FFFFFF",
+                    borderRadius: "16px",
+                    padding: "28px",
+                    border: "1px solid #E5E7EB",
+                    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
                   }}
                 >
-                  <svg
-                    style={{ width: "20px", height: "20px" }}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                  <h3
+                    style={{
+                      fontSize: "11px",
+                      fontWeight: "700",
+                      color: "#1B4D3E",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.5px",
+                      marginBottom: "20px",
+                    }}
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
-                  </svg>
-                  Documentos
-                </h3>
-                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                 
+                    Endereço
+                  </h3>
 
-                  {docs.caf ? (
-                    <a
-                      href={`${API_URL}/uploads/caf/${docs.caf}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "12px",
-                        padding: "16px",
-                        backgroundColor: "#F0FDF4",
-                        border: "1px solid #BBF7D0",
-                        borderRadius: "12px",
-                        textDecoration: "none",
-                        transition: "all 0.2s ease",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = "#DCFCE7";
-                        e.currentTarget.style.transform = "translateX(4px)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = "#F0FDF4";
-                        e.currentTarget.style.transform = "translateX(0)";
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: "40px",
-                          height: "40px",
-                          borderRadius: "8px",
-                          backgroundColor: "#309274",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <svg
-                          style={{ width: "20px", height: "20px", color: "#fff" }}
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                          />
-                        </svg>
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div
-                          style={{
-                            fontSize: "14px",
-                            fontWeight: "600",
-                            color: "#1B4D3E",
-                          }}
-                        >
-                          CAF
-                        </div>
-                        <div style={{ fontSize: "12px", color: "#309274" }}>
-                          Clique para visualizar
-                        </div>
-                      </div>
-                      <svg
-                        style={{ width: "20px", height: "20px", color: "#309274" }}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                        />
-                      </svg>
-                    </a>
-                  ) : (
+                  <div
+                    style={{
+                      padding: "20px",
+                      backgroundColor: "#F9FAFB",
+                      borderRadius: "10px",
+                      border: "1px solid #E5E7EB",
+                      marginBottom: "20px",
+                    }}
+                  >
                     <div
                       style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "12px",
-                        padding: "16px",
-                        backgroundColor: "#F9FAFB",
-                        border: "1px solid #E5E7EB",
-                        borderRadius: "12px",
+                        fontSize: "14px",
+                        lineHeight: "1.8",
+                        color: "#1F2937",
                       }}
                     >
-                      <div
-                        style={{
-                          width: "40px",
-                          height: "40px",
-                          borderRadius: "8px",
-                          backgroundColor: "#E5E7EB",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <svg
-                          style={{ width: "20px", height: "20px", color: "#9CA3AF" }}
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div
-                          style={{
-                            fontSize: "14px",
-                            fontWeight: "600",
-                            color: "#6B7280",
-                          }}
-                        >
-                          CAF
+                      {endereco.rua && (
+                        <div style={{ fontWeight: "600" }}>
+                          {endereco.rua}
+                          {endereco.numero && `, ${endereco.numero}`}
                         </div>
-                        <div style={{ fontSize: "12px", color: "#9CA3AF" }}>
-                          Documento não disponível
+                      )}
+                      {endereco.complemento && (
+                        <div style={{ color: "#6B7280", fontSize: "13px", marginTop: "2px" }}>
+                          {endereco.complemento}
                         </div>
-                      </div>
+                      )}
+                      {endereco.bairro && (
+                        <div style={{ marginTop: "8px" }}>{endereco.bairro}</div>
+                      )}
+                      {endereco.cidade && endereco.uf && (
+                        <div style={{ fontWeight: "600" }}>
+                          {endereco.cidade} - {endereco.uf}
+                        </div>
+                      )}
+                      {endereco.cep && (
+                        <div style={{ marginTop: "8px", color: "#6B7280", fontSize: "13px" }}>
+                          CEP: {endereco.cep}
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
+
+                 
+                    
                 </div>
               </div>
             </div>
-          )}
-
-          {!isEditing && activeTab === "endereco" && (
-            <div>
-              <h3
-                style={{
-                  fontSize: "16px",
-                  fontWeight: "600",
-                  color: "#1B4D3E",
-                  marginBottom: "16px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                }}
-              >
-                <svg
-                  style={{ width: "20px", height: "20px" }}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-                Endereço Completo
-              </h3>
+          ) : (
+            <form onSubmit={handleSalvar}>
               <div
                 style={{
                   display: "grid",
                   gridTemplateColumns: "1fr 1fr",
-                  gap: "16px",
+                  gap: "24px",
                 }}
               >
-                <InfoItem label="Rua" value={endereco.rua} fullWidth />
-                <InfoItem label="Número" value={endereco.numero} />
-                <InfoItem label="Complemento" value={endereco.complemento} />
-                <InfoItem label="Bairro" value={endereco.bairro} />
-                <InfoItem label="Cidade" value={endereco.cidade} />
-                <InfoItem label="UF" value={endereco.uf} />
-                <InfoItem label="CEP" value={endereco.cep} />
-              </div>
-            </div>
-          )}
-
-          {/* EDIT MODE */}
-          {isEditing && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-              {/* Dados Pessoais */}
-              <div>
-                <h3
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: "600",
-                    color: "#1B4D3E",
-                    marginBottom: "16px",
-                    paddingBottom: "8px",
-                    borderBottom: "2px solid #D4E7D7",
-                  }}
-                >
-                  Dados Pessoais
-                </h3>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px" }}>
-                  <div>
-                    <label style={{ display: "block", marginBottom: "6px", color: "#1B4D3E", fontSize: "13px", fontWeight: "500" }}>
-                      Nome Completo *
-                    </label>
-                    <input
-                      type="text"
-                      value={form.nome}
-                      onChange={(e) => updateForm({ nome: e.target.value })}
-                      onFocus={() => setFocusField("nome")}
-                      onBlur={() => setFocusField(null)}
-                      required
-                      style={{
-                        width: "100%",
-                        height: "40px",
-                        padding: "0 12px",
-                        border: "2px solid",
-                        borderColor: focusField === "nome" ? "#1B4D3E" : "#D4E7D7",
-                        borderRadius: "8px",
-                        backgroundColor: "#FEFDFB",
-                        fontSize: "14px",
-                        outline: "none",
-                        transition: "all 0.3s",
-                        boxSizing: "border-box",
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: "block", marginBottom: "6px", color: "#1B4D3E", fontSize: "13px", fontWeight: "500" }}>
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      value={form.email}
-                      onChange={(e) => updateForm({ email: e.target.value })}
-                      onFocus={() => setFocusField("email")}
-                      onBlur={() => setFocusField(null)}
-                      style={{
-                        width: "100%",
-                        height: "40px",
-                        padding: "0 12px",
-                        border: "2px solid",
-                        borderColor: focusField === "email" ? "#1B4D3E" : "#D4E7D7",
-                        borderRadius: "8px",
-                        backgroundColor: "#FEFDFB",
-                        fontSize: "14px",
-                        outline: "none",
-                        transition: "all 0.3s",
-                        boxSizing: "border-box",
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: "block", marginBottom: "6px", color: "#1B4D3E", fontSize: "13px", fontWeight: "500" }}>
-                      Telefone *
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="(00) 00000-0000"
-                      value={form.telefone}
-                      onChange={(e) => updateForm({ telefone: e.target.value })}
-                      onFocus={() => setFocusField("telefone")}
-                      onBlur={() => setFocusField(null)}
-                      required
-                      style={{
-                        width: "100%",
-                        height: "40px",
-                        padding: "0 12px",
-                        border: "2px solid",
-                        borderColor: focusField === "telefone" ? "#1B4D3E" : "#D4E7D7",
-                        borderRadius: "8px",
-                        backgroundColor: "#FEFDFB",
-                        fontSize: "14px",
-                        outline: "none",
-                        transition: "all 0.3s",
-                        boxSizing: "border-box",
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: "block", marginBottom: "6px", color: "#1B4D3E", fontSize: "13px", fontWeight: "500" }}>
-                      CPF *
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="000.000.000-00"
-                      value={form.cpf}
-                      onChange={(e) => updateForm({ cpf: e.target.value })}
-                      onFocus={() => setFocusField("cpf")}
-                      onBlur={() => setFocusField(null)}
-                      required
-                      style={{
-                        width: "100%",
-                        height: "40px",
-                        padding: "0 12px",
-                        border: "2px solid",
-                        borderColor: focusField === "cpf" ? "#1B4D3E" : "#D4E7D7",
-                        borderRadius: "8px",
-                        backgroundColor: "#FEFDFB",
-                        fontSize: "14px",
-                        outline: "none",
-                        transition: "all 0.3s",
-                        boxSizing: "border-box",
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: "block", marginBottom: "6px", color: "#1B4D3E", fontSize: "13px", fontWeight: "500" }}>
-                      Senha
-                    </label>
-                    <input
-                      type="password"
-                      value={form.senha}
-                      onChange={(e) => updateForm({ senha: e.target.value })}
-                      onFocus={() => setFocusField("senha")}
-                      onBlur={() => setFocusField(null)}
-                      placeholder="Deixe em branco para manter"
-                      style={{
-                        width: "100%",
-                        height: "40px",
-                        padding: "0 12px",
-                        border: "2px solid",
-                        borderColor: focusField === "senha" ? "#1B4D3E" : "#D4E7D7",
-                        borderRadius: "8px",
-                        backgroundColor: "#FEFDFB",
-                        fontSize: "14px",
-                        outline: "none",
-                        transition: "all 0.3s",
-                        boxSizing: "border-box",
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: "block", marginBottom: "6px", color: "#1B4D3E", fontSize: "13px", fontWeight: "500" }}>
-                      Data Associação *
-                    </label>
-                    <input
-                      type="date"
-                      value={form.data_associacao}
-                      onChange={(e) => updateForm({ data_associacao: e.target.value })}
-                      onFocus={() => setFocusField("data_associacao")}
-                      onBlur={() => setFocusField(null)}
-                      required
-                      style={{
-                        width: "100%",
-                        height: "40px",
-                        padding: "0 12px",
-                        border: "2px solid",
-                        borderColor: focusField === "data_associacao" ? "#1B4D3E" : "#D4E7D7",
-                        borderRadius: "8px",
-                        backgroundColor: "#FEFDFB",
-                        fontSize: "14px",
-                        outline: "none",
-                        transition: "all 0.3s",
-                        boxSizing: "border-box",
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Endereço */}
-              <div>
-                <h3
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: "600",
-                    color: "#1B4D3E",
-                    marginBottom: "16px",
-                    paddingBottom: "8px",
-                    borderBottom: "2px solid #D4E7D7",
-                  }}
-                >
-                  Endereço
-                </h3>
-                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                  <div style={{ display: "grid", gridTemplateColumns: "3fr 1fr", gap: "16px" }}>
-                    <div>
-                      <label style={{ display: "block", marginBottom: "6px", color: "#1B4D3E", fontSize: "13px", fontWeight: "500" }}>
-                        Rua *
-                      </label>
-                      <input
-                        type="text"
-                        value={form.endereco.rua}
-                        onChange={(e) => updateEndereco({ rua: e.target.value })}
-                        onFocus={() => setFocusField("rua")}
-                        onBlur={() => setFocusField(null)}
-                        required
-                        style={{
-                          width: "100%",
-                          height: "40px",
-                          padding: "0 12px",
-                          border: "2px solid",
-                          borderColor: focusField === "rua" ? "#1B4D3E" : "#D4E7D7",
-                          borderRadius: "8px",
-                          backgroundColor: "#FEFDFB",
-                          fontSize: "14px",
-                          outline: "none",
-                          transition: "all 0.3s",
-                          boxSizing: "border-box",
-                        }}
-                      />
-                    </div>
-
-                    <div>
-                      <label style={{ display: "block", marginBottom: "6px", color: "#1B4D3E", fontSize: "13px", fontWeight: "500" }}>
-                        Número *
-                      </label>
-                      <input
-                        type="text"
-                        value={form.endereco.numero}
-                        onChange={(e) => updateEndereco({ numero: e.target.value })}
-                        onFocus={() => setFocusField("numero")}
-                        onBlur={() => setFocusField(null)}
-                        required
-                        style={{
-                          width: "100%",
-                          height: "40px",
-                          padding: "0 12px",
-                          border: "2px solid",
-                          borderColor: focusField === "numero" ? "#1B4D3E" : "#D4E7D7",
-                          borderRadius: "8px",
-                          backgroundColor: "#FEFDFB",
-                          fontSize: "14px",
-                          outline: "none",
-                          transition: "all 0.3s",
-                          boxSizing: "border-box",
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px" }}>
-                    <div>
-                      <label style={{ display: "block", marginBottom: "6px", color: "#1B4D3E", fontSize: "13px", fontWeight: "500" }}>
-                        Complemento
-                      </label>
-                      <input
-                        type="text"
-                        value={form.endereco.complemento}
-                        onChange={(e) => updateEndereco({ complemento: e.target.value })}
-                        onFocus={() => setFocusField("complemento")}
-                        onBlur={() => setFocusField(null)}
-                        style={{
-                          width: "100%",
-                          height: "40px",
-                          padding: "0 12px",
-                          border: "2px solid",
-                          borderColor: focusField === "complemento" ? "#1B4D3E" : "#D4E7D7",
-                          borderRadius: "8px",
-                          backgroundColor: "#FEFDFB",
-                          fontSize: "14px",
-                          outline: "none",
-                          transition: "all 0.3s",
-                          boxSizing: "border-box",
-                        }}
-                      />
-                    </div>
-
-                    <div>
-                      <label style={{ display: "block", marginBottom: "6px", color: "#1B4D3E", fontSize: "13px", fontWeight: "500" }}>
-                        Bairro *
-                      </label>
-                      <input
-                        type="text"
-                        value={form.endereco.bairro}
-                        onChange={(e) => updateEndereco({ bairro: e.target.value })}
-                        onFocus={() => setFocusField("bairro")}
-                        onBlur={() => setFocusField(null)}
-                        required
-                        style={{
-                          width: "100%",
-                          height: "40px",
-                          padding: "0 12px",
-                          border: "2px solid",
-                          borderColor: focusField === "bairro" ? "#1B4D3E" : "#D4E7D7",
-                          borderRadius: "8px",
-                          backgroundColor: "#FEFDFB",
-                          fontSize: "14px",
-                          outline: "none",
-                          transition: "all 0.3s",
-                          boxSizing: "border-box",
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: "16px" }}>
-                    <div>
-                      <label style={{ display: "block", marginBottom: "6px", color: "#1B4D3E", fontSize: "13px", fontWeight: "500" }}>
-                        Cidade *
-                      </label>
-                      <input
-                        type="text"
-                        value={form.endereco.cidade}
-                        onChange={(e) => updateEndereco({ cidade: e.target.value })}
-                        onFocus={() => setFocusField("cidade")}
-                        onBlur={() => setFocusField(null)}
-                        required
-                        style={{
-                          width: "100%",
-                          height: "40px",
-                          padding: "0 12px",
-                          border: "2px solid",
-                          borderColor: focusField === "cidade" ? "#1B4D3E" : "#D4E7D7",
-                          borderRadius: "8px",
-                          backgroundColor: "#FEFDFB",
-                          fontSize: "14px",
-                          outline: "none",
-                          transition: "all 0.3s",
-                          boxSizing: "border-box",
-                        }}
-                      />
-                    </div>
-
-                    <div>
-                      <label style={{ display: "block", marginBottom: "6px", color: "#1B4D3E", fontSize: "13px", fontWeight: "500" }}>
-                        UF *
-                      </label>
-                      <select
-                        value={form.endereco.uf}
-                        onChange={(e) => updateEndereco({ uf: e.target.value })}
-                        onFocus={() => setFocusField("uf")}
-                        onBlur={() => setFocusField(null)}
-                        required
-                        style={{
-                          width: "100%",
-                          height: "40px",
-                          padding: "0 12px",
-                          border: "2px solid",
-                          borderColor: focusField === "uf" ? "#1B4D3E" : "#D4E7D7",
-                          borderRadius: "8px",
-                          backgroundColor: "#FEFDFB",
-                          fontSize: "14px",
-                          outline: "none",
-                          transition: "all 0.3s",
-                          boxSizing: "border-box",
-                        }}
-                      >
-                        <option value=""></option>
-                        <option value="AC">AC</option>
-                        <option value="AL">AL</option>
-                        <option value="AP">AP</option>
-                        <option value="AM">AM</option>
-                        <option value="BA">BA</option>
-                        <option value="CE">CE</option>
-                        <option value="DF">DF</option>
-                        <option value="ES">ES</option>
-                        <option value="GO">GO</option>
-                        <option value="MA">MA</option>
-                        <option value="MT">MT</option>
-                        <option value="MS">MS</option>
-                        <option value="MG">MG</option>
-                        <option value="PA">PA</option>
-                        <option value="PB">PB</option>
-                        <option value="PR">PR</option>
-                        <option value="PE">PE</option>
-                        <option value="PI">PI</option>
-                        <option value="RJ">RJ</option>
-                        <option value="RN">RN</option>
-                        <option value="RS">RS</option>
-                        <option value="RO">RO</option>
-                        <option value="RR">RR</option>
-                        <option value="SC">SC</option>
-                        <option value="SP">SP</option>
-                        <option value="SE">SE</option>
-                        <option value="TO">TO</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label style={{ display: "block", marginBottom: "6px", color: "#1B4D3E", fontSize: "13px", fontWeight: "500" }}>
-                        CEP *
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="00000-000"
-                        value={form.endereco.cep}
-                        onChange={(e) => updateEndereco({ cep: e.target.value })}
-                        onFocus={() => setFocusField("cep")}
-                        onBlur={() => setFocusField(null)}
-                        required
-                        style={{
-                          width: "100%",
-                          height: "40px",
-                          padding: "0 12px",
-                          border: "2px solid",
-                          borderColor: focusField === "cep" ? "#1B4D3E" : "#D4E7D7",
-                          borderRadius: "8px",
-                          backgroundColor: "#FEFDFB",
-                          fontSize: "14px",
-                          outline: "none",
-                          transition: "all 0.3s",
-                          boxSizing: "border-box",
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Documentos */}
-              <div>
-                <h3
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: "600",
-                    color: "#1B4D3E",
-                    marginBottom: "16px",
-                    paddingBottom: "8px",
-                    borderBottom: "2px solid #D4E7D7",
-                  }}
-                >
-                  Documentos
-                </h3>
-                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                  {/* Anuidade */}
+                {/* Left Column - Personal & Contact */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
                   <div
                     style={{
-                      border: "2px solid #D4E7D7",
-                      borderRadius: "12px",
-                      padding: "16px",
-                      backgroundColor: "#F5F1E8",
+                      backgroundColor: "#FFFFFF",
+                      borderRadius: "16px",
+                      padding: "28px",
+                      border: "1px solid #E5E7EB",
+                      boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
                     }}
                   >
-                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                      <div
-                        style={{
-                          width: "40px",
-                          height: "40px",
-                          borderRadius: "50%",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          backgroundColor: "#1B4D3E",
-                          color: "#F5F1E8",
-                          flexShrink: 0,
-                        }}
-                      >
-                        <UploadIcon />
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <h4 style={{ marginBottom: "2px", color: "#1B4D3E", fontSize: "14px", fontWeight: "600" }}>
-                          Anuidade
-                        </h4>
-                        <p style={{ fontSize: "11px", color: "#6B7280" }}>
-                          {form.documentos.anuidade || "Nenhum arquivo selecionado"}
-                        </p>
-                      </div>
-                      <label
-                        htmlFor="anuidade"
-                        style={{
-                          padding: "6px 16px",
-                          borderRadius: "6px",
-                          cursor: "pointer",
-                          backgroundColor: "#1B4D3E",
-                          color: "#F5F1E8",
-                          fontWeight: "500",
-                          transition: "all 0.3s",
-                          display: "inline-block",
-                          fontSize: "12px",
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.12)";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.boxShadow = "none";
-                        }}
-                      >
-                        Escolher
-                      </label>
-                      <input
-                        type="file"
-                        id="anuidade"
-                        accept="image/*,.pdf"
-                        style={{ display: "none" }}
-                        onChange={(e) => updateDocumentos({ anuidade: e.target.files?.[0]?.name || "" })}
+                    <h3
+                      style={{
+                        fontSize: "11px",
+                        fontWeight: "700",
+                        color: "#1B4D3E",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.5px",
+                        marginBottom: "20px",
+                      }}
+                    >
+                      Dados Pessoais
+                    </h3>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                      <InputField
+                        label="Nome Completo"
+                        value={formData.nome}
+                        onChange={(e) => handleChange("nome", e.target.value)}
+                        required
+                      />
+                      <InputField
+                        label="CPF"
+                        value={formData.cpf}
+                        onChange={(e) => handleChange("cpf", e.target.value)}
+                        required
+                      />
+                      <InputField
+                        label="Telefone"
+                        value={formData.telefone}
+                        onChange={(e) => handleChange("telefone", e.target.value)}
+                        required
+                      />
+                      <InputField
+                        label="E-mail"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => handleChange("email", e.target.value)}
+                        required
+                      />
+                      <InputField
+                        label="Data de Associação"
+                        type="date"
+                        value={formData.data_associacao}
+                        onChange={(e) => handleChange("data_associacao", e.target.value)}
                       />
                     </div>
                   </div>
+                </div>
 
-                  {/* CAF */}
+                {/* Right Column - Address */}
+                <div>
                   <div
                     style={{
-                      border: "2px solid #D4E7D7",
-                      borderRadius: "12px",
-                      padding: "16px",
-                      backgroundColor: "#F5F1E8",
+                      backgroundColor: "#FFFFFF",
+                      borderRadius: "16px",
+                      padding: "28px",
+                      border: "1px solid #E5E7EB",
+                      boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
                     }}
                   >
-                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                      <div
-                        style={{
-                          width: "40px",
-                          height: "40px",
-                          borderRadius: "50%",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          backgroundColor: "#1B4D3E",
-                          color: "#F5F1E8",
-                          flexShrink: 0,
-                        }}
-                      >
-                        <UploadIcon />
+                    <h3
+                      style={{
+                        fontSize: "11px",
+                        fontWeight: "700",
+                        color: "#1B4D3E",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.5px",
+                        marginBottom: "20px",
+                      }}
+                    >
+                      Endereço
+                    </h3>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                      <InputField
+                        label="CEP"
+                        value={formData.endereco.cep}
+                        onChange={(e) => handleChange("endereco.cep", e.target.value)}
+                      />
+                      <InputField
+                        label="Rua"
+                        value={formData.endereco.rua}
+                        onChange={(e) => handleChange("endereco.rua", e.target.value)}
+                      />
+                      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "16px" }}>
+                        <InputField
+                          label="Número"
+                          value={formData.endereco.numero}
+                          onChange={(e) => handleChange("endereco.numero", e.target.value)}
+                        />
+                        <SelectField
+                          label="UF"
+                          value={formData.endereco.uf}
+                          onChange={(e) => handleChange("endereco.uf", e.target.value)}
+                          options={ESTADOS_BRASILEIROS}
+                        />
                       </div>
-                      <div style={{ flex: 1 }}>
-                        <h4 style={{ marginBottom: "2px", color: "#1B4D3E", fontSize: "14px", fontWeight: "600" }}>
-                          CAF
-                        </h4>
-                        <p style={{ fontSize: "11px", color: "#6B7280" }}>
-                          {form.documentos.caf || "Nenhum arquivo selecionado"}
-                        </p>
-                      </div>
-                      <label
-                        htmlFor="caf"
-                        style={{
-                          padding: "6px 16px",
-                          borderRadius: "6px",
-                          cursor: "pointer",
-                          backgroundColor: "#1B4D3E",
-                          color: "#F5F1E8",
-                          fontWeight: "500",
-                          transition: "all 0.3s",
-                          display: "inline-block",
-                          fontSize: "12px",
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.12)";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.boxShadow = "none";
-                        }}
-                      >
-                        Escolher
-                      </label>
-                      <input
-                        type="file"
-                        id="caf"
-                        accept="image/*,.pdf"
-                        style={{ display: "none" }}
-                        onChange={(e) => updateDocumentos({ caf: e.target.files?.[0]?.name || "" })}
+                      <InputField
+                        label="Complemento"
+                        value={formData.endereco.complemento}
+                        onChange={(e) => handleChange("endereco.complemento", e.target.value)}
+                      />
+                      <InputField
+                        label="Bairro"
+                        value={formData.endereco.bairro}
+                        onChange={(e) => handleChange("endereco.bairro", e.target.value)}
+                      />
+                      <InputField
+                        label="Cidade"
+                        value={formData.endereco.cidade}
+                        onChange={(e) => handleChange("endereco.cidade", e.target.value)}
                       />
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </form>
           )}
         </div>
 
         {/* Footer Actions */}
         <div
           style={{
-            padding: "24px 32px",
+            padding: "24px 36px",
             borderTop: "1px solid #E5E7EB",
+            backgroundColor: "#FFFFFF",
             display: "flex",
             gap: "12px",
             justifyContent: "flex-end",
@@ -1156,33 +557,35 @@ export default function DetalhesAssociado({ associado, onClose, onDeleted, onUpd
               <button
                 onClick={() => setIsEditing(true)}
                 style={{
-                  padding: "12px 24px",
-                  borderRadius: "8px",
-                  border: "1px solid #1B4D3E",
-                  backgroundColor: "#1B4D3E",
-                  color: "#fff",
+                  padding: "12px 28px",
+                  borderRadius: "10px",
+                  border: "none",
+                  background: "linear-gradient(135deg, #1B4D3E 0%, #2A6B4F 100%)",
+                  color: "#FFFFFF",
                   fontSize: "14px",
                   fontWeight: "600",
                   cursor: "pointer",
-                  transition: "all 0.3s ease",
+                  transition: "all 0.2s ease",
+                  boxShadow: "0 4px 12px rgba(27, 77, 62, 0.2)",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = "0 4px 12px rgba(27, 77, 62, 0.3)";
+                  e.target.style.transform = "translateY(-2px)";
+                  e.target.style.boxShadow = "0 6px 16px rgba(27, 77, 62, 0.3)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = "none";
+                  e.target.style.transform = "translateY(0)";
+                  e.target.style.boxShadow = "0 4px 12px rgba(27, 77, 62, 0.2)";
                 }}
               >
                 Editar
               </button>
-
               <button
                 onClick={handleExcluir}
                 style={{
-                  padding: "12px 24px",
-                  borderRadius: "8px",
-                  border: "1px solid #DC2626",
-                  backgroundColor: "transparent",
+                  padding: "12px 28px",
+                  borderRadius: "10px",
+                  border: "1px solid #FCA5A5",
+                  backgroundColor: "#FEF2F2",
                   color: "#DC2626",
                   fontSize: "14px",
                   fontWeight: "600",
@@ -1191,9 +594,11 @@ export default function DetalhesAssociado({ associado, onClose, onDeleted, onUpd
                 }}
                 onMouseEnter={(e) => {
                   e.target.style.backgroundColor = "#FEE2E2";
+                  e.target.style.transform = "translateY(-2px)";
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = "transparent";
+                  e.target.style.backgroundColor = "#FEF2F2";
+                  e.target.style.transform = "translateY(0)";
                 }}
               >
                 Excluir
@@ -1202,84 +607,102 @@ export default function DetalhesAssociado({ associado, onClose, onDeleted, onUpd
           ) : (
             <>
               <button
-                onClick={handleCancelEdit}
+                type="button"
+                onClick={() => setIsEditing(false)}
                 style={{
-                  padding: "12px 24px",
-                  borderRadius: "8px",
-                  border: "2px solid #DC2626",
-                  backgroundColor: "transparent",
-                  color: "#DC2626",
+                  padding: "12px 28px",
+                  borderRadius: "10px",
+                  border: "1px solid #D1D5DB",
+                  backgroundColor: "#FFFFFF",
+                  color: "#6B7280",
                   fontSize: "14px",
                   fontWeight: "600",
                   cursor: "pointer",
                   transition: "all 0.2s ease",
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = "#FEE2E2";
+                  e.target.style.backgroundColor = "#F9FAFB";
+                  e.target.style.transform = "translateY(-2px)";
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = "transparent";
+                  e.target.style.backgroundColor = "#FFFFFF";
+                  e.target.style.transform = "translateY(0)";
                 }}
               >
                 Cancelar
               </button>
-
               <button
-                onClick={handleSave}
+                onClick={handleSalvar}
+                disabled={loading}
                 style={{
-                  padding: "12px 24px",
-                  borderRadius: "8px",
+                  padding: "12px 28px",
+                  borderRadius: "10px",
                   border: "none",
-                  backgroundColor: "#1B4D3E",
-                  color: "#fff",
+                  background: loading ? "#D1D5DB" : "linear-gradient(135deg, #1B4D3E 0%, #2A6B4F 100%)",
+                  color: "#FFFFFF",
                   fontSize: "14px",
                   fontWeight: "600",
-                  cursor: "pointer",
-                  transition: "all 0.3s ease",
+                  cursor: loading ? "not-allowed" : "pointer",
+                  transition: "all 0.2s ease",
                   display: "flex",
                   alignItems: "center",
-                  gap: "8px",
+                  gap: "10px",
+                  boxShadow: loading ? "none" : "0 4px 12px rgba(27, 77, 62, 0.2)",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = "0 4px 12px rgba(27, 77, 62, 0.3)";
-                  e.currentTarget.style.transform = "translateY(-2px)";
+                  if (!loading) {
+                    e.target.style.transform = "translateY(-2px)";
+                    e.target.style.boxShadow = "0 6px 16px rgba(27, 77, 62, 0.3)";
+                  }
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = "none";
-                  e.currentTarget.style.transform = "translateY(0)";
+                  if (!loading) {
+                    e.target.style.transform = "translateY(0)";
+                    e.target.style.boxShadow = "0 4px 12px rgba(27, 77, 62, 0.2)";
+                  }
                 }}
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                  <polyline points="17 21 17 13 7 13 7 21" />
-                  <polyline points="7 3 7 8 15 8" />
-                </svg>
+                {loading && (
+                  <div
+                    style={{
+                      width: "18px",
+                      height: "18px",
+                      border: "2px solid #FFFFFF",
+                      borderTop: "2px solid transparent",
+                      borderRadius: "50%",
+                      animation: "spin 1s linear infinite",
+                    }}
+                  />
+                )}
                 Salvar Alterações
               </button>
             </>
           )}
         </div>
       </div>
+
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }
 
-// Helper component for displaying info items
-function InfoItem({ label, value, fullWidth }) {
+// Helper Components
+function InfoItem({ label, value }) {
   return (
-    <div
-      style={{
-        gridColumn: fullWidth ? "1 / -1" : "auto",
-      }}
-    >
+    <div>
       <div
         style={{
-          fontSize: "12px",
-          fontWeight: "600",
-          color: "#6B7280",
-          marginBottom: "6px",
+          fontSize: "11px",
+          fontWeight: "700",
+          color: "#9CA3AF",
           textTransform: "uppercase",
           letterSpacing: "0.5px",
+          marginBottom: "6px",
         }}
       >
         {label}
@@ -1288,10 +711,251 @@ function InfoItem({ label, value, fullWidth }) {
         style={{
           fontSize: "15px",
           color: "#1F2937",
-          fontWeight: "500",
+          fontWeight: "600",
         }}
       >
         {value || "-"}
+      </div>
+    </div>
+  );
+}
+
+function InputField({ label, value, onChange, type = "text", required = false, maxLength }) {
+  return (
+    <div>
+      <label
+        style={{
+          display: "block",
+          fontSize: "11px",
+          fontWeight: "700",
+          color: "#6B7280",
+          textTransform: "uppercase",
+          letterSpacing: "0.5px",
+          marginBottom: "8px",
+        }}
+      >
+        {label}
+        {required && <span style={{ color: "#DC2626" }}> *</span>}
+      </label>
+      <input
+        type={type}
+        value={value}
+        onChange={onChange}
+        required={required}
+        maxLength={maxLength}
+        style={{
+          width: "100%",
+          padding: "12px 14px",
+          borderRadius: "10px",
+          border: "1px solid #E5E7EB",
+          fontSize: "14px",
+          color: "#1F2937",
+          outline: "none",
+          transition: "all 0.2s ease",
+          backgroundColor: "#FFFFFF",
+        }}
+        onFocus={(e) => {
+          e.target.style.borderColor = "#1B4D3E";
+          e.target.style.boxShadow = "0 0 0 4px rgba(27, 77, 62, 0.1)";
+        }}
+        onBlur={(e) => {
+          e.target.style.borderColor = "#E5E7EB";
+          e.target.style.boxShadow = "none";
+        }}
+      />
+    </div>
+  );
+}
+
+function SelectField({ label, value, onChange, options }) {
+  return (
+    <div>
+      <label
+        style={{
+          display: "block",
+          fontSize: "11px",
+          fontWeight: "700",
+          color: "#6B7280",
+          textTransform: "uppercase",
+          letterSpacing: "0.5px",
+          marginBottom: "8px",
+        }}
+      >
+        {label}
+      </label>
+      <select
+        value={value}
+        onChange={onChange}
+        style={{
+          width: "100%",
+          padding: "12px 14px",
+          borderRadius: "10px",
+          border: "1px solid #E5E7EB",
+          fontSize: "14px",
+          color: "#1F2937",
+          outline: "none",
+          transition: "all 0.2s ease",
+          backgroundColor: "#FFFFFF",
+          cursor: "pointer",
+        }}
+        onFocus={(e) => {
+          e.target.style.borderColor = "#1B4D3E";
+          e.target.style.boxShadow = "0 0 0 4px rgba(27, 77, 62, 0.1)";
+        }}
+        onBlur={(e) => {
+          e.target.style.borderColor = "#E5E7EB";
+          e.target.style.boxShadow = "none";
+        }}
+      >
+        <option value="">Selecione...</option>
+        {options.map((uf) => (
+          <option key={uf} value={uf}>
+            {uf}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+function DocumentItem({ label, available, url }) {
+  if (available && url) {
+    return (
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "12px 16px",
+          backgroundColor: "#F0F9F6",
+          border: "1px solid #D1FAE5",
+          borderRadius: "10px",
+          textDecoration: "none",
+          transition: "all 0.2s ease",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = "#E6F5EF";
+          e.currentTarget.style.borderColor = "#1B4D3E";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = "#F0F9F6";
+          e.currentTarget.style.borderColor = "#D1FAE5";
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div
+            style={{
+              width: "32px",
+              height: "32px",
+              borderRadius: "8px",
+              backgroundColor: "#1B4D3E",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <svg
+              style={{ width: "16px", height: "16px", color: "#FFFFFF" }}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+          </div>
+          <div>
+            <div
+              style={{
+                fontSize: "13px",
+                fontWeight: "600",
+                color: "#1B4D3E",
+              }}
+            >
+              {label}
+            </div>
+            <div style={{ fontSize: "11px", color: "#6B7280" }}>
+              Disponível
+            </div>
+          </div>
+        </div>
+        <svg
+          style={{ width: "16px", height: "16px", color: "#1B4D3E" }}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+          />
+        </svg>
+      </a>
+    );
+  }
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "12px 16px",
+        backgroundColor: "#F9FAFB",
+        border: "1px solid #E5E7EB",
+        borderRadius: "10px",
+        opacity: 0.6,
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        <div
+          style={{
+            width: "32px",
+            height: "32px",
+            borderRadius: "8px",
+            backgroundColor: "#E5E7EB",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <svg
+            style={{ width: "16px", height: "16px", color: "#9CA3AF" }}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </div>
+        <div>
+          <div
+            style={{
+              fontSize: "13px",
+              fontWeight: "600",
+              color: "#9CA3AF",
+            }}
+          >
+            {label}
+          </div>
+          <div style={{ fontSize: "11px", color: "#D1D5DB" }}>
+            Não disponível
+          </div>
+        </div>
       </div>
     </div>
   );

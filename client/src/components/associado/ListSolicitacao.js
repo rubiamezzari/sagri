@@ -6,28 +6,11 @@ import { Search, FileText, Trash2, X } from "lucide-react"
 
 const API_URL = "http://localhost:5050"
 
-const colors = {
-  primary: "#1B4D3E",
-  secondary: "#2a6b54",
-  background: "#F5F1E8",
-  cardBg: "#FFFFFF",
-  accent: "#D1FAE5",
-  accentDark: "#10B981",
-  border: "#E5E7EB",
-  textPrimary: "#1F2937",
-  textSecondary: "#6B7280",
-  warning: "#F59E0B",
-  success: "#10B981",
-  approved: "#10B981",
-  pending: "#F59E0B",
-  rejected: "#EF4444",
-  canceled: "#6B7280",
-}
-
 const Detalhes = ({ solicitacao, handleDelete, handleCancel }) => {
-  console.log("[v0] Detalhes solicitacao:", solicitacao)
-  console.log("[v0] Status:", solicitacao.status)
-  console.log("[v0] motivo_recusa:", solicitacao.motivo_recusa)
+  const horasTotais =
+    solicitacao.horimetro_inicial != null && solicitacao.horimetro_final != null
+      ? Number(solicitacao.horimetro_final) - Number(solicitacao.horimetro_inicial)
+      : null
 
   return (
     <div
@@ -170,7 +153,6 @@ const Detalhes = ({ solicitacao, handleDelete, handleCancel }) => {
             backgroundColor: "#F9FAFB",
             borderRadius: "10px",
             border: "1px solid #E5E7EB",
-            marginBottom: "14px",
           }}
         >
           <div
@@ -246,6 +228,36 @@ const Detalhes = ({ solicitacao, handleDelete, handleCancel }) => {
             Observação
           </div>
           <div style={{ fontSize: "14px", color: "#374151", lineHeight: "1.6" }}>{solicitacao.observacao}</div>
+        </div>
+      )}
+
+      {/* Horímetro - quando houver dados */}
+      {horasTotais != null && (
+        <div
+          style={{
+            padding: "18px 20px",
+            backgroundColor: "#ECFDF5",
+            borderRadius: "12px",
+            marginBottom: "16px",
+            border: "1px solid #A7F3D0",
+          }}
+        >
+          <div
+            style={{
+              fontSize: "11px",
+              color: "#065F46",
+              fontWeight: "600",
+              marginBottom: "6px",
+              textTransform: "uppercase",
+              letterSpacing: "0.5px",
+            }}
+          >
+            Horas Trabalhadas
+          </div>
+          <div style={{ fontSize: "28px", color: "#065F46", fontWeight: "700" }}>{horasTotais}h</div>
+          <div style={{ fontSize: "12px", color: "#065F46", marginTop: "4px", opacity: 0.8 }}>
+            Inicial: {solicitacao.horimetro_inicial}h • Final: {solicitacao.horimetro_final}h
+          </div>
         </div>
       )}
 
@@ -326,8 +338,8 @@ export default function MinhasSolicitacoes() {
   const [solicitacoes, setSolicitacoes] = useState([])
   const [searchTerm, setSearchTerm] = useState("")
   const [loading, setLoading] = useState(true)
-  const [expandedId, setExpandedId] = useState(null)
   const [statusFilter, setStatusFilter] = useState("todos")
+  const [modalSolicitacao, setModalSolicitacao] = useState(null)
 
   useEffect(() => {
     const usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado"))
@@ -352,31 +364,30 @@ export default function MinhasSolicitacoes() {
   const getStatusBadge = (status) => {
     const styles = {
       pendente: {
-        backgroundColor: "#F3F4F6",
-        color: "#6B7280",
-        dotColor: "#9CA3AF",
+        backgroundColor: "#FFF9E6",
+        color: "#8B6914",
       },
       aprovado: {
-        backgroundColor: "#F0FDF4",
-        color: "#166534",
-        dotColor: "#10B981",
+        backgroundColor: "#E8F5E9",
+        color: "#1B5E20",
       },
       recusado: {
-        backgroundColor: "#FEF2F2",
-        color: "#991B1B",
-        dotColor: "#EF4444",
+        backgroundColor: "#FBE9E7",
+        color: "#BF360C",
       },
       cancelado: {
-        backgroundColor: "#F3F4F6",
-        color: "#6B7280",
-        dotColor: "#9CA3AF",
+        backgroundColor: "#F5F5F5",
+        color: "#757575",
+      },
+      concluido: {
+        backgroundColor: "#E0F2F1",
+        color: "#00695C",
       },
     }
 
     const style = styles[status?.toLowerCase()] || {
-      backgroundColor: "#F3F4F6",
-      color: "#6B7280",
-      dotColor: "#9CA3AF",
+      backgroundColor: "#F5F5F5",
+      color: "#757575",
     }
 
     return (
@@ -385,23 +396,15 @@ export default function MinhasSolicitacoes() {
           display: "inline-flex",
           alignItems: "center",
           gap: "8px",
-          padding: "6px 12px",
-          borderRadius: "12px",
+          padding: "8px 14px",
+          borderRadius: "20px",
           fontSize: "13px",
-          fontWeight: "500",
+          fontWeight: "600",
           textTransform: "capitalize",
           backgroundColor: style.backgroundColor,
           color: style.color,
         }}
       >
-        <div
-          style={{
-            width: "8px",
-            height: "8px",
-            borderRadius: "50%",
-            backgroundColor: style.dotColor,
-          }}
-        />
         {status || "Pendente"}
       </div>
     )
@@ -412,6 +415,7 @@ export default function MinhasSolicitacoes() {
     try {
       await fetch(`${API_URL}/solicitacoes/${id}`, { method: "DELETE" })
       setSolicitacoes((old) => old.filter((s) => s._id !== id))
+      setModalSolicitacao(null)
     } catch (err) {
       console.error(err)
       alert("Erro ao excluir.")
@@ -427,6 +431,7 @@ export default function MinhasSolicitacoes() {
         body: JSON.stringify({ status: "Cancelado" }),
       })
       setSolicitacoes((old) => old.map((s) => (s._id === id ? { ...s, status: "Cancelado" } : s)))
+      setModalSolicitacao(null)
     } catch (err) {
       console.warn("Falha ao notificar servidor sobre cancelamento:", err)
       alert("Erro ao cancelar.")
@@ -444,6 +449,7 @@ export default function MinhasSolicitacoes() {
     pendente: solicitacoes.filter((s) => s.status?.toLowerCase() === "pendente").length,
     aprovado: solicitacoes.filter((s) => s.status?.toLowerCase() === "aprovado").length,
     recusado: solicitacoes.filter((s) => s.status?.toLowerCase() === "recusado").length,
+    concluido: solicitacoes.filter((s) => s.status?.toLowerCase() === "concluido").length,
   }
 
   if (loading) {
@@ -462,13 +468,13 @@ export default function MinhasSolicitacoes() {
               width: "48px",
               height: "48px",
               border: "4px solid #E5E7EB",
-              borderTop: `4px solid ${colors.primary}`,
+              borderTop: "4px solid #1B4D3E",
               borderRadius: "50%",
               animation: "spin 1s linear infinite",
               margin: "0 auto 20px",
             }}
           />
-          <p style={{ color: colors.primary, fontWeight: "500" }}>Carregando solicitações...</p>
+          <p style={{ color: "#1B4D3E", fontWeight: "500" }}>Carregando solicitações...</p>
         </div>
         <style>{`
           @keyframes spin {
@@ -493,6 +499,23 @@ export default function MinhasSolicitacoes() {
           margin: "0 auto",
         }}
       >
+        {/* Header */}
+        <div style={{ marginBottom: "32px" }}>
+          <h1
+            style={{
+              fontSize: "32px",
+              fontWeight: "700",
+              color: "#1B4D3E",
+              margin: "0 0 8px 0",
+            }}
+          >
+            Minhas Solicitações
+          </h1>
+          <p style={{ fontSize: "15px", color: "#6B7280", margin: 0 }}>
+            Acompanhe o status de todas as suas solicitações de serviço
+          </p>
+        </div>
+
         {/* Search Bar */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -519,7 +542,7 @@ export default function MinhasSolicitacoes() {
               width: "100%",
               padding: "12px 14px 12px 44px",
               borderRadius: "12px",
-              border: "1px solid #E5E7EB",
+              border: "2px solid #E5E7EB",
               backgroundColor: "#fff",
               fontSize: "14px",
               outline: "none",
@@ -528,7 +551,7 @@ export default function MinhasSolicitacoes() {
               boxSizing: "border-box",
             }}
             onFocus={(e) => {
-              e.target.style.borderColor = colors.primary
+              e.target.style.borderColor = "#1B4D3E"
               e.target.style.boxShadow = `0 0 0 3px rgba(27, 77, 62, 0.1)`
             }}
             onBlur={(e) => {
@@ -545,177 +568,175 @@ export default function MinhasSolicitacoes() {
           transition={{ delay: 0.15 }}
           style={{ marginBottom: "32px" }}
         >
-          <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+          <div
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: "12px",
+              padding: "8px",
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.06)",
+              display: "inline-flex",
+              gap: "8px",
+              flexWrap: "wrap",
+            }}
+          >
             <button
               onClick={() => setStatusFilter("todos")}
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "10px 16px",
-                backgroundColor: statusFilter === "todos" ? "#1B4D3E" : "#F9FAFB",
+                padding: "10px 20px",
                 borderRadius: "8px",
-                border: statusFilter === "todos" ? "1px solid #1B4D3E" : "1px solid #E5E7EB",
+                border: "none",
+                backgroundColor: statusFilter === "todos" ? "#1B4D3E" : "transparent",
+                color: statusFilter === "todos" ? "#fff" : "#6B7280",
                 fontSize: "14px",
-                color: statusFilter === "todos" ? "#FFFFFF" : "#6B7280",
-                fontWeight: "500",
+                fontWeight: "600",
                 cursor: "pointer",
                 transition: "all 0.2s ease",
-              }}
-              onMouseEnter={(e) => {
-                if (statusFilter !== "todos") {
-                  e.currentTarget.style.backgroundColor = "#F3F4F6"
-                  e.currentTarget.style.borderColor = "#D1D5DB"
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (statusFilter !== "todos") {
-                  e.currentTarget.style.backgroundColor = "#F9FAFB"
-                  e.currentTarget.style.borderColor = "#E5E7EB"
-                }
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
               }}
             >
-              <span style={{ fontWeight: "600", fontSize: "15px" }}>{countByStatus.todos}</span>
-              Todas
+              Todos
+              <span
+                style={{
+                  backgroundColor: statusFilter === "todos" ? "rgba(255,255,255,0.25)" : "#E5E7EB",
+                  color: statusFilter === "todos" ? "#fff" : "#6B7280",
+                  padding: "2px 8px",
+                  borderRadius: "12px",
+                  fontSize: "12px",
+                  fontWeight: "600",
+                }}
+              >
+                {countByStatus.todos}
+              </span>
             </button>
 
             <button
               onClick={() => setStatusFilter("pendente")}
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "10px 16px",
-                backgroundColor: statusFilter === "pendente" ? "#F3F4F6" : "#F9FAFB",
+                padding: "10px 20px",
                 borderRadius: "8px",
-                border: statusFilter === "pendente" ? "2px solid #6B7280" : "1px solid #E5E7EB",
+                border: "none",
+                backgroundColor: statusFilter === "pendente" ? "#1B4D3E" : "transparent",
+                color: statusFilter === "pendente" ? "#fff" : "#6B7280",
                 fontSize: "14px",
-                color: "#6B7280",
-                fontWeight: "500",
+                fontWeight: "600",
                 cursor: "pointer",
                 transition: "all 0.2s ease",
-              }}
-              onMouseEnter={(e) => {
-                if (statusFilter !== "pendente") {
-                  e.currentTarget.style.backgroundColor = "#F3F4F6"
-                  e.currentTarget.style.borderColor = "#D1D5DB"
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (statusFilter !== "pendente") {
-                  e.currentTarget.style.backgroundColor = "#F9FAFB"
-                  e.currentTarget.style.borderColor = "#E5E7EB"
-                }
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
               }}
             >
-              <div
+              Pendentes
+              <span
                 style={{
-                  width: "8px",
-                  height: "8px",
-                  borderRadius: "50%",
-                  backgroundColor: "#9CA3AF",
+                  backgroundColor: statusFilter === "pendente" ? "rgba(255,255,255,0.25)" : "#FFF9E6",
+                  color: statusFilter === "pendente" ? "#fff" : "#8B6914",
+                  padding: "2px 8px",
+                  borderRadius: "12px",
+                  fontSize: "12px",
+                  fontWeight: "600",
                 }}
-              />
-              <span style={{ fontWeight: "600", fontSize: "15px", color: "#374151" }}>{countByStatus.pendente}</span>
-              Pendente{countByStatus.pendente !== 1 ? "s" : ""}
+              >
+                {countByStatus.pendente}
+              </span>
             </button>
 
             <button
               onClick={() => setStatusFilter("aprovado")}
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "10px 16px",
-                backgroundColor: statusFilter === "aprovado" ? "#F0FDF4" : "#F9FAFB",
+                padding: "10px 20px",
                 borderRadius: "8px",
-                border: statusFilter === "aprovado" ? "2px solid #10B981" : "1px solid #E5E7EB",
+                border: "none",
+                backgroundColor: statusFilter === "aprovado" ? "#1B4D3E" : "transparent",
+                color: statusFilter === "aprovado" ? "#fff" : "#6B7280",
                 fontSize: "14px",
-                color: statusFilter === "aprovado" ? "#166534" : "#6B7280",
-                fontWeight: "500",
+                fontWeight: "600",
                 cursor: "pointer",
                 transition: "all 0.2s ease",
-              }}
-              onMouseEnter={(e) => {
-                if (statusFilter !== "aprovado") {
-                  e.currentTarget.style.backgroundColor = "#F3F4F6"
-                  e.currentTarget.style.borderColor = "#D1D5DB"
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (statusFilter !== "aprovado") {
-                  e.currentTarget.style.backgroundColor = "#F9FAFB"
-                  e.currentTarget.style.borderColor = "#E5E7EB"
-                }
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
               }}
             >
-              <div
-                style={{
-                  width: "8px",
-                  height: "8px",
-                  borderRadius: "50%",
-                  backgroundColor: "#10B981",
-                }}
-              />
+              Aprovados
               <span
                 style={{
+                  backgroundColor: statusFilter === "aprovado" ? "rgba(255,255,255,0.25)" : "#E8F5E9",
+                  color: statusFilter === "aprovado" ? "#fff" : "#1B5E20",
+                  padding: "2px 8px",
+                  borderRadius: "12px",
+                  fontSize: "12px",
                   fontWeight: "600",
-                  fontSize: "15px",
-                  color: statusFilter === "aprovado" ? "#166534" : "#374151",
                 }}
               >
                 {countByStatus.aprovado}
               </span>
-              Aprovado{countByStatus.aprovado !== 1 ? "s" : ""}
+            </button>
+
+            <button
+              onClick={() => setStatusFilter("concluido")}
+              style={{
+                padding: "10px 20px",
+                borderRadius: "8px",
+                border: "none",
+                backgroundColor: statusFilter === "concluido" ? "#1B4D3E" : "transparent",
+                color: statusFilter === "concluido" ? "#fff" : "#6B7280",
+                fontSize: "14px",
+                fontWeight: "600",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+              }}
+            >
+              Concluídos
+              <span
+                style={{
+                  backgroundColor: statusFilter === "concluido" ? "rgba(255,255,255,0.25)" : "#E0F2F1",
+                  color: statusFilter === "concluido" ? "#fff" : "#00695C",
+                  padding: "2px 8px",
+                  borderRadius: "12px",
+                  fontSize: "12px",
+                  fontWeight: "600",
+                }}
+              >
+                {countByStatus.concluido}
+              </span>
             </button>
 
             <button
               onClick={() => setStatusFilter("recusado")}
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "10px 16px",
-                backgroundColor: statusFilter === "recusado" ? "#FEF2F2" : "#F9FAFB",
+                padding: "10px 20px",
                 borderRadius: "8px",
-                border: statusFilter === "recusado" ? "2px solid #EF4444" : "1px solid #E5E7EB",
+                border: "none",
+                backgroundColor: statusFilter === "recusado" ? "#1B4D3E" : "transparent",
+                color: statusFilter === "recusado" ? "#fff" : "#6B7280",
                 fontSize: "14px",
-                color: statusFilter === "recusado" ? "#991B1B" : "#6B7280",
-                fontWeight: "500",
+                fontWeight: "600",
                 cursor: "pointer",
                 transition: "all 0.2s ease",
-              }}
-              onMouseEnter={(e) => {
-                if (statusFilter !== "recusado") {
-                  e.currentTarget.style.backgroundColor = "#F3F4F6"
-                  e.currentTarget.style.borderColor = "#D1D5DB"
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (statusFilter !== "recusado") {
-                  e.currentTarget.style.backgroundColor = "#F9FAFB"
-                  e.currentTarget.style.borderColor = "#E5E7EB"
-                }
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
               }}
             >
-              <div
-                style={{
-                  width: "8px",
-                  height: "8px",
-                  borderRadius: "50%",
-                  backgroundColor: "#EF4444",
-                }}
-              />
+              Recusados
               <span
                 style={{
+                  backgroundColor: statusFilter === "recusado" ? "rgba(255,255,255,0.25)" : "#FBE9E7",
+                  color: statusFilter === "recusado" ? "#fff" : "#BF360C",
+                  padding: "2px 8px",
+                  borderRadius: "12px",
+                  fontSize: "12px",
                   fontWeight: "600",
-                  fontSize: "15px",
-                  color: statusFilter === "recusado" ? "#991B1B" : "#374151",
                 }}
               >
                 {countByStatus.recusado}
               </span>
-              Recusado{countByStatus.recusado !== 1 ? "s" : ""}
             </button>
           </div>
         </motion.div>
@@ -732,199 +753,333 @@ export default function MinhasSolicitacoes() {
               backgroundColor: "#fff",
               borderRadius: "16px",
               boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
-              border: "1px solid #E5E7EB",
             }}
           >
-            <FileText size={48} style={{ color: "#D1D5DB", margin: "0 auto 16px" }} />
-            <p style={{ color: colors.textSecondary, fontSize: "15px", margin: 0 }}>
-              {searchTerm ? "Nenhuma solicitação encontrada" : "Você ainda não tem solicitações"}
+            <svg
+              style={{
+                width: "56px",
+                height: "56px",
+                color: "#D1D5DB",
+                margin: "0 auto 16px",
+              }}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+            <p style={{ color: "#6B7280", fontSize: "15px" }}>
+              {searchTerm
+                ? "Nenhuma solicitação encontrada"
+                : statusFilter === "todos"
+                ? "Você ainda não tem solicitações"
+                : `Você não tem solicitações ${statusFilter}s`}
             </p>
           </motion.div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          <motion.div layout style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             <AnimatePresence>
-              {filtered.map((s, index) => {
-                const isExpanded = expandedId === s._id
-
-                return (
-                  <motion.div
-                    key={s._id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ delay: index * 0.05 }}
+              {filtered.map((s) => (
+                <motion.div
+                  key={s._id}
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  onClick={() => setModalSolicitacao(s)}
+                  style={{
+                    backgroundColor: "#fff",
+                    borderRadius: "16px",
+                    overflow: "hidden",
+                    boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)",
+                    transition: "all 0.2s ease",
+                    border: "1px solid #E5E7EB",
+                    cursor: "pointer",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = "0 4px 6px rgba(0, 0, 0, 0.07)"
+                    e.currentTarget.style.borderColor = "#1B4D3E"
+                    e.currentTarget.style.transform = "translateY(-2px)"
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = "0 1px 2px rgba(0, 0, 0, 0.05)"
+                    e.currentTarget.style.borderColor = "#E5E7EB"
+                    e.currentTarget.style.transform = "translateY(0)"
+                  }}
+                >
+                  {/* Card Header */}
+                  <div
                     style={{
-                      backgroundColor: "#fff",
-                      borderRadius: "16px",
-                      overflow: "hidden",
-                      boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)",
-                      transition: "all 0.2s ease",
-                      border: "1px solid #E5E7EB",
-                      position: "relative",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "#FAFAF9"
-                      e.currentTarget.style.borderColor = "#1B4D3E"
-                      e.currentTarget.style.transform = "translateY(-2px)"
-                      e.currentTarget.style.boxShadow = "0 8px 16px rgba(0, 0, 0, 0.1)"
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "#fff"
-                      e.currentTarget.style.borderColor = "#E5E7EB"
-                      e.currentTarget.style.transform = "translateY(0)"
-                      e.currentTarget.style.boxShadow = "0 1px 2px rgba(0, 0, 0, 0.05)"
+                      padding: "20px 24px",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
                     }}
                   >
-                    {/* Card Header */}
-                    <div
-                      onClick={() => setExpandedId(isExpanded ? null : s._id)}
-                      style={{
-                        padding: "24px",
-                        cursor: "pointer",
-                        transition: "background-color 0.2s ease",
-                      }}
-                    >
-                      {/* Status Badge - Top Right */}
-                      <div style={{ position: "absolute", top: "20px", right: "20px" }}>{getStatusBadge(s.status)}</div>
-
-                      {/* Main Content */}
-                      <div style={{ paddingRight: "140px" }}>
+                    <div style={{ flex: 1 }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "10px",
+                          marginBottom: "6px",
+                          flexWrap: "wrap",
+                        }}
+                      >
                         <h3
                           style={{
                             fontSize: "18px",
-                            fontWeight: "600",
-                            color: "#1F2937",
-                            marginBottom: "12px",
+                            fontWeight: "700",
+                            color: "#1B4D3E",
+                            margin: 0,
                           }}
                         >
                           {s.tipoServico}
                         </h3>
-
-                        {/* Details Row */}
-                        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                            <svg
-                              style={{ width: "16px", height: "16px", color: "#6B7280", flexShrink: 0 }}
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                              />
-                            </svg>
-                            <span style={{ fontSize: "14px", color: "#374151", fontWeight: "500" }}>
-                              {new Date(s.data_servico).toLocaleDateString("pt-BR", {
-                                day: "2-digit",
-                                month: "long",
-                                year: "numeric",
-                              })}
-                            </span>
-                          </div>
-
-                          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                            <svg
-                              style={{ width: "16px", height: "16px", color: "#6B7280", flexShrink: 0 }}
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                              />
-                            </svg>
-                            <span style={{ fontSize: "14px", color: "#374151", fontWeight: "500" }}>
-                              {s.hora || "--:--"}
-                            </span>
-                          </div>
-
-                          {s.tempo_estimado && (
-                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                              <svg
-                                style={{ width: "16px", height: "16px", color: "#6B7280", flexShrink: 0 }}
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M13 10V3L4 14h7v7l9-11h-7z"
-                                />
-                              </svg>
-                              <div style={{ fontSize: "14px", color: "#374151" }}>
-                                <span style={{ color: "#6B7280" }}>Tempo estimado: </span>
-                                <span style={{ fontWeight: "500" }}>{s.tempo_estimado}</span>
-                              </div>
-                            </div>
-                          )}
+                        {getStatusBadge(s.status)}
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "12px",
+                          fontSize: "13px",
+                          color: "#6B7280",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                          <svg
+                            style={{ width: "14px", height: "14px" }}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                            />
+                          </svg>
+                          {new Date(s.data_servico).toLocaleDateString("pt-BR")}
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                          <svg
+                            style={{ width: "14px", height: "14px" }}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          {s.hora}
                         </div>
                       </div>
-
-                      {/* Footer - Ver detalhes */}
-                      {!isExpanded && (
-                        <div
-                          style={{
-                            marginTop: "16px",
-                            paddingTop: "16px",
-                            borderTop: "1px solid #F3F4F6",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "flex-end",
-                          }}
-                        >
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "4px",
-                              fontSize: "13px",
-                              fontWeight: "500",
-                              color: "#1B4D3E",
-                            }}
-                          >
-                            Ver detalhes
-                            <svg
-                              style={{ width: "16px", height: "16px" }}
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
-                          </div>
-                        </div>
-                      )}
                     </div>
 
-                    {/* Expanded Content */}
-                    <motion.div
-                      initial={false}
-                      animate={{
-                        height: isExpanded ? "auto" : 0,
-                        opacity: isExpanded ? 1 : 0,
-                      }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
-                      style={{
-                        overflow: "hidden",
-                      }}
-                    >
-                      <Detalhes solicitacao={s} handleDelete={handleDelete} handleCancel={handleCancel} />
-                    </motion.div>
-                  </motion.div>
-                )
-              })}
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      {/* Delete Button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDelete(s._id)
+                        }}
+                        style={{
+                          width: "32px",
+                          height: "32px",
+                          borderRadius: "50%",
+                          backgroundColor: "#FEF2F2",
+                          border: "1px solid #FEE2E2",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                          transition: "all 0.2s ease",
+                          flexShrink: 0,
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = "#FEE2E2"
+                          e.currentTarget.style.borderColor = "#FCA5A5"
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = "#FEF2F2"
+                          e.currentTarget.style.borderColor = "#FEE2E2"
+                        }}
+                      >
+                        <Trash2 size={14} color="#991B1B" />
+                      </button>
+                      
+                      <ArrowCircle />
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
             </AnimatePresence>
-          </div>
+          </motion.div>
         )}
       </div>
+
+      {/* Modal */}
+      <AnimatePresence>
+        {modalSolicitacao && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(0, 0, 0, 0.6)",
+              backdropFilter: "blur(4px)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 1000,
+              padding: "20px",
+            }}
+            onClick={() => setModalSolicitacao(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              style={{
+                backgroundColor: "#fff",
+                borderRadius: "24px",
+                maxWidth: "650px",
+                width: "100%",
+                maxHeight: "90vh",
+                overflow: "hidden",
+                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                display: "flex",
+                flexDirection: "column",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div
+                style={{
+                  padding: "32px 36px",
+                  borderBottom: "2px solid #E5E7EB",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  background: "linear-gradient(to bottom, #FAFAF9 0%, #fff 100%)",
+                }}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <h2
+                    style={{
+                      fontSize: "26px",
+                      fontWeight: "700",
+                      color: "#1F2937",
+                      margin: 0,
+                      marginBottom: "8px",
+                      letterSpacing: "-0.5px",
+                    }}
+                  >
+                    {modalSolicitacao.tipoServico}
+                  </h2>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    {getStatusBadge(modalSolicitacao.status)}
+                  </div>
+                </div>
+                <button
+                  onClick={() => setModalSolicitacao(null)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    fontSize: "32px",
+                    cursor: "pointer",
+                    color: "#9CA3AF",
+                    padding: "4px",
+                    marginLeft: "16px",
+                    lineHeight: "1",
+                    transition: "color 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.color = "#6B7280"
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.color = "#9CA3AF"
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+
+              {/* Modal Content */}
+              <div
+                style={{
+                  overflowY: "auto",
+                  flex: 1,
+                }}
+              >
+                <Detalhes solicitacao={modalSolicitacao} handleDelete={handleDelete} handleCancel={handleCancel} />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
+  )
+}
+
+// Arrow Circle Component with hover effect
+function ArrowCircle() {
+  const [isHovered, setIsHovered] = useState(false)
+
+  return (
+    <div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        width: "32px",
+        height: "32px",
+        borderRadius: "50%",
+        backgroundColor: isHovered ? "#1B4D3E" : "#F3F4F6",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexShrink: 0,
+        transition: "all 0.2s ease",
+      }}
+    >
+      <svg
+        style={{ 
+          width: "16px", 
+          height: "16px",
+          color: isHovered ? "#fff" : "#6B7280",
+          transition: "color 0.2s ease",
+        }}
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+      </svg>
     </div>
   )
 }

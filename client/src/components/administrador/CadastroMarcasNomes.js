@@ -14,10 +14,6 @@ const CadastroMarcasNomes = () => {
   const [modalItem, setModalItem] = useState(null);
   const [modalTipo, setModalTipo] = useState("");
   const [loading, setLoading] = useState(false);
-  const [notification, setNotification] = useState({ message: "", type: "" });
-
-  const dismissNotification = () =>
-    setNotification({ message: "", type: "" });
 
   const fetchMarcas = async () => {
     try {
@@ -26,7 +22,7 @@ const CadastroMarcasNomes = () => {
       const data = await res.json();
       setMarcas(data);
     } catch (e) {
-      setNotification({ message: "Erro ao buscar marcas", type: "error" });
+      console.error("Erro ao buscar marcas", e);
     } finally {
       setLoading(false);
     }
@@ -39,7 +35,7 @@ const CadastroMarcasNomes = () => {
       const data = await res.json();
       setTipos(data.filter((t) => t.categoria === categoria));
     } catch (e) {
-      setNotification({ message: "Erro ao buscar tipos", type: "error" });
+      console.error("Erro ao buscar tipos", e);
     } finally {
       setLoading(false);
     }
@@ -48,6 +44,7 @@ const CadastroMarcasNomes = () => {
   useEffect(() => {
     fetchMarcas();
   }, []);
+  
   useEffect(() => {
     if (abaPrincipal === "tipos") fetchTipos(abaTipo);
   }, [abaTipo, abaPrincipal]);
@@ -57,18 +54,20 @@ const CadastroMarcasNomes = () => {
     if (!marca.trim()) return;
     setLoading(true);
     try {
-      await fetch(`${API_URL}/marcas${editMarcaId ? `/${editMarcaId}` : ""}`, {
-        method: editMarcaId ? "PATCH" : "POST",
+      const method = editMarcaId ? "PATCH" : "POST";
+      const url = editMarcaId ? `${API_URL}/marcas/${editMarcaId}` : `${API_URL}/marcas`;
+      
+      await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nome: marca }),
       });
-      fetchMarcas();
+      
+      await fetchMarcas();
       setMarca("");
       setEditMarcaId(null);
-      setNotification({ message: "Marca salva com sucesso!", type: "success" });
-      setTimeout(dismissNotification, 3000);
-    } catch {
-      setNotification({ message: "Erro ao salvar marca", type: "error" });
+    } catch (error) {
+      console.error("Erro ao salvar marca", error);
     } finally {
       setLoading(false);
     }
@@ -79,18 +78,20 @@ const CadastroMarcasNomes = () => {
     if (!tipo.trim()) return;
     setLoading(true);
     try {
-      await fetch(`${API_URL}/tipos${editTipoId ? `/${editTipoId}` : ""}`, {
-        method: editTipoId ? "PATCH" : "POST",
+      const method = editTipoId ? "PATCH" : "POST";
+      const url = editTipoId ? `${API_URL}/tipos/${editTipoId}` : `${API_URL}/tipos`;
+      
+      await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tipo, categoria: abaTipo }),
       });
-      fetchTipos(abaTipo);
+      
+      await fetchTipos(abaTipo);
       setTipo("");
       setEditTipoId(null);
-      setNotification({ message: "Tipo salvo com sucesso!", type: "success" });
-      setTimeout(dismissNotification, 3000);
-    } catch {
-      setNotification({ message: "Erro ao salvar tipo", type: "error" });
+    } catch (error) {
+      console.error("Erro ao salvar tipo", error);
     } finally {
       setLoading(false);
     }
@@ -105,10 +106,13 @@ const CadastroMarcasNomes = () => {
         `${API_URL}/${modalTipo === "marca" ? "marcas" : "tipos"}/${id}`,
         { method: "DELETE" }
       );
-      if (modalTipo === "marca") fetchMarcas();
-      else fetchTipos(abaTipo);
-      setNotification({ message: "Item excluído com sucesso!", type: "success" });
-      setTimeout(dismissNotification, 3000);
+      if (modalTipo === "marca") {
+        await fetchMarcas();
+      } else {
+        await fetchTipos(abaTipo);
+      }
+    } catch (error) {
+      console.error("Erro ao excluir", error);
     } finally {
       setLoading(false);
       setModalItem(null);
@@ -292,70 +296,6 @@ const CadastroMarcasNomes = () => {
         padding: "32px 20px",
       }}
     >
-      {/* Notification */}
-      {notification.message && (
-        <div
-          style={{
-            position: "fixed",
-            top: "20px",
-            right: "20px",
-            zIndex: 1000,
-            padding: "16px 20px",
-            borderRadius: "12px",
-            backgroundColor:
-              notification.type === "success" ? "#D1FAE5" : "#FEE2E2",
-            color: notification.type === "success" ? "#065F46" : "#991B1B",
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            maxWidth: "400px",
-            animation: "slideIn 0.3s ease-out",
-          }}
-        >
-          <svg
-            style={{ width: "20px", height: "20px", flexShrink: 0 }}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            {notification.type === "success" ? (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            ) : (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            )}
-          </svg>
-          <span style={{ fontSize: "14px", fontWeight: "500", flex: 1 }}>
-            {notification.message}
-          </span>
-          <button
-            onClick={dismissNotification}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: "4px",
-              color: "inherit",
-              fontSize: "20px",
-              lineHeight: "1",
-            }}
-          >
-            ×
-          </button>
-        </div>
-      )}
-
-     
       {/* Main Tabs */}
       <div
         style={{
@@ -765,11 +705,15 @@ const CadastroMarcasNomes = () => {
                   if (modalTipo === "marca") {
                     setMarca(modalItem.nome);
                     setEditMarcaId(modalItem._id || modalItem.id);
+                    setAbaPrincipal("marcas");
                   } else {
                     setTipo(modalItem.tipo);
                     setEditTipoId(modalItem._id || modalItem.id);
+                    setAbaPrincipal("tipos");
+                    setAbaTipo(modalItem.categoria);
                   }
                   setModalItem(null);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
                 style={{
                   flex: 1,
@@ -870,11 +814,6 @@ const CadastroMarcasNomes = () => {
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
-        }
-        
-        @keyframes slideIn {
-          0% { transform: translateX(100%); opacity: 0; }
-          100% { transform: translateX(0); opacity: 1; }
         }
       `}</style>
     </div>

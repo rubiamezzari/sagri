@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import Logo from "./components/Logo.png";
 
@@ -35,17 +35,9 @@ const SVG_ICONS = {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
     </svg>
   ),
-  ChevronDown: (props) => (
-   <svg
-  className={`chevron ${props.className || ""}`}
-  fill="none"
-  stroke="currentColor"
-  viewBox="0 0 24 24"
-  width={12}   // <- menor largura
-  height={12}  // <- menor altura
-  {...props}
->
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 9l-7 7-7-7"/>
+  Wrench: (props) => (
+    <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}>
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
     </svg>
   )
 };
@@ -54,7 +46,6 @@ export default function NavbarAdmin({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [equipmentOpen, setEquipmentOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const SIDEBAR_WIDTH = "256px";
@@ -69,13 +60,6 @@ export default function NavbarAdmin({ children }) {
     localStorage.clear();
     navigate("/login");
   };
-
-  // Mantém o dropdown aberto se a rota for de equipamentos
-  useEffect(() => {
-    const path = location.pathname;
-    const isEquipmentPath = path.startsWith("/maquinas") || path.startsWith("/implementos") || path.startsWith("/servicos");
-    setEquipmentOpen(isEquipmentPath);
-  }, [location.pathname]);
 
   const closeSidebar = () => sidebarOpen && setSidebarOpen(false);
 
@@ -95,37 +79,24 @@ export default function NavbarAdmin({ children }) {
     );
   };
 
-  const DropdownLinkItem = ({ to, children }) => {
-    const isActive = location.pathname === to;
-    return (
-      <NavLink
-        to={to}
-        className={`dropdown-item ${isActive ? "active" : ""}`}
-        onClick={closeSidebar}
-      >
-        <span className="dropdown-item-text">{children}</span>
-      </NavLink>
-    );
-  };
-
   return (
     <>
       <style>{`
         * {margin:0; padding:0; box-sizing:border-box;}
- .top-navbar {
-    height: 56px; 
-    background-color:${SIDEBAR_BG}; 
-    color:white; 
-    display:flex; 
-    align-items:center; 
-    justify-content:space-between; 
-    padding:0 16px;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-  }
+        .top-navbar {
+          height: 56px; 
+          background-color:${SIDEBAR_BG}; 
+          color:white; 
+          display:flex; 
+          align-items:center; 
+          justify-content:space-between; 
+          padding:0 16px;
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          z-index: 1000;
+        }
         .hamburger {font-size:24px; cursor:pointer;}
         .top-logo {position:absolute; left:50%; transform:translateX(-50%);}
         .top-logo img {height:48px; width: 48px; object-fit:contain;}
@@ -137,20 +108,10 @@ export default function NavbarAdmin({ children }) {
         .sidebar-nav {flex:1; padding:0 12px; overflow-y:auto;}
         .nav-list {list-style:none; padding:0; margin:0;}
         .nav-item {margin-bottom:4px;}
-        .nav-link, .nav-item button.dropdown-button {display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:8px; color:rgba(255,255,255,0.8); text-decoration:none; cursor:pointer; transition: all 0.2s ease; background-color: transparent; border:none; width:100%; text-align:left; font-family:inherit;}
-        .nav-link:hover, .nav-item button.dropdown-button:hover {background-color:${HOVER_BG}; color:white;}
+        .nav-link {display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:8px; color:rgba(255,255,255,0.8); text-decoration:none; cursor:pointer; transition: all 0.2s ease;}
+        .nav-link:hover {background-color:${HOVER_BG}; color:white;}
         .nav-link.active {background-color:${ACTIVE_BG}; color:white;}
-        .nav-item button.dropdown-button.active {background-color:${ACTIVE_BG}; color:white;}
         .nav-link-text {text-transform:uppercase; letter-spacing:0.5px; font-size:12px; font-weight:500;}
-        .dropdown-button {justify-content:space-between;}
-        .dropdown-button-content {display:flex; align-items:center; gap:12px;}
-        .dropdown-menu {margin-top:4px; margin-left:16px; padding-left:16px; border-left:2px solid rgba(255,255,255,0.1);}
-        .dropdown-item {display:flex; align-items:center; gap:12px; padding:8px 12px; border-radius:6px; color:rgba(255,255,255,0.7); text-decoration:none; cursor:pointer; transition: all 0.2s ease; background-color: transparent; border:none; width:100%; text-align:left; font-family:inherit; margin-bottom:4px;}
-        .dropdown-item:hover {background-color:rgba(255,255,255,0.05); color:white;}
-        .dropdown-item.active {background-color:${ACTIVE_BG}; color:white;}
-        .dropdown-item-text {text-transform:uppercase; letter-spacing:0.5px; font-size:12px; font-weight:500;}
-        .chevron {width:16px; height:16px; transition: transform 0.3s ease;}
-        .chevron.open {transform:rotate(180deg);}
         .sidebar-footer {padding:12px; border-top:1px solid rgba(255,255,255,0.1);}
         .footer-content {padding:8px 12px; color:rgba(255,255,255,0.6); font-size:12px;}
         .main-content {margin-left:${sidebarOpen ? SIDEBAR_WIDTH : "0"}; flex:1; min-height:calc(100vh - 56px); background-color:${MAIN_BG}; transition:margin-left 0.3s ease; padding:16px;  padding-top:72px;}
@@ -175,35 +136,15 @@ export default function NavbarAdmin({ children }) {
             <NavLinkItem to="/" Icon={SVG_ICONS.Home}>Início</NavLinkItem>
             <NavLinkItem to="/associados" Icon={SVG_ICONS.Users}>Associados</NavLinkItem>
             <NavLinkItem to="/operadores" Icon={SVG_ICONS.UserTie}>Operadores</NavLinkItem>
-
-            {/* Dropdown Equipamentos */}
-            <li className="nav-item">
-              <button 
-                onClick={() => setEquipmentOpen(!equipmentOpen)} 
-                className={`dropdown-button ${equipmentOpen ? "active" : ""}`}
-              >
-                <div className="dropdown-button-content">
-                  <SVG_ICONS.Settings />
-                  <span className="nav-link-text">Equipamentos</span>
-                </div>
-                <SVG_ICONS.ChevronDown className={`${equipmentOpen ? "open" : ""}`} />
-              </button>
-
-              {equipmentOpen && (
-                <div className="dropdown-menu">
-                  <DropdownLinkItem to="/maquinas">Máquinas</DropdownLinkItem>
-                  <DropdownLinkItem to="/servicos">Serviços</DropdownLinkItem>
-                </div>
-              )}
-            </li>
-
+            <NavLinkItem to="/maquinas" Icon={SVG_ICONS.Settings}>Máquinas</NavLinkItem>
+            <NavLinkItem to="/servicos" Icon={SVG_ICONS.Wrench}>Serviços</NavLinkItem>
             <NavLinkItem to="/agendamentos" Icon={SVG_ICONS.Calendar}>Agendamentos</NavLinkItem>
             <NavLinkItem to="/marcas" Icon={SVG_ICONS.Tag}>Marcas</NavLinkItem>
           </ul>
         </nav>
 
         <div className="sidebar-footer">
-          <div className="footer-content"><p>Sistema de Gestão</p></div>
+          <div className="footer-content"><p>Sistema de Agendamento de Maquinário Agrícola</p></div>
         </div>
       </div>
 

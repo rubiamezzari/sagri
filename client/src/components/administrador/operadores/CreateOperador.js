@@ -1,493 +1,410 @@
-import React, { useState } from "react";
+"use client"
 
-const API_URL = "http://localhost:5050";
+import { useState } from "react"
+import { motion } from "framer-motion"
+import { UserPlus, X, AlertCircle } from "lucide-react"
 
-export default function CreateOperador({ onClose }) {
+const API_URL = "http://localhost:5050"
+
+export default function CreateOperador({ onClose, onCreated }) {
   const [form, setForm] = useState({
     nome: "",
     email: "",
     telefone: "",
     cpf: "",
     senha: "",
-  });
-  const [focusField, setFocusField] = useState(null);
-  const [errors, setErrors] = useState({});
+  })
+  const [focusField, setFocusField] = useState(null)
+  const [errors, setErrors] = useState({})
 
-  // Funções de máscara
-  function maskTelefone(value) {
-    const cleaned = value.replace(/\D/g, "");
-    if (cleaned.length <= 10) {
-      return cleaned
-        .replace(/^(\d{2})(\d)/, "($1) $2")
-        .replace(/(\d{4})(\d)/, "$1-$2");
-    }
-    return cleaned
-      .replace(/^(\d{2})(\d)/, "($1) $2")
-      .replace(/(\d{5})(\d)/, "$1-$2")
-      .slice(0, 15);
-  }
-
-  function maskCPF(value) {
-    return value
-      .replace(/\D/g, "")
-      .replace(/(\d{3})(\d)/, "$1.$2")
-      .replace(/(\d{3})(\d)/, "$1.$2")
-      .replace(/(\d{3})(\d{1,2})$/, "$1-$2")
-      .slice(0, 14);
-  }
-
-  // Funções de validação
   function validateEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
   }
 
   function validateTelefone(telefone) {
-    const cleaned = telefone.replace(/\D/g, "");
-    return cleaned.length === 10 || cleaned.length === 11;
+    const cleaned = telefone.replace(/\D/g, "")
+    return cleaned.length === 10 || cleaned.length === 11
   }
 
   function validateCPF(cpf) {
-    const cleaned = cpf.replace(/\D/g, "");
-    return cleaned.length === 11;
+    const cleaned = cpf.replace(/\D/g, "")
+    return cleaned.length === 11
   }
 
   function validateForm() {
-    const newErrors = {};
+    const newErrors = {}
 
     if (!form.nome.trim()) {
-      newErrors.nome = "Nome completo é obrigatório";
+      newErrors.nome = "Nome completo é obrigatório"
     } else if (form.nome.trim().length < 3) {
-      newErrors.nome = "Nome deve ter pelo menos 3 caracteres";
+      newErrors.nome = "Nome deve ter pelo menos 3 caracteres"
     }
 
     if (!form.email) {
-      newErrors.email = "Email é obrigatório";
+      newErrors.email = "Email é obrigatório"
     } else if (!validateEmail(form.email)) {
-      newErrors.email = "Email inválido";
+      newErrors.email = "Email inválido"
     }
 
     if (!form.telefone) {
-      newErrors.telefone = "Telefone é obrigatório";
+      newErrors.telefone = "Telefone é obrigatório"
     } else if (!validateTelefone(form.telefone)) {
-      newErrors.telefone = "Telefone deve ter 10 ou 11 dígitos";
+      newErrors.telefone = "Telefone deve ter 10 ou 11 dígitos"
     }
 
     if (!form.cpf) {
-      newErrors.cpf = "CPF é obrigatório";
+      newErrors.cpf = "CPF é obrigatório"
     } else if (!validateCPF(form.cpf)) {
-      newErrors.cpf = "CPF deve ter 11 dígitos";
+      newErrors.cpf = "CPF deve ter 11 dígitos"
     }
 
     if (!form.senha) {
-      newErrors.senha = "Senha é obrigatória";
+      newErrors.senha = "Senha é obrigatória"
     } else if (form.senha.length < 6) {
-      newErrors.senha = "Senha deve ter no mínimo 6 caracteres";
+      newErrors.senha = "Senha deve ter no mínimo 6 caracteres"
     }
 
-    return newErrors;
+    return newErrors
   }
 
   function updateForm(value) {
-    setForm((prev) => ({ ...prev, ...value }));
-    // Limpar erro do campo quando ele for modificado
-    if (value.nome !== undefined) setErrors((prev) => ({ ...prev, nome: undefined }));
-    if (value.email !== undefined) setErrors((prev) => ({ ...prev, email: undefined }));
-    if (value.telefone !== undefined) setErrors((prev) => ({ ...prev, telefone: undefined }));
-    if (value.cpf !== undefined) setErrors((prev) => ({ ...prev, cpf: undefined }));
-    if (value.senha !== undefined) setErrors((prev) => ({ ...prev, senha: undefined }));
+    setForm((prev) => ({ ...prev, ...value }))
+    Object.keys(value).forEach((key) => {
+      if (errors[key]) {
+        setErrors((prev) => ({ ...prev, [key]: undefined }))
+      }
+    })
   }
 
   async function onSubmit(e) {
-    e.preventDefault();
+    e.preventDefault()
 
-    const formErrors = validateForm();
+    const formErrors = validateForm()
     if (Object.keys(formErrors).length > 0) {
-      setErrors(formErrors);
-      return;
+      setErrors(formErrors)
+      return
     }
 
     const cleanData = {
       ...form,
       cpf: form.cpf.replace(/\D/g, ""),
       telefone: form.telefone.replace(/\D/g, ""),
-    };
+    }
 
     try {
       const response = await fetch(`${API_URL}/operadores/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(cleanData),
-      });
+      })
 
       if (!response.ok) {
-        const errorText = await response.text();
-        alert("Erro ao cadastrar operador: " + errorText);
-        return;
+        const errorText = await response.text()
+        alert("Erro ao cadastrar operador: " + errorText)
+        return
       }
 
-      alert("Operador cadastrado com sucesso!");
-      onClose();
+      alert("Operador cadastrado com sucesso!")
+      if (onCreated) {
+        onCreated()
+      }
+      setForm({
+        nome: "",
+        email: "",
+        telefone: "",
+        cpf: "",
+        senha: "",
+      })
+      setErrors({})
+      onClose()
     } catch (error) {
-      alert("Erro na comunicação com o servidor.");
+      alert("Erro na comunicação com o servidor.")
     }
   }
 
-  // --- ESTILOS ---
-  const modalStyle = {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    width: "100vw",
-    height: "100vh",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 1000,
-    backdropFilter: "blur(3px)",
-  };
-
-  const boxStyle = {
-    backgroundColor: "#fff",
-    padding: "0",
-    borderRadius: "16px",
-    width: "520px",
-    maxWidth: "95%",
-    boxShadow: "0 12px 40px rgba(0, 0, 0, 0.2)",
-    maxHeight: "85vh",
-    overflowY: "auto",
-    position: "relative",
-    animation: "modalSlideIn 0.3s ease-out",
-  };
-
-  const headerStyle = {
-    padding: "24px 24px 20px",
-    borderBottom: "1px solid #F3F4F6",
-    position: "relative",
-  };
-
-  const closeBtnStyle = {
-    position: "absolute",
-    top: "18px",
-    right: "18px",
-    width: "32px",
-    height: "32px",
-    borderRadius: "50%",
-    backgroundColor: "#F3F4F6",
-    border: "none",
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    transition: "all 0.2s",
-  };
-
-  const iconWrapperStyle = {
-    width: "52px",
-    height: "52px",
-    borderRadius: "12px",
-    background: "linear-gradient(135deg, #1B4D3E 0%, #2a6b54 100%)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: "14px",
-  };
-
-  const titulo = {
-    color: "#1B4D3E",
-    fontSize: "22px",
-    fontWeight: "700",
-    margin: "0",
-    textTransform: "uppercase",
-    letterSpacing: "0.3px",
-  };
-
-  const contentStyle = {
-    padding: "24px",
-  };
-
-  const labelStyle = {
-    display: "block",
-    marginBottom: "6px",
-    color: "#1B4D3E",
-    fontSize: "13px",
-    fontWeight: "500",
-  };
-
-  const inputStyle = (fieldName) => ({
-    width: "100%",
-    padding: "11px 14px",
-    marginBottom: errors[fieldName] ? "6px" : "16px",
-    borderRadius: "8px",
-    border: "2px solid",
-    borderColor: errors[fieldName] ? "#dc2626" : (focusField === fieldName ? "#1B4D3E" : "#D4E7D7"),
-    fontSize: "14px",
-    outline: "none",
-    transition: "all 0.3s",
-    backgroundColor: "#FEFDFB",
-    boxSizing: "border-box",
-  });
-
-  const errorStyle = {
-    color: "#dc2626",
-    fontSize: "12px",
-    marginBottom: "16px",
-    display: "flex",
-    alignItems: "center",
-    gap: "4px",
-  };
-
-  const buttonContainerStyle = {
-    display: "flex",
-    gap: "10px",
-    paddingTop: "20px",
-    borderTop: "1px solid #F3F4F6",
-  };
-
-  const btnCancelar = {
-    flex: 1,
-    padding: "11px 20px",
-    borderRadius: "8px",
-    border: "1.5px solid #D1D5DB",
-    backgroundColor: "#fff",
-    color: "#4B5563",
-    fontWeight: "600",
-    fontSize: "14px",
-    cursor: "pointer",
-    transition: "all 0.2s",
-  };
-
-  const btnSalvar = {
-    flex: 1,
-    padding: "11px 20px",
-    borderRadius: "8px",
-    border: "none",
-    backgroundColor: "#1B4D3E",
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: "14px",
-    cursor: "pointer",
-    transition: "all 0.2s",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "6px",
-  };
-
-  // SVG Icons
-  const UserPlusIcon = () => (
-    <svg
-      width="28"
-      height="28"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="#fff"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-      <circle cx="8.5" cy="7" r="4" />
-      <line x1="20" y1="8" x2="20" y2="14" />
-      <line x1="23" y1="11" x2="17" y2="11" />
-    </svg>
-  );
-
-  const CheckIcon = () => (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  );
-
-  const AlertCircleIcon = () => (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="12" r="10" />
-      <line x1="12" y1="8" x2="12" y2="12" />
-      <line x1="12" y1="16" x2="12.01" y2="16" />
-    </svg>
-  );
-
-  // --- JSX ---
   return (
-    <div style={modalStyle} onClick={onClose}>
-      <div style={boxStyle} onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
-        <div style={headerStyle}>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(27, 77, 62, 0.15)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 1000,
+        padding: "20px",
+        backdropFilter: "blur(8px)",
+      }}
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        style={{
+          backgroundColor: "#FFFFFF",
+          borderRadius: "20px",
+          maxWidth: "720px",
+          width: "100%",
+          maxHeight: "90vh",
+          overflow: "hidden",
+          boxShadow: "0 25px 50px -12px rgba(27, 77, 62, 0.25), 0 0 0 1px rgba(27, 77, 62, 0.05)",
+          display: "flex",
+          flexDirection: "column",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div
+          style={{
+            background: "#FFFFFF",
+            padding: "32px 32px 24px",
+            borderBottom: "1px solid #E5E7EB",
+            position: "relative",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: "4px",
+              background: "linear-gradient(90deg, #1B4D3E 0%, #2A6B4F 100%)",
+            }}
+          />
+
           <button
-            style={closeBtnStyle}
             onClick={onClose}
+            style={{
+              position: "absolute",
+              top: "20px",
+              right: "20px",
+              border: "1px solid #E5E7EB",
+              borderRadius: "10px",
+              width: "40px",
+              height: "40px",
+              cursor: "pointer",
+              color: "#6B7280",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "all 0.2s ease",
+              backgroundColor: "#F9FAFB",
+            }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#E5E7EB";
+              e.target.style.backgroundColor = "#F3F4F6"
+              e.target.style.borderColor = "#D1D5DB"
+              e.target.style.color = "#1F2937"
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "#F3F4F6";
+              e.target.style.backgroundColor = "#F9FAFB"
+              e.target.style.borderColor = "#E5E7EB"
+              e.target.style.color = "#6B7280"
             }}
           >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#6B7280"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
+            <X size={20} />
           </button>
 
-          <div style={iconWrapperStyle}>
-            <UserPlusIcon />
-          </div>
-          <h3 style={titulo}>Novo Operador</h3>
-        </div>
-
-        {/* Content */}
-        <div style={contentStyle}>
-          <form onSubmit={onSubmit}>
-            <label style={labelStyle}>Nome Completo *</label>
-            <input
-              type="text"
-              value={form.nome}
-              onChange={(e) => updateForm({ nome: e.target.value })}
-              onFocus={() => setFocusField("nome")}
-              onBlur={() => setFocusField(null)}
-              style={inputStyle("nome")}
-              placeholder="Digite o nome completo"
-              required
-            />
-            {errors.nome && (
-              <div style={errorStyle}>
-                <AlertCircleIcon />
-                <span>{errors.nome}</span>
-              </div>
-            )}
-
-            <label style={labelStyle}>Email *</label>
-            <input
-              type="email"
-              value={form.email}
-              onChange={(e) => updateForm({ email: e.target.value })}
-              onFocus={() => setFocusField("email")}
-              onBlur={() => setFocusField(null)}
-              style={inputStyle("email")}
-              placeholder="email@exemplo.com"
-              required
-            />
-            {errors.email && (
-              <div style={errorStyle}>
-                <AlertCircleIcon />
-                <span>{errors.email}</span>
-              </div>
-            )}
-
-            <label style={labelStyle}>Telefone *</label>
-            <input
-              type="text"
-              value={form.telefone}
-              onChange={(e) => updateForm({ telefone: maskTelefone(e.target.value) })}
-              onFocus={() => setFocusField("telefone")}
-              onBlur={() => setFocusField(null)}
-              style={inputStyle("telefone")}
-              placeholder="(00) 00000-0000"
-              required
-            />
-            {errors.telefone && (
-              <div style={errorStyle}>
-                <AlertCircleIcon />
-                <span>{errors.telefone}</span>
-              </div>
-            )}
-
-            <label style={labelStyle}>CPF *</label>
-            <input
-              type="text"
-              value={form.cpf}
-              onChange={(e) => updateForm({ cpf: maskCPF(e.target.value) })}
-              onFocus={() => setFocusField("cpf")}
-              onBlur={() => setFocusField(null)}
-              style={inputStyle("cpf")}
-              placeholder="000.000.000-00"
-              required
-            />
-            {errors.cpf && (
-              <div style={errorStyle}>
-                <AlertCircleIcon />
-                <span>{errors.cpf}</span>
-              </div>
-            )}
-
-            <label style={labelStyle}>Senha *</label>
-            <input
-              type="password"
-              value={form.senha}
-              onChange={(e) => updateForm({ senha: e.target.value })}
-              onFocus={() => setFocusField("senha")}
-              onBlur={() => setFocusField(null)}
-              style={inputStyle("senha")}
-              placeholder="Mínimo 6 caracteres"
-              required
-            />
-            {errors.senha && (
-              <div style={errorStyle}>
-                <AlertCircleIcon />
-                <span>{errors.senha}</span>
-              </div>
-            )}
-
-            {/* Buttons */}
-            <div style={buttonContainerStyle}>
-              <button
-                style={btnCancelar}
-                onClick={onClose}
-                type="button"
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "#F9FAFB";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "#fff";
-                }}
-              >
-                Cancelar
-              </button>
-              <button
-                style={btnSalvar}
-                type="submit"
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "#153D2F";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "#1B4D3E";
-                }}
-              >
-                <CheckIcon />
-                Cadastrar
-              </button>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            <div
+              style={{
+                width: "56px",
+                height: "56px",
+                borderRadius: "14px",
+                background: "linear-gradient(135deg, #1B4D3E 0%, #2A6B4F 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                boxShadow: "0 4px 12px rgba(27, 77, 62, 0.15)",
+              }}
+            >
+              <UserPlus size={28} color="#fff" />
             </div>
-          </form>
+            <div>
+              <h2
+                style={{
+                  fontSize: "24px",
+                  fontWeight: "700",
+                  margin: 0,
+                  color: "#1F2937",
+                  letterSpacing: "-0.5px",
+                }}
+              >
+                Novo Operador
+              </h2>
+              <p
+                style={{
+                  fontSize: "14px",
+                  color: "#6B7280",
+                  margin: "4px 0 0 0",
+                }}
+              >
+                Cadastre um novo operador no sistema
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
+
+        <div
+          style={{
+            padding: "32px",
+            overflowY: "auto",
+            flex: 1,
+            backgroundColor: "#F9FAFB",
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "#FFFFFF",
+              borderRadius: "16px",
+              padding: "24px",
+              border: "1px solid #E5E7EB",
+              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
+            }}
+          >
+            <form onSubmit={onSubmit}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                  gap: "20px",
+                }}
+              >
+                <div style={{ gridColumn: "1 / -1" }}>
+                  <InputField
+                    label="Nome Completo"
+                    name="nome"
+                    type="text"
+                    value={form.nome}
+                    onChange={(e) => updateForm({ nome: e.target.value })}
+                    placeholder="Digite o nome completo"
+                    required
+                    error={errors.nome}
+                  />
+                </div>
+
+                <InputField
+                  label="Email"
+                  name="email"
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => updateForm({ email: e.target.value })}
+                  placeholder="email@exemplo.com"
+                  required
+                  error={errors.email}
+                />
+
+                <InputField
+                  label="Telefone"
+                  name="telefone"
+                  type="text"
+                  value={form.telefone}
+                  onChange={(e) => updateForm({ telefone: maskTelefone(e.target.value) })}
+                  placeholder="(00) 00000-0000"
+                  required
+                  error={errors.telefone}
+                />
+
+                <InputField
+                  label="CPF"
+                  name="cpf"
+                  type="text"
+                  value={form.cpf}
+                  onChange={(e) => updateForm({ cpf: maskCPF(e.target.value) })}
+                  placeholder="000.000.000-00"
+                  required
+                  error={errors.cpf}
+                />
+
+                <div style={{ gridColumn: "1 / -1" }}>
+                  <InputField
+                    label="Senha"
+                    name="senha"
+                    type="password"
+                    value={form.senha}
+                    onChange={(e) => updateForm({ senha: e.target.value })}
+                    placeholder="Mínimo 6 caracteres"
+                    required
+                    error={errors.senha}
+                  />
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div
+          style={{
+            padding: "24px 32px",
+            borderTop: "1px solid #E5E7EB",
+            backgroundColor: "#FFFFFF",
+            display: "flex",
+            gap: "12px",
+            justifyContent: "flex-end",
+          }}
+        >
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              padding: "12px 28px",
+              borderRadius: "10px",
+              border: "1px solid #D1D5DB",
+              backgroundColor: "#FFFFFF",
+              color: "#6B7280",
+              fontSize: "14px",
+              fontWeight: "600",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = "#F9FAFB"
+              e.target.style.transform = "translateY(-2px)"
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = "#FFFFFF"
+              e.target.style.transform = "translateY(0)"
+            }}
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={onSubmit}
+            style={{
+              padding: "12px 28px",
+              borderRadius: "10px",
+              border: "none",
+              background: "linear-gradient(135deg, #1B4D3E 0%, #2A6B4F 100%)",
+              color: "#FFFFFF",
+              fontSize: "14px",
+              fontWeight: "600",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              boxShadow: "0 4px 12px rgba(27, 77, 62, 0.2)",
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = "translateY(-2px)"
+              e.target.style.boxShadow = "0 6px 16px rgba(27, 77, 62, 0.3)"
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = "translateY(0)"
+              e.target.style.boxShadow = "0 4px 12px rgba(27, 77, 62, 0.2)"
+            }}
+          >
+            Cadastrar
+          </button>
+        </div>
+      </motion.div>
 
       <style>{`
         @keyframes modalSlideIn {
@@ -501,6 +418,90 @@ export default function CreateOperador({ onClose }) {
           }
         }
       `}</style>
+    </motion.div>
+  )
+}
+
+function InputField({ label, name, type, value, onChange, placeholder, required = false, error }) {
+  return (
+    <div>
+      <label
+        style={{
+          display: "block",
+          fontSize: "12px",
+          fontWeight: "600",
+          color: "#374151",
+          marginBottom: "8px",
+        }}
+      >
+        {label}
+        {required && <span style={{ color: "#DC2626", marginLeft: "4px" }}>*</span>}
+      </label>
+      <input
+        type={type}
+        name={name}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        required={required}
+        style={{
+          width: "100%",
+          padding: "12px 14px",
+          borderRadius: "10px",
+          border: error ? "1px solid #DC2626" : "1px solid #E5E7EB",
+          fontSize: "14px",
+          color: "#1F2937",
+          outline: "none",
+          transition: "all 0.2s ease",
+          boxSizing: "border-box",
+          backgroundColor: "#fff",
+        }}
+        onFocus={(e) => {
+          if (!error) {
+            e.target.style.borderColor = "#1B4D3E"
+            e.target.style.boxShadow = "0 0 0 3px rgba(27, 77, 62, 0.1)"
+          }
+        }}
+        onBlur={(e) => {
+          e.target.style.borderColor = error ? "#DC2626" : "#E5E7EB"
+          e.target.style.boxShadow = "none"
+        }}
+      />
+      {error && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
+            marginTop: "4px",
+            color: "#DC2626",
+            fontSize: "12px",
+          }}
+        >
+          <AlertCircle size={14} />
+          <span>{error}</span>
+        </div>
+      )}
     </div>
-  );
+  )
+}
+
+function maskTelefone(value) {
+  const cleaned = value.replace(/\D/g, "")
+  if (cleaned.length <= 10) {
+    return cleaned.replace(/^(\d{2})(\d)/, "($1) $2").replace(/(\d{4})(\d)/, "$1-$2")
+  }
+  return cleaned
+    .replace(/^(\d{2})(\d)/, "($1) $2")
+    .replace(/(\d{5})(\d)/, "$1-$2")
+    .slice(0, 15)
+}
+
+function maskCPF(value) {
+  return value
+    .replace(/\D/g, "")
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d{1,2})$/, "$1-$2")
+    .slice(0, 14)
 }
